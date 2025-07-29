@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { createChart, IChartApi } from 'lightweight-charts';
+import { useTheme } from './ThemeProvider';
 
 // Interface cho HLCAreaData
 interface HLCAreaData {
@@ -52,29 +53,36 @@ interface CustomChartProps {
 export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (chartContainerRef.current && !chartRef.current) {
-      // Tạo chart
+      // Tạo chart với theme
       chartRef.current = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
         height: 400,
         layout: {
-          background: { color: '#ffffff' },
-          textColor: '#333',
+          background: { 
+            color: theme === 'dark' ? '#1f2937' : '#ffffff' 
+          },
+          textColor: theme === 'dark' ? '#f9fafb' : '#333',
         },
         grid: {
-          vertLines: { color: '#f0f0f0' },
-          horzLines: { color: '#f0f0f0' },
+          vertLines: { 
+            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
+          },
+          horzLines: { 
+            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
+          },
         },
         crosshair: {
           mode: 1,
         },
         rightPriceScale: {
-          borderColor: '#cccccc',
+          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
         },
         timeScale: {
-          borderColor: '#cccccc',
+          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
           timeVisible: true,
           secondsVisible: false,
         },
@@ -104,6 +112,34 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
     };
   }, []);
 
+  // Update theme khi theme thay đổi
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.applyOptions({
+        layout: {
+          background: { 
+            color: theme === 'dark' ? '#1f2937' : '#ffffff' 
+          },
+          textColor: theme === 'dark' ? '#f9fafb' : '#333',
+        },
+        grid: {
+          vertLines: { 
+            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
+          },
+          horzLines: { 
+            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
+          },
+        },
+        rightPriceScale: {
+          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
+        },
+        timeScale: {
+          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
+        },
+      });
+    }
+  }, [theme]);
+
   // Handle resize
   useEffect(() => {
     const handleResize = () => {
@@ -121,7 +157,9 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
 
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">
+        {title}
+      </h2>
       <div ref={chartContainerRef} className="chart-container" />
     </div>
   );

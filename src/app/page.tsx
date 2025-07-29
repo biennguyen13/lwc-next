@@ -7,12 +7,12 @@ import { CandlestickData } from 'lightweight-charts';
 // Dynamic import để tránh SSR issues
 const Chart = dynamic(() => import('@/components/Chart'), {
   ssr: false,
-  loading: () => <div className="chart-container flex items-center justify-center">Loading chart...</div>
+  loading: () => <div className="chart-container flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Loading chart...</div>
 });
 
 const CustomChart = dynamic(() => import('@/components/CustomChart'), {
   ssr: false,
-  loading: () => <div className="chart-container flex items-center justify-center">Loading custom chart...</div>
+  loading: () => <div className="chart-container flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Loading custom chart...</div>
 });
 
 // Sample data
@@ -46,9 +46,9 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'candlestick' | 'custom'>('candlestick');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white transition-colors">
           Lightweight Charts với Next.js
         </h1>
         
@@ -56,20 +56,20 @@ export default function HomePage() {
           <div className="flex space-x-4 justify-center">
             <button
               onClick={() => setActiveTab('candlestick')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === 'candlestick'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
               }`}
             >
               Candlestick Chart
             </button>
             <button
               onClick={() => setActiveTab('custom')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === 'custom'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
               }`}
             >
               HLC Area Chart
@@ -77,7 +77,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300">
           {activeTab === 'candlestick' && (
             <Chart 
               data={sampleCandlestickData} 
@@ -93,13 +93,16 @@ export default function HomePage() {
           )}
         </div>
 
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Thông tin</h2>
-          <div className="space-y-2 text-gray-600">
-            <p>• <strong>Candlestick Chart:</strong> Biểu đồ nến truyền thống với dữ liệu OHLC</p>
-            <p>• <strong>HLC Area Chart:</strong> Biểu đồ tùy chỉnh hiển thị High, Low, Close với vùng được tô màu</p>
-            <p>• <strong>Responsive:</strong> Tự động điều chỉnh kích thước khi thay đổi màn hình</p>
-            <p>• <strong>Interactive:</strong> Hỗ trợ zoom, pan, và crosshair</p>
+        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300">
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">
+            Thông tin
+          </h2>
+          <div className="space-y-2 text-gray-600 dark:text-gray-300 transition-colors">
+            <p>• <strong className="text-gray-900 dark:text-white">Candlestick Chart:</strong> Biểu đồ nến truyền thống với dữ liệu OHLC</p>
+            <p>• <strong className="text-gray-900 dark:text-white">HLC Area Chart:</strong> Biểu đồ tùy chỉnh hiển thị High, Low, Close với vùng được tô màu</p>
+            <p>• <strong className="text-gray-900 dark:text-white">Responsive:</strong> Tự động điều chỉnh kích thước khi thay đổi màn hình</p>
+            <p>• <strong className="text-gray-900 dark:text-white">Interactive:</strong> Hỗ trợ zoom, pan, và crosshair</p>
+            <p>• <strong className="text-gray-900 dark:text-white">Dark Mode:</strong> Hỗ trợ chế độ tối với toggle button</p>
           </div>
         </div>
       </div>
