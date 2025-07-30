@@ -12,44 +12,12 @@ interface ChartProps {
   title?: string;
 }
 
-// Bollinger Bands calculation
-const calculateBollingerBands = (data: HLCAreaData[], period: number = 20, multiplier: number = 2) => {
-  const bands: { upper: number; middle: number; lower: number }[] = [];
-  
-  for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) {
-      bands.push({ upper: 0, middle: 0, lower: 0 });
-      continue;
-    }
-    
-    // Tính SMA (Simple Moving Average) sử dụng close price
-    const slice = data.slice(i - period + 1, i + 1);
-    const sma = slice.reduce((sum, item) => sum + item.close, 0) / period;
-    
-    // Tính Standard Deviation
-    const variance = slice.reduce((sum, item) => sum + Math.pow(item.close - sma, 2), 0) / period;
-    const stdDev = Math.sqrt(variance);
-    
-    bands.push({
-      upper: sma + (multiplier * stdDev),
-      middle: sma,
-      lower: sma - (multiplier * stdDev)
-    });
-  }
-  
-  return bands;
-};
-
 export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
   const hlcSeriesRef = useRef<any>(null);
   const volumeSeriesRef = useRef<any>(null);
-  const upperBandSeriesRef = useRef<any>(null);
-  const middleBandSeriesRef = useRef<any>(null);
-  const lowerBandSeriesRef = useRef<any>(null);
-  const bollingerAreaSeriesRef = useRef<any>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -127,40 +95,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Thêm Bollinger Bands Area (fill màu) - sử dụng area series đơn giản
-      bollingerAreaSeriesRef.current = chartRef.current.addAreaSeries({
-        topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(217, 119, 6, 0.3)',
-        bottomColor: 'transparent',
-        lineColor: 'transparent',
-        lineWidth: 0,
-        title: 'Bollinger Bands Area',
-        priceLineVisible: false,
-        lastValueVisible: false,
-      });
-
-      // Thêm Bollinger Bands Lines
-      const bollingerBands = calculateBollingerBands(hlcData, 20, 2);
-      
-      upperBandSeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? '#f59e0b' : '#d97706',
-        lineWidth: 1,
-        lineStyle: 1, // Dashed line
-        title: 'Upper Band',
-      });
-
-      middleBandSeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? '#8b5cf6' : '#7c3aed',
-        lineWidth: 1,
-        title: 'Middle Band (SMA)',
-      });
-
-      lowerBandSeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? '#f59e0b' : '#d97706',
-        lineWidth: 1,
-        lineStyle: 1, // Dashed line
-        title: 'Lower Band',
-      });
-
       // Set data cho tất cả series
       if (candlestickData.length > 0) {
         candlestickSeriesRef.current.setData(candlestickData);
@@ -171,36 +105,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       if (volumeData.length > 0) {
         volumeSeriesRef.current.setData(volumeData);
       }
-
-      // Set Bollinger Bands data
-      const upperBandData = bollingerBands.map((band, index) => ({
-        time: hlcData[index].time,
-        value: band.upper,
-      })).filter(item => item.value > 0);
-
-      const middleBandData = bollingerBands.map((band, index) => ({
-        time: hlcData[index].time,
-        value: band.middle,
-      })).filter(item => item.value > 0);
-
-      const lowerBandData = bollingerBands.map((band, index) => ({
-        time: hlcData[index].time,
-        value: band.lower,
-      })).filter(item => item.value > 0);
-
-      // Tạo Bollinger Area data với baseline
-      const bollingerAreaData = bollingerBands.map((band, index) => ({
-        time: hlcData[index].time,
-        value: band.upper,
-        baseline: band.lower, // Sử dụng lower band làm baseline
-      })).filter(item => item.value > 0 && item.baseline > 0);
-
-      upperBandSeriesRef.current.setData(upperBandData);
-      middleBandSeriesRef.current.setData(middleBandData);
-      lowerBandSeriesRef.current.setData(lowerBandData);
-
-      // Set area data với upper band, sẽ fill xuống đến middle band
-      bollingerAreaSeriesRef.current.setData(bollingerAreaData);
 
       // Fit content để hiển thị tất cả dữ liệu
       chartRef.current.timeScale().fitContent();
@@ -214,10 +118,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         candlestickSeriesRef.current = null;
         hlcSeriesRef.current = null;
         volumeSeriesRef.current = null;
-        upperBandSeriesRef.current = null;
-        middleBandSeriesRef.current = null;
-        lowerBandSeriesRef.current = null;
-        bollingerAreaSeriesRef.current = null;
       }
     };
   }, []);
@@ -254,33 +154,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           color: theme === 'dark' ? '#3b82f6' : '#2563eb',
         });
       }
-
-      // Update Bollinger Bands colors theo theme
-      if (upperBandSeriesRef.current) {
-        upperBandSeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#f59e0b' : '#d97706',
-        });
-      }
-      if (middleBandSeriesRef.current) {
-        middleBandSeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#8b5cf6' : '#7c3aed',
-        });
-      }
-      if (lowerBandSeriesRef.current) {
-        lowerBandSeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#f59e0b' : '#d97706',
-        });
-      }
-
-      // Update Bollinger Area colors theo theme
-      if (bollingerAreaSeriesRef.current) {
-        bollingerAreaSeriesRef.current.applyOptions({
-          topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(217, 119, 6, 0.3)',
-          bottomColor: 'transparent',
-          lineColor: 'transparent',
-          lineWidth: 0,
-        });
-      }
     }
   }, [theme]);
 
@@ -300,46 +173,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Update volume data
       if (volumeData.length > 0 && volumeSeriesRef.current) {
         volumeSeriesRef.current.setData(volumeData);
-      }
-
-      // Update Bollinger Bands
-      if (hlcData.length > 0) {
-        const bollingerBands = calculateBollingerBands(hlcData, 20, 2);
-        
-        const upperBandData = bollingerBands.map((band, index) => ({
-          time: hlcData[index].time,
-          value: band.upper,
-        })).filter(item => item.value > 0);
-
-        const middleBandData = bollingerBands.map((band, index) => ({
-          time: hlcData[index].time,
-          value: band.middle,
-        })).filter(item => item.value > 0);
-
-        const lowerBandData = bollingerBands.map((band, index) => ({
-          time: hlcData[index].time,
-          value: band.lower,
-        })).filter(item => item.value > 0);
-
-        // Update Bollinger Area data
-        const bollingerAreaData = bollingerBands.map((band, index) => ({
-          time: hlcData[index].time,
-          value: band.upper,
-          baseline: band.lower, // Sử dụng lower band làm baseline
-        })).filter(item => item.value > 0 && item.baseline > 0);
-
-        if (upperBandSeriesRef.current) {
-          upperBandSeriesRef.current.setData(upperBandData);
-        }
-        if (middleBandSeriesRef.current) {
-          middleBandSeriesRef.current.setData(middleBandData);
-        }
-        if (lowerBandSeriesRef.current) {
-          lowerBandSeriesRef.current.setData(lowerBandData);
-        }
-        if (bollingerAreaSeriesRef.current) {
-          bollingerAreaSeriesRef.current.setData(bollingerAreaData);
-        }
       }
       
       chartRef.current.timeScale().fitContent();
@@ -391,22 +224,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
           <span>Volume</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-orange-500 rounded"></div>
-          <span>Upper Band</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-purple-500 rounded"></div>
-          <span>Middle Band (SMA)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-orange-500 rounded"></div>
-          <span>Lower Band</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-orange-200 rounded"></div>
-          <span>Bollinger Area</span>
         </div>
       </div>
     </div>
