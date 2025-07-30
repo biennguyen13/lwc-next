@@ -164,7 +164,7 @@ export default function Home() {
               candlestickData={candlestickData}
               hlcData={[]}
               volumeData={[]}
-              title="Candlestick Chart (100 data points)"
+              title="Candlestick Chart (120 data points)"
             />
           )}
           
@@ -173,7 +173,7 @@ export default function Home() {
             candlestickData={candlestickData}
               hlcData={[]}
               volumeData={[]}
-              title="HLC Area Chart (100 data points)"
+              title="HLC Area Chart (120 data points)"
             />
           )}
           
@@ -182,7 +182,7 @@ export default function Home() {
             candlestickData={candlestickData}
               hlcData={[]}
               volumeData={[]}
-              title="Bollinger Bands Chart (100 data points)"
+              title="Bollinger Bands Chart (120 data points)"
             />
           )}
 
@@ -191,7 +191,7 @@ export default function Home() {
               candlestickData={candlestickData}
               hlcData={[]}
               volumeData={volumeData}
-              title="Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (100 data points)"
+              title="Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (120 data points)"
             />
           )}
         </div>

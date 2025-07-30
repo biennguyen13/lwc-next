@@ -44,14 +44,37 @@ const calculateBollingerBands = (data: CandlestickData[], period: number = 20, m
   return bands;
 };
 
+// Hàm tính toán Moving Average
+const calculateMA = (data: CandlestickData[], period: number) => {
+  const maData: { time: any; value: number }[] = [];
+  
+  for (let i = 0; i < data.length; i++) {
+    if (i < period - 1) {
+      // Chưa đủ data để tính, set giá trị mặc định
+      maData.push({ time: data[i].time, value: 0 });
+      continue;
+    }
+    
+    // Lấy slice data để tính SMA
+    const slice = data.slice(i - period + 1, i + 1);
+    
+    // Tính Simple Moving Average (SMA)
+    const sma = slice.reduce((sum, item) => sum + item.close, 0) / period;
+    
+    maData.push({ time: data[i].time, value: sma });
+  }
+  
+  return maData;
+};
+
 // Hàm convert candlestick data thành bollinger data format
 const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCAreaData[] => {
   if (candlestickData.length === 0) return [];
   
   // Tính toán Bollinger Bands từ toàn bộ data (200 items)
-  const bollingerBands = calculateBollingerBands(candlestickData, 20, 2);
+  const bollingerBands = calculateBollingerBands(candlestickData, 10, 2);
   
-  // Convert thành HLC format và chỉ lấy 100 items cuối cùng
+  // Convert thành HLC format và chỉ lấy 120 items cuối cùng
   const allBollingerData = bollingerBands.map((band, index) => ({
     time: candlestickData[index].time,
     high: band.upper,    // Upper band làm high
@@ -59,8 +82,8 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
     close: band.middle,  // Middle band (SMA) làm close
   }));
   
-  // Chỉ trả về 100 items cuối cùng
-  return allBollingerData.slice(-100);
+  // Chỉ trả về 120 items cuối cùng
+  return allBollingerData.slice(-120);
 };
 
 export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
@@ -69,6 +92,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   const candlestickSeriesRef = useRef<any>(null);
   const hlcSeriesRef = useRef<any>(null);
   const volumeSeriesRef = useRef<any>(null);
+  const ma7SeriesRef = useRef<any>(null);
+  const ma25SeriesRef = useRef<any>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -123,14 +148,28 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       const bollingerAreaColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.2)';
       
       hlcSeriesRef.current = chartRef.current.addCustomSeries(customSeriesView, {
-        highLineColor: bollingerColor,      // Upper band
-        lowLineColor: bollingerColor,       // Lower band
+        highLineColor: bollingerAreaColor,      // Upper band
+        lowLineColor: bollingerAreaColor,       // Lower band
         closeLineColor: bollingerColor,     // Middle band
         areaBottomColor: bollingerAreaColor, // Area fill
         areaTopColor: bollingerAreaColor,   // Area fill
         highLineWidth: 2,
         lowLineWidth: 2,
         closeLineWidth: 2,
+      });
+
+      // Thêm MA7 line series
+      ma7SeriesRef.current = chartRef.current.addLineSeries({
+        color: theme === 'dark' ? '#10b981' : '#059669', // Green color
+        lineWidth: 2,
+        title: 'MA7',
+      });
+
+      // Thêm MA25 line series
+      ma25SeriesRef.current = chartRef.current.addLineSeries({
+        color: theme === 'dark' ? 'purple' : 'purple', // Orange color
+        lineWidth: 2,
+        title: 'MA25',
       });
 
       // Thêm volume histogram series
@@ -151,10 +190,20 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Set data cho tất cả series - chỉ lấy 100 items cuối cùng
+      // Set data cho tất cả series - chỉ lấy 120 items cuối cùng
       if (candlestickData.length > 0) {
-        const last100Candlestick = candlestickData.slice(-100);
-        candlestickSeriesRef.current.setData(last100Candlestick);
+        const last120Candlestick = candlestickData.slice(-120);
+        candlestickSeriesRef.current.setData(last120Candlestick);
+        
+        // Tính toán và set MA data
+        const ma7Data = calculateMA(candlestickData, 7);
+        const ma25Data = calculateMA(candlestickData, 25);
+        
+        const last120MA7 = ma7Data.slice(-120);
+        const last120MA25 = ma25Data.slice(-120);
+        
+        ma7SeriesRef.current.setData(last120MA7);
+        ma25SeriesRef.current.setData(last120MA25);
       }
       
       // Xử lý HLC data - nếu có hlcData thì dùng, không thì convert từ candlestick
@@ -170,8 +219,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       }
       
       if (volumeData.length > 0) {
-        const last100Volume = volumeData.slice(-100);
-        volumeSeriesRef.current.setData(last100Volume);
+        const last120Volume = volumeData.slice(-120);
+        volumeSeriesRef.current.setData(last120Volume);
       }
 
       // Fit content để hiển thị tất cả dữ liệu
@@ -186,6 +235,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         candlestickSeriesRef.current = null;
         hlcSeriesRef.current = null;
         volumeSeriesRef.current = null;
+        ma7SeriesRef.current = null;
+        ma25SeriesRef.current = null;
       }
     };
   }, []);
@@ -221,11 +272,24 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         const bollingerColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(217, 119, 6, 0.8)';
         const bollingerAreaColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.2)';
         hlcSeriesRef.current.applyOptions({
-          highLineColor: bollingerColor,
-          lowLineColor: bollingerColor,
+          highLineColor: bollingerAreaColor,
+          lowLineColor: bollingerAreaColor,
           closeLineColor: bollingerColor,
           areaBottomColor: bollingerAreaColor,
           areaTopColor: bollingerAreaColor,
+        });
+      }
+
+      // Update MA series colors theo theme
+      if (ma7SeriesRef.current) {
+        ma7SeriesRef.current.applyOptions({
+          color: theme === 'dark' ? '#10b981' : '#059669', // Green
+        });
+      }
+
+      if (ma25SeriesRef.current) {
+        ma25SeriesRef.current.applyOptions({
+          color: theme === 'dark' ? 'purple' : 'purple', // Orange
         });
       }
 
@@ -241,10 +305,24 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   // Update data khi data thay đổi
   useEffect(() => {
     if (chartRef.current) {
-      // Update candlestick data - chỉ lấy 100 items cuối cùng
+      // Update candlestick data - chỉ lấy 120 items cuối cùng
       if (candlestickData.length > 0 && candlestickSeriesRef.current) {
-        const last100Candlestick = candlestickData.slice(-100);
-        candlestickSeriesRef.current.setData(last100Candlestick);
+        const last120Candlestick = candlestickData.slice(-120);
+        candlestickSeriesRef.current.setData(last120Candlestick);
+        
+        // Update MA data
+        const ma7Data = calculateMA(candlestickData, 7);
+        const ma25Data = calculateMA(candlestickData, 25);
+        
+        const last120MA7 = ma7Data.slice(-120);
+        const last120MA25 = ma25Data.slice(-120);
+        
+        if (ma7SeriesRef.current) {
+          ma7SeriesRef.current.setData(last120MA7);
+        }
+        if (ma25SeriesRef.current) {
+          ma25SeriesRef.current.setData(last120MA25);
+        }
       }
       
       // Update HLC data - xử lý logic convert
@@ -261,10 +339,10 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         }
       }
 
-      // Update volume data - chỉ lấy 100 items cuối cùng
+      // Update volume data - chỉ lấy 120 items cuối cùng
       if (volumeData.length > 0 && volumeSeriesRef.current) {
-        const last100Volume = volumeData.slice(-100);
-        volumeSeriesRef.current.setData(last100Volume);
+        const last120Volume = volumeData.slice(-120);
+        volumeSeriesRef.current.setData(last120Volume);
       }
       
       chartRef.current.timeScale().fitContent();
@@ -312,6 +390,14 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-orange-500"></div>
           <span>Middle Band (SMA)</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-green-600"></div>
+          <span>MA7</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-orange-600"></div>
+          <span>MA25</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
