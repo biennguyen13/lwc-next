@@ -74,7 +74,7 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
   // Tính toán Bollinger Bands từ toàn bộ data (200 items)
   const bollingerBands = calculateBollingerBands(candlestickData, 10, 2);
   
-  // Convert thành HLC format và chỉ lấy 120 items cuối cùng
+  // Convert thành HLC format và chỉ lấy 150 items cuối cùng
   const allBollingerData = bollingerBands.map((band, index) => ({
     time: candlestickData[index].time,
     high: band.upper,    // Upper band làm high
@@ -82,8 +82,8 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
     close: band.middle,  // Middle band (SMA) làm close
   }));
   
-  // Chỉ trả về 120 items cuối cùng
-  return allBollingerData.slice(-120);
+  // Chỉ trả về 150 items cuối cùng
+  return allBollingerData.slice(-150);
 };
 
 export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
@@ -101,7 +101,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Tạo chart với theme
       chartRef.current = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: 400,
+        height: 700, // Tăng từ 400 lên 600
         layout: {
           background: { 
             color: theme === 'dark' ? '#1f2937' : '#ffffff' 
@@ -121,11 +121,22 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
         rightPriceScale: {
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
+          scaleMargins: {
+            top: 0.1, // Giảm margin top
+            bottom: 0.1, // Giảm margin bottom
+          },
         },
         timeScale: {
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
           timeVisible: true,
           secondsVisible: false,
+        },
+        // Thêm options để tối ưu không gian
+        overlayPriceScales: {
+          scaleMargins: {
+            top: 0.1,
+            bottom: 0.1,
+          },
         },
       });
 
@@ -190,20 +201,20 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Set data cho tất cả series - chỉ lấy 120 items cuối cùng
+      // Set data cho tất cả series - chỉ lấy 150 items cuối cùng
       if (candlestickData.length > 0) {
-        const last120Candlestick = candlestickData.slice(-120);
-        candlestickSeriesRef.current.setData(last120Candlestick);
+        const last150Candlestick = candlestickData.slice(-150);
+        candlestickSeriesRef.current.setData(last150Candlestick);
         
         // Tính toán và set MA data
         const ma7Data = calculateMA(candlestickData, 7);
         const ma25Data = calculateMA(candlestickData, 25);
         
-        const last120MA7 = ma7Data.slice(-120);
-        const last120MA25 = ma25Data.slice(-120);
+        const last150MA7 = ma7Data.slice(-150);
+        const last150MA25 = ma25Data.slice(-150);
         
-        ma7SeriesRef.current.setData(last120MA7);
-        ma25SeriesRef.current.setData(last120MA25);
+        ma7SeriesRef.current.setData(last150MA7);
+        ma25SeriesRef.current.setData(last150MA25);
       }
       
       // Xử lý HLC data - nếu có hlcData thì dùng, không thì convert từ candlestick
@@ -219,12 +230,31 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       }
       
       if (volumeData.length > 0) {
-        const last120Volume = volumeData.slice(-120);
-        volumeSeriesRef.current.setData(last120Volume);
+        const last150Volume = volumeData.slice(-150);
+        volumeSeriesRef.current.setData(last150Volume);
       }
 
       // Fit content để hiển thị tất cả dữ liệu
       chartRef.current.timeScale().fitContent();
+      
+      // Tối ưu price scale để loại bỏ khoảng trống
+      if (candlestickData.length > 0) {
+        const prices = candlestickData.map(item => [item.high, item.low]).flat();
+        const maxPrice = Math.max(...prices);
+        const minPrice = Math.min(...prices);
+        const priceRange = maxPrice - minPrice;
+        const padding = priceRange * 0.05; // 5% padding
+        
+        chartRef.current.priceScale('right').applyOptions({
+          autoScale: false,
+          scaleMargins: {
+            top: 0.1,
+            bottom: 0.1,
+          },
+          minValue: minPrice - padding,
+          maxValue: maxPrice + padding,
+        });
+      }
     }
 
     // Cleanup khi component unmount
@@ -305,24 +335,41 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   // Update data khi data thay đổi
   useEffect(() => {
     if (chartRef.current) {
-      // Update candlestick data - chỉ lấy 120 items cuối cùng
+      // Update candlestick data - chỉ lấy 150 items cuối cùng
       if (candlestickData.length > 0 && candlestickSeriesRef.current) {
-        const last120Candlestick = candlestickData.slice(-120);
-        candlestickSeriesRef.current.setData(last120Candlestick);
+        const last150Candlestick = candlestickData.slice(-150);
+        candlestickSeriesRef.current.setData(last150Candlestick);
         
         // Update MA data
         const ma7Data = calculateMA(candlestickData, 7);
         const ma25Data = calculateMA(candlestickData, 25);
         
-        const last120MA7 = ma7Data.slice(-120);
-        const last120MA25 = ma25Data.slice(-120);
+        const last150MA7 = ma7Data.slice(-150);
+        const last150MA25 = ma25Data.slice(-150);
         
         if (ma7SeriesRef.current) {
-          ma7SeriesRef.current.setData(last120MA7);
+          ma7SeriesRef.current.setData(last150MA7);
         }
         if (ma25SeriesRef.current) {
-          ma25SeriesRef.current.setData(last120MA25);
+          ma25SeriesRef.current.setData(last150MA25);
         }
+        
+        // Tối ưu price scale cho data mới
+        const prices = last150Candlestick.map(item => [item.high, item.low]).flat();
+        const maxPrice = Math.max(...prices);
+        const minPrice = Math.min(...prices);
+        const priceRange = maxPrice - minPrice;
+        const padding = priceRange * 0.05; // 5% padding
+        
+        chartRef.current.priceScale('right').applyOptions({
+          autoScale: false,
+          scaleMargins: {
+            top: 0.1,
+            bottom: 0.1,
+          },
+          minValue: minPrice - padding,
+          maxValue: maxPrice + padding,
+        });
       }
       
       // Update HLC data - xử lý logic convert
@@ -339,10 +386,10 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         }
       }
 
-      // Update volume data - chỉ lấy 120 items cuối cùng
+      // Update volume data - chỉ lấy 150 items cuối cùng
       if (volumeData.length > 0 && volumeSeriesRef.current) {
-        const last120Volume = volumeData.slice(-120);
-        volumeSeriesRef.current.setData(last120Volume);
+        const last150Volume = volumeData.slice(-150);
+        volumeSeriesRef.current.setData(last150Volume);
       }
       
       chartRef.current.timeScale().fitContent();
@@ -355,7 +402,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       if (chartRef.current && chartContainerRef.current) {
         chartRef.current.resize(
           chartContainerRef.current.clientWidth,
-          400
+          700 // Tăng từ 400 lên 600
         );
       }
     };
