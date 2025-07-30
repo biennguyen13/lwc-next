@@ -11,7 +11,7 @@ const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
 // Helper functions để tạo sample data
 const getDateString = (index: number) => {
   const date = new Date();
-  date.setDate(date.getDate() - (100 - index));
+  date.setDate(date.getDate() - (200 - index)); // Tăng lên 200 để có đủ data
   return Math.floor(date.getTime() / 1000) as any;
 };
 
@@ -23,12 +23,12 @@ const generateVolume = (baseVolume: number = 1000000) => {
   return Math.floor(baseVolume * (0.5 + Math.random() * 1.5));
 };
 
-// Generate sample data
+// Generate sample data - tạo 200 items
 const generateCandlestickData = (): CandlestickData[] => {
   const data: CandlestickData[] = [];
   let basePrice = 100;
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 200; i++) { // Tăng lên 200 items
     const open = generatePrice(basePrice);
     const high = open * (1 + Math.random() * 0.03);
     const low = open * (1 - Math.random() * 0.03);
@@ -52,7 +52,7 @@ const generateHLCData = (): HLCAreaData[] => {
   const data: HLCAreaData[] = [];
   let basePrice = 100;
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 200; i++) { // Tăng lên 200 items
     const close = generatePrice(basePrice);
     const high = close * (1 + Math.random() * 0.02);
     const low = close * (1 - Math.random() * 0.02);
@@ -78,20 +78,25 @@ const generateVolumeData = (candlestickData: CandlestickData[]): HistogramData[]
   }));
 };
 
+// Helper function để lấy 100 items cuối cùng
+const getLast100Items = <T,>(data: T[]): T[] => {
+  return data.slice(-100); // Lấy 100 items cuối cùng
+};
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'candlestick' | 'hlc' | 'combined' | 'bollinger'>('candlestick');
   
   // Generate sample data chỉ một lần khi khởi tạo page
   const { candlestickData, hlcData, volumeData } = useMemo(() => {
     console.log('🔄 Generating datasets...'); // Debug log
-    const candlestick = generateCandlestickData();
-    const hlc = generateHLCData();
-    const volume = generateVolumeData(candlestick);
+    const candlestick = generateCandlestickData(); // 200 items
+    const hlc = generateHLCData(); // 200 items
+    const volume = generateVolumeData(candlestick); // 200 items
     
     return {
-      candlestickData: candlestick,
-      hlcData: hlc,
-      volumeData: volume,
+      candlestickData: candlestick, // Giữ nguyên 200 items để Chart component xử lý
+      hlcData: hlc, // Giữ nguyên 200 items để Chart component xử lý
+      volumeData: volume, // Giữ nguyên 200 items để Chart component xử lý
     };
   }, []); // Empty dependency array = chỉ chạy một lần
 

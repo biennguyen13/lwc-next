@@ -48,15 +48,19 @@ const calculateBollingerBands = (data: CandlestickData[], period: number = 20, m
 const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCAreaData[] => {
   if (candlestickData.length === 0) return [];
   
-  // Tính toán Bollinger Bands
-  const bollingerBands = calculateBollingerBands(candlestickData, 10, 2);
-  // Convert thành HLC format
-  return bollingerBands.map((band, index) => ({
+  // Tính toán Bollinger Bands từ toàn bộ data (200 items)
+  const bollingerBands = calculateBollingerBands(candlestickData, 20, 2);
+  
+  // Convert thành HLC format và chỉ lấy 100 items cuối cùng
+  const allBollingerData = bollingerBands.map((band, index) => ({
     time: candlestickData[index].time,
     high: band.upper,    // Upper band làm high
     low: band.lower,     // Lower band làm low  
     close: band.middle,  // Middle band (SMA) làm close
   }));
+  
+  // Chỉ trả về 100 items cuối cùng
+  return allBollingerData.slice(-100);
 };
 
 export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
@@ -147,9 +151,10 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Set data cho tất cả series
+      // Set data cho tất cả series - chỉ lấy 100 items cuối cùng
       if (candlestickData.length > 0) {
-        candlestickSeriesRef.current.setData(candlestickData);
+        const last100Candlestick = candlestickData.slice(-100);
+        candlestickSeriesRef.current.setData(last100Candlestick);
       }
       
       // Xử lý HLC data - nếu có hlcData thì dùng, không thì convert từ candlestick
@@ -160,11 +165,13 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       }
       
       if (finalHLCData.length > 0) {
+        console.log('📊 Setting HLC data:', finalHLCData.length, 'items');
         hlcSeriesRef.current.setData(finalHLCData);
       }
       
       if (volumeData.length > 0) {
-        volumeSeriesRef.current.setData(volumeData);
+        const last100Volume = volumeData.slice(-100);
+        volumeSeriesRef.current.setData(last100Volume);
       }
 
       // Fit content để hiển thị tất cả dữ liệu
@@ -234,9 +241,10 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   // Update data khi data thay đổi
   useEffect(() => {
     if (chartRef.current) {
-      // Update candlestick data
+      // Update candlestick data - chỉ lấy 100 items cuối cùng
       if (candlestickData.length > 0 && candlestickSeriesRef.current) {
-        candlestickSeriesRef.current.setData(candlestickData);
+        const last100Candlestick = candlestickData.slice(-100);
+        candlestickSeriesRef.current.setData(last100Candlestick);
       }
       
       // Update HLC data - xử lý logic convert
@@ -248,14 +256,15 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         }
         
         if (finalHLCData.length > 0) {
-          console.log(finalHLCData)
+          console.log('📊 Updating HLC data:', finalHLCData.length, 'items');
           hlcSeriesRef.current.setData(finalHLCData);
         }
       }
 
-      // Update volume data
+      // Update volume data - chỉ lấy 100 items cuối cùng
       if (volumeData.length > 0 && volumeSeriesRef.current) {
-        volumeSeriesRef.current.setData(volumeData);
+        const last100Volume = volumeData.slice(-100);
+        volumeSeriesRef.current.setData(last100Volume);
       }
       
       chartRef.current.timeScale().fitContent();
