@@ -165,8 +165,8 @@ export default function Home() {
           
           {activeTab === 'hlc' && (
             <Chart 
-              candlestickData={[]}
-              hlcData={candlestickData}
+            candlestickData={candlestickData}
+              hlcData={[]}
               volumeData={[]}
               title="HLC Area Chart (100 data points)"
             />
@@ -174,8 +174,8 @@ export default function Home() {
           
           {activeTab === 'bollinger' && (
             <Chart 
-              candlestickData={[]}
-              hlcData={candlestickData}
+            candlestickData={candlestickData}
+              hlcData={[]}
               volumeData={[]}
               title="Bollinger Bands Chart (100 data points)"
             />
@@ -184,7 +184,7 @@ export default function Home() {
           {activeTab === 'combined' && (
             <Chart 
               candlestickData={candlestickData}
-              hlcData={candlestickData}
+              hlcData={[]}
               volumeData={volumeData}
               title="Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (100 data points)"
             />
