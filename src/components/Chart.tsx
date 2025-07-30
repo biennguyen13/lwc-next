@@ -3,15 +3,19 @@
 import { useEffect, useRef } from 'react';
 import { createChart, IChartApi, CandlestickData } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
+import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
 
 interface ChartProps {
-  data: CandlestickData[];
+  candlestickData: CandlestickData[];
+  hlcData: HLCAreaData[];
   title?: string;
 }
 
-export default function Chart({ data, title = 'Biểu đồ giá' }: ChartProps) {
+export default function Chart({ candlestickData, hlcData, title = 'Biểu đồ giá' }: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
+  const candlestickSeriesRef = useRef<any>(null);
+  const hlcSeriesRef = useRef<any>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -48,16 +52,36 @@ export default function Chart({ data, title = 'Biểu đồ giá' }: ChartProps)
       });
 
       // Thêm candlestick series
-      const candlestickSeries = chartRef.current.addCandlestickSeries({
+      candlestickSeriesRef.current = chartRef.current.addCandlestickSeries({
         upColor: '#26a69a',
         downColor: '#ef5350',
         borderDownColor: '#ef5350',
         borderUpColor: '#26a69a',
         wickDownColor: '#ef5350',
         wickUpColor: '#26a69a',
+        title: 'Candlestick',
       });
 
-      candlestickSeries.setData(data);
+      // Thêm HLC Area series
+      const customSeriesView = new HLCAreaSeries();
+      hlcSeriesRef.current = chartRef.current.addCustomSeries(customSeriesView, {
+        highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.6)' : 'rgba(220, 38, 38, 0.6)',
+        lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.6)' : 'rgba(37, 99, 235, 0.6)',
+        closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.6)' : 'rgba(5, 150, 105, 0.6)',
+        areaBottomColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(220, 38, 38, 0.1)',
+        areaTopColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(5, 150, 105, 0.1)',
+        highLineWidth: 1,
+        lowLineWidth: 1,
+        closeLineWidth: 1,
+      });
+
+      // Set data cho cả 2 series
+      if (candlestickData.length > 0) {
+        candlestickSeriesRef.current.setData(candlestickData);
+      }
+      if (hlcData.length > 0) {
+        hlcSeriesRef.current.setData(hlcData);
+      }
 
       // Fit content để hiển thị tất cả dữ liệu
       chartRef.current.timeScale().fitContent();
@@ -68,6 +92,8 @@ export default function Chart({ data, title = 'Biểu đồ giá' }: ChartProps)
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
+        candlestickSeriesRef.current = null;
+        hlcSeriesRef.current = null;
       }
     };
   }, []);
@@ -102,12 +128,20 @@ export default function Chart({ data, title = 'Biểu đồ giá' }: ChartProps)
 
   // Update data khi data thay đổi
   useEffect(() => {
-    if (chartRef.current && data.length > 0) {
-      const candlestickSeries = chartRef.current.addCandlestickSeries();
-      candlestickSeries.setData(data);
+    if (chartRef.current) {
+      // Update candlestick data
+      if (candlestickData.length > 0 && candlestickSeriesRef.current) {
+        candlestickSeriesRef.current.setData(candlestickData);
+      }
+      
+      // Update HLC data
+      if (hlcData.length > 0 && hlcSeriesRef.current) {
+        hlcSeriesRef.current.setData(hlcData);
+      }
+      
       chartRef.current.timeScale().fitContent();
     }
-  }, [data]);
+  }, [candlestickData, hlcData]);
 
   // Handle resize
   useEffect(() => {
@@ -130,6 +164,28 @@ export default function Chart({ data, title = 'Biểu đồ giá' }: ChartProps)
         {title}
       </h2>
       <div ref={chartContainerRef} className="chart-container" />
+      <div className="mt-4 flex justify-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-green-500 rounded"></div>
+          <span>Candlestick (Up)</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-red-500 rounded"></div>
+          <span>Candlestick (Down)</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span>HLC High</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span>HLC Low</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <span>HLC Close</span>
+        </div>
+      </div>
     </div>
   );
 } 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { CandlestickData } from 'lightweight-charts';
+import { HLCAreaData } from '@/components/HLCAreaSeries';
 
 // Dynamic import để tránh SSR issues
 const Chart = dynamic(() => import('@/components/Chart'), {
@@ -29,7 +30,7 @@ const sampleCandlestickData: CandlestickData[] = [
   { time: '2023-01-10', open: 122, high: 132, low: 112, close: 128 },
 ];
 
-const sampleHLCData = [
+const sampleHLCData: HLCAreaData[] = [
   { time: '2023-01-01', high: 110, low: 90, close: 105 },
   { time: '2023-01-02', high: 115, low: 95, close: 110 },
   { time: '2023-01-03', high: 120, low: 100, close: 108 },
@@ -43,7 +44,7 @@ const sampleHLCData = [
 ];
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'candlestick' | 'custom'>('candlestick');
+  const [activeTab, setActiveTab] = useState<'combined' | 'candlestick' | 'custom'>('combined');
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -55,6 +56,16 @@ export default function HomePage() {
         <div className="mb-6">
           <div className="flex space-x-4 justify-center">
             <button
+              onClick={() => setActiveTab('combined')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === 'combined'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+              }`}
+            >
+              Combined Chart
+            </button>
+            <button
               onClick={() => setActiveTab('candlestick')}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === 'candlestick'
@@ -62,7 +73,7 @@ export default function HomePage() {
                   : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
               }`}
             >
-              Candlestick Chart
+              Candlestick Only
             </button>
             <button
               onClick={() => setActiveTab('custom')}
@@ -72,23 +83,32 @@ export default function HomePage() {
                   : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
               }`}
             >
-              HLC Area Chart
+              HLC Area Only
             </button>
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300">
+          {activeTab === 'combined' && (
+            <Chart 
+              candlestickData={sampleCandlestickData}
+              hlcData={sampleHLCData}
+              title="Combined Chart - Candlestick + HLC Area" 
+            />
+          )}
+          
           {activeTab === 'candlestick' && (
             <Chart 
-              data={sampleCandlestickData} 
-              title="Biểu đồ Candlestick" 
+              candlestickData={sampleCandlestickData}
+              hlcData={[]}
+              title="Candlestick Chart Only" 
             />
           )}
           
           {activeTab === 'custom' && (
             <CustomChart 
               data={sampleHLCData} 
-              title="Biểu đồ HLC Area" 
+              title="HLC Area Chart Only" 
             />
           )}
         </div>
@@ -98,6 +118,7 @@ export default function HomePage() {
             Thông tin
           </h2>
           <div className="space-y-2 text-gray-600 dark:text-gray-300 transition-colors">
+            <p>• <strong className="text-gray-900 dark:text-white">Combined Chart:</strong> Hiển thị cả Candlestick và HLC Area trên cùng một chart</p>
             <p>• <strong className="text-gray-900 dark:text-white">Candlestick Chart:</strong> Biểu đồ nến truyền thống với dữ liệu OHLC</p>
             <p>• <strong className="text-gray-900 dark:text-white">HLC Area Chart:</strong> Biểu đồ tùy chỉnh hiển thị High, Low, Close với vùng được tô màu</p>
             <p>• <strong className="text-gray-900 dark:text-white">Responsive:</strong> Tự động điều chỉnh kích thước khi thay đổi màn hình</p>

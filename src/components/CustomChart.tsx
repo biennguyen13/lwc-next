@@ -3,47 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { createChart, IChartApi } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
-
-// Interface cho HLCAreaData
-interface HLCAreaData {
-  time: string | number;
-  high: number;
-  low: number;
-  close: number;
-}
-
-// HLCAreaSeries class (simplified version)
-class HLCAreaSeries {
-  renderer() {
-    return {
-      draw: () => {},
-      update: () => {},
-    };
-  }
-
-  priceValueBuilder(data: HLCAreaData) {
-    return [data.low, data.high, data.close];
-  }
-
-  isWhitespace(data: any) {
-    return data.close === undefined;
-  }
-
-  update() {}
-
-  defaultOptions() {
-    return {
-      highLineColor: 'rgba(242, 54, 69, 0.2)',
-      lowLineColor: 'rgba(242, 54, 69, 0.2)',
-      closeLineColor: 'rgba(242, 54, 69, 0.2)',
-      areaBottomColor: 'rgba(242, 54, 69, 0.2)',
-      areaTopColor: 'rgba(242, 54, 69, 0.2)',
-      highLineWidth: 2,
-      lowLineWidth: 2,
-      closeLineWidth: 2,
-    };
-  }
-}
+import { HLCAreaSeries, HLCAreaData, HLCAreaSeriesOptions } from './HLCAreaSeries';
 
 interface CustomChartProps {
   data: HLCAreaData[];
@@ -88,14 +48,17 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
         },
       });
 
-      // Thêm custom series
+      // Thêm custom HLC Area series
       const customSeriesView = new HLCAreaSeries();
       const myCustomSeries = chartRef.current.addCustomSeries(customSeriesView, {
-        highLineColor: 'rgba(242, 54, 69, 0.8)',
-        lowLineColor: 'rgba(242, 54, 69, 0.8)',
-        closeLineColor: 'rgba(242, 54, 69, 0.8)',
-        areaBottomColor: 'rgba(242, 54, 69, 0.2)',
-        areaTopColor: 'rgba(242, 54, 69, 0.2)',
+        highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.8)' : 'rgba(220, 38, 38, 0.8)',
+        lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.8)' : 'rgba(37, 99, 235, 0.8)',
+        closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(5, 150, 105, 0.8)',
+        areaBottomColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(220, 38, 38, 0.1)',
+        areaTopColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(5, 150, 105, 0.1)',
+        highLineWidth: 2,
+        lowLineWidth: 2,
+        closeLineWidth: 2,
       });
 
       myCustomSeries.setData(data);
@@ -161,6 +124,20 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
         {title}
       </h2>
       <div ref={chartContainerRef} className="chart-container" />
+      <div className="mt-4 flex justify-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span>High</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span>Low</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <span>Close</span>
+        </div>
+      </div>
     </div>
   );
 } 
