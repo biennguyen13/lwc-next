@@ -127,13 +127,15 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Thêm Bollinger Bands Area (fill màu)
+      // Thêm Bollinger Bands Area (fill màu) - sử dụng area series đơn giản
       bollingerAreaSeriesRef.current = chartRef.current.addAreaSeries({
-        topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(217, 119, 6, 0.1)',
-        bottomColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(217, 119, 6, 0.05)',
+        topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(217, 119, 6, 0.3)',
+        bottomColor: 'transparent',
         lineColor: 'transparent',
         lineWidth: 0,
         title: 'Bollinger Bands Area',
+        priceLineVisible: false,
+        lastValueVisible: false,
       });
 
       // Thêm Bollinger Bands Lines
@@ -186,36 +188,18 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         value: band.lower,
       })).filter(item => item.value > 0);
 
-      // Set Bollinger Bands Area data (upper và lower bands)
+      // Tạo Bollinger Area data với baseline
       const bollingerAreaData = bollingerBands.map((band, index) => ({
         time: hlcData[index].time,
         value: band.upper,
-      })).filter(item => item.value > 0);
-
-      // Thêm lower band data để tạo area fill
-      const lowerBandForArea = bollingerBands.map((band, index) => ({
-        time: hlcData[index].time,
-        value: band.lower,
-      })).filter(item => item.value > 0);
-
-      // Combine upper và lower để tạo area
-      const combinedAreaData = bollingerAreaData.map((upperItem, index) => {
-        const lowerItem = lowerBandForArea[index];
-        if (lowerItem && lowerItem.time === upperItem.time) {
-          return {
-            time: upperItem.time,
-            value: upperItem.value,
-            lowerValue: lowerItem.value,
-          };
-        }
-        return upperItem;
-      });
+        baseline: band.lower, // Sử dụng lower band làm baseline
+      })).filter(item => item.value > 0 && item.baseline > 0);
 
       upperBandSeriesRef.current.setData(upperBandData);
       middleBandSeriesRef.current.setData(middleBandData);
       lowerBandSeriesRef.current.setData(lowerBandData);
 
-      // Set area data (chỉ upper band, area sẽ tự động fill xuống dưới)
+      // Set area data với upper band, sẽ fill xuống đến middle band
       bollingerAreaSeriesRef.current.setData(bollingerAreaData);
 
       // Fit content để hiển thị tất cả dữ liệu
@@ -291,8 +275,10 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Update Bollinger Area colors theo theme
       if (bollingerAreaSeriesRef.current) {
         bollingerAreaSeriesRef.current.applyOptions({
-          topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(217, 119, 6, 0.1)',
-          bottomColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(217, 119, 6, 0.05)',
+          topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(217, 119, 6, 0.3)',
+          bottomColor: 'transparent',
+          lineColor: 'transparent',
+          lineWidth: 0,
         });
       }
     }
@@ -339,7 +325,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         const bollingerAreaData = bollingerBands.map((band, index) => ({
           time: hlcData[index].time,
           value: band.upper,
-        })).filter(item => item.value > 0);
+          baseline: band.lower, // Sử dụng lower band làm baseline
+        })).filter(item => item.value > 0 && item.baseline > 0);
 
         if (upperBandSeriesRef.current) {
           upperBandSeriesRef.current.setData(upperBandData);

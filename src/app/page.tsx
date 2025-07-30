@@ -7,8 +7,6 @@ import { HLCAreaData } from '@/components/HLCAreaSeries';
 
 // Dynamic imports để tránh SSR issues
 const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
-const CustomChart = dynamic(() => import('@/components/CustomChart'), { ssr: false });
-const BollingerChart = dynamic(() => import('@/components/BollingerChart'), { ssr: false });
 
 // Helper functions để tạo sample data
 const getDateString = (index: number) => {
@@ -131,7 +129,6 @@ export default function Home() {
             >
               HLC Area
             </button>
-         
             <button
               onClick={() => setActiveTab('bollinger')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -142,7 +139,6 @@ export default function Home() {
             >
               Bollinger Bands
             </button>
-
             <button
               onClick={() => setActiveTab('combined')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -168,25 +164,29 @@ export default function Home() {
           )}
           
           {activeTab === 'hlc' && (
-            <CustomChart 
+            <Chart 
+              candlestickData={[]}
               hlcData={hlcData}
+              volumeData={[]}
               title="HLC Area Chart (100 data points)"
             />
           )}
           
+          {activeTab === 'bollinger' && (
+            <Chart 
+              candlestickData={[]}
+              hlcData={hlcData}
+              volumeData={[]}
+              title="Bollinger Bands Chart (100 data points)"
+            />
+          )}
+
           {activeTab === 'combined' && (
             <Chart 
               candlestickData={candlestickData}
               hlcData={hlcData}
               volumeData={volumeData}
               title="Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (100 data points)"
-            />
-          )}
-
-          {activeTab === 'bollinger' && (
-            <BollingerChart 
-              hlcData={hlcData}
-              title="Bollinger Bands Chart (100 data points)"
             />
           )}
         </div>
