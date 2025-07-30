@@ -12,44 +12,6 @@ interface ChartProps {
   title?: string;
 }
 
-// Bollinger Bands calculation
-const calculateBollingerBands = (data: HLCAreaData[], period: number = 20, multiplier: number = 2) => {
-  const bands: { upper: number; middle: number; lower: number }[] = [];
-  
-  for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) {
-      bands.push({ upper: 0, middle: 0, lower: 0 });
-      continue;
-    }
-    
-    // Tính SMA (Simple Moving Average) sử dụng close price
-    const slice = data.slice(i - period + 1, i + 1);
-    const sma = slice.reduce((sum, item) => sum + item.close, 0) / period;
-    
-    // Tính Standard Deviation
-    const variance = slice.reduce((sum, item) => sum + Math.pow(item.close - sma, 2), 0) / period;
-    const stdDev = Math.sqrt(variance);
-    
-    bands.push({
-      upper: sma + (multiplier * stdDev),
-      middle: sma,
-      lower: sma - (multiplier * stdDev)
-    });
-  }
-  
-  return bands;
-};
-
-// Convert Bollinger Bands to HLC data format
-const convertBollingerToHLC = (bollingerBands: { upper: number; middle: number; lower: number }[], originalData: HLCAreaData[]): HLCAreaData[] => {
-  return bollingerBands.map((band, index) => ({
-    time: originalData[index].time,
-    high: band.upper,    // Upper band làm high
-    low: band.lower,     // Lower band làm low  
-    close: band.middle,  // Middle band làm close
-  }));
-};
-
 export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -102,12 +64,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         title: 'Candlestick',
       });
 
-      // Thêm HLC Area series với Bollinger data
+      // Thêm HLC Area series
       const customSeriesView = new HLCAreaSeries();
-      
-      // Tính toán Bollinger Bands từ HLC data
-      const bollingerBands = calculateBollingerBands(hlcData, 20, 2);
-      const bollingerHLCData = convertBollingerToHLC(bollingerBands, hlcData);
       
       // Sử dụng cùng màu cho tất cả (orange theme)
       const bollingerColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(217, 119, 6, 0.8)';
@@ -146,8 +104,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       if (candlestickData.length > 0) {
         candlestickSeriesRef.current.setData(candlestickData);
       }
-      if (bollingerHLCData.length > 0) {
-        hlcSeriesRef.current.setData(bollingerHLCData);
+      if (hlcData.length > 0) {
+        hlcSeriesRef.current.setData(hlcData);
       }
       if (volumeData.length > 0) {
         volumeSeriesRef.current.setData(volumeData);
@@ -201,20 +159,6 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           color: theme === 'dark' ? '#3b82f6' : '#2563eb',
         });
       }
-
-      // Update HLC series colors theo theme
-      if (hlcSeriesRef.current) {
-        const bollingerColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(217, 119, 6, 0.8)';
-        const bollingerAreaColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.2)';
-        
-        hlcSeriesRef.current.applyOptions({
-          highLineColor: bollingerColor,      // Upper band
-          lowLineColor: bollingerColor,       // Lower band
-          closeLineColor: bollingerColor,     // Middle band
-          areaBottomColor: bollingerAreaColor, // Area fill
-          areaTopColor: bollingerAreaColor,   // Area fill
-        });
-      }
     }
   }, [theme]);
 
@@ -226,11 +170,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         candlestickSeriesRef.current.setData(candlestickData);
       }
       
-      // Update HLC data với Bollinger calculation
+      // Update HLC data
       if (hlcData.length > 0 && hlcSeriesRef.current) {
-        const bollingerBands = calculateBollingerBands(hlcData, 20, 2);
-        const bollingerHLCData = convertBollingerToHLC(bollingerBands, hlcData);
-        hlcSeriesRef.current.setData(bollingerHLCData);
+        hlcSeriesRef.current.setData(hlcData);
       }
 
       // Update volume data
@@ -273,16 +215,16 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           <span>Candlestick (Down)</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-          <span>Upper Band</span>
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span>HLC High</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-          <span>Lower Band</span>
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span>HLC Low</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-          <span>Middle Band (SMA)</span>
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <span>HLC Close</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
