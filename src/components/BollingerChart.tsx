@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { createChart, IChartApi, CandlestickData, HistogramData } from 'lightweight-charts';
+import { createChart, IChartApi } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
-import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
+import { HLCAreaData } from './HLCAreaSeries';
 
-interface ChartProps {
-  candlestickData: CandlestickData[];
+interface BollingerChartProps {
   hlcData: HLCAreaData[];
-  volumeData: HistogramData[];
   title?: string;
 }
 
@@ -40,12 +38,10 @@ const calculateBollingerBands = (data: HLCAreaData[], period: number = 20, multi
   return bands;
 };
 
-export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
+export default function BollingerChart({ hlcData, title = 'Bollinger Bands Chart' }: BollingerChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const candlestickSeriesRef = useRef<any>(null);
   const hlcSeriesRef = useRef<any>(null);
-  const volumeSeriesRef = useRef<any>(null);
   const upperBandSeriesRef = useRef<any>(null);
   const middleBandSeriesRef = useRef<any>(null);
   const lowerBandSeriesRef = useRef<any>(null);
@@ -57,7 +53,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Tạo chart với theme
       chartRef.current = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: 400,
+        height: 500, // Tăng height cho Bollinger chart
         layout: {
           background: { 
             color: theme === 'dark' ? '#1f2937' : '#ffffff' 
@@ -85,52 +81,24 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Thêm candlestick series
-      candlestickSeriesRef.current = chartRef.current.addCandlestickSeries({
-        upColor: '#26a69a',
-        downColor: '#ef5350',
-        borderDownColor: '#ef5350',
-        borderUpColor: '#26a69a',
-        wickDownColor: '#ef5350',
-        wickUpColor: '#26a69a',
-        title: 'Candlestick',
-      });
-
-      // Thêm HLC Area series
+      // Thêm HLC Area series (chỉ để tham khảo)
+      const { HLCAreaSeries } = require('./HLCAreaSeries');
       const customSeriesView = new HLCAreaSeries();
       hlcSeriesRef.current = chartRef.current.addCustomSeries(customSeriesView, {
-        highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.6)' : 'rgba(220, 38, 38, 0.6)',
-        lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.6)' : 'rgba(37, 99, 235, 0.6)',
-        closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.6)' : 'rgba(5, 150, 105, 0.6)',
-        areaBottomColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(220, 38, 38, 0.1)',
-        areaTopColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(5, 150, 105, 0.1)',
+        highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(220, 38, 38, 0.4)',
+        lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(37, 99, 235, 0.4)',
+        closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(5, 150, 105, 0.4)',
+        areaBottomColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(220, 38, 38, 0.05)',
+        areaTopColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(5, 150, 105, 0.05)',
         highLineWidth: 1,
         lowLineWidth: 1,
         closeLineWidth: 1,
       });
 
-      // Thêm volume histogram series
-      volumeSeriesRef.current = chartRef.current.addHistogramSeries({
-        color: theme === 'dark' ? '#3b82f6' : '#2563eb',
-        priceFormat: {
-          type: 'volume',
-        },
-        priceScaleId: '', // Tạo price scale riêng cho volume
-        title: 'Volume',
-      });
-
-      // Tạo price scale riêng cho volume
-      chartRef.current.priceScale('').applyOptions({
-        scaleMargins: {
-          top: 0.8, // Volume ở dưới 20% của chart
-          bottom: 0,
-        },
-      });
-
       // Thêm Bollinger Bands Area (fill màu)
       bollingerAreaSeriesRef.current = chartRef.current.addAreaSeries({
-        topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(217, 119, 6, 0.1)',
-        bottomColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(217, 119, 6, 0.05)',
+        topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(217, 119, 6, 0.15)',
+        bottomColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(217, 119, 6, 0.08)',
         lineColor: 'transparent',
         lineWidth: 0,
         title: 'Bollinger Bands Area',
@@ -141,33 +109,27 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       
       upperBandSeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? '#f59e0b' : '#d97706',
-        lineWidth: 1,
+        lineWidth: 2,
         lineStyle: 1, // Dashed line
         title: 'Upper Band',
       });
 
       middleBandSeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? '#8b5cf6' : '#7c3aed',
-        lineWidth: 1,
+        lineWidth: 2,
         title: 'Middle Band (SMA)',
       });
 
       lowerBandSeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? '#f59e0b' : '#d97706',
-        lineWidth: 1,
+        lineWidth: 2,
         lineStyle: 1, // Dashed line
         title: 'Lower Band',
       });
 
       // Set data cho tất cả series
-      if (candlestickData.length > 0) {
-        candlestickSeriesRef.current.setData(candlestickData);
-      }
       if (hlcData.length > 0) {
         hlcSeriesRef.current.setData(hlcData);
-      }
-      if (volumeData.length > 0) {
-        volumeSeriesRef.current.setData(volumeData);
       }
 
       // Set Bollinger Bands data
@@ -186,36 +148,15 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         value: band.lower,
       })).filter(item => item.value > 0);
 
-      // Set Bollinger Bands Area data (upper và lower bands)
+      // Set Bollinger Bands Area data
       const bollingerAreaData = bollingerBands.map((band, index) => ({
         time: hlcData[index].time,
         value: band.upper,
       })).filter(item => item.value > 0);
 
-      // Thêm lower band data để tạo area fill
-      const lowerBandForArea = bollingerBands.map((band, index) => ({
-        time: hlcData[index].time,
-        value: band.lower,
-      })).filter(item => item.value > 0);
-
-      // Combine upper và lower để tạo area
-      const combinedAreaData = bollingerAreaData.map((upperItem, index) => {
-        const lowerItem = lowerBandForArea[index];
-        if (lowerItem && lowerItem.time === upperItem.time) {
-          return {
-            time: upperItem.time,
-            value: upperItem.value,
-            lowerValue: lowerItem.value,
-          };
-        }
-        return upperItem;
-      });
-
       upperBandSeriesRef.current.setData(upperBandData);
       middleBandSeriesRef.current.setData(middleBandData);
       lowerBandSeriesRef.current.setData(lowerBandData);
-
-      // Set area data (chỉ upper band, area sẽ tự động fill xuống dưới)
       bollingerAreaSeriesRef.current.setData(bollingerAreaData);
 
       // Fit content để hiển thị tất cả dữ liệu
@@ -227,9 +168,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
-        candlestickSeriesRef.current = null;
         hlcSeriesRef.current = null;
-        volumeSeriesRef.current = null;
         upperBandSeriesRef.current = null;
         middleBandSeriesRef.current = null;
         lowerBandSeriesRef.current = null;
@@ -264,10 +203,14 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Update volume series color theo theme
-      if (volumeSeriesRef.current) {
-        volumeSeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#3b82f6' : '#2563eb',
+      // Update HLC series colors theo theme
+      if (hlcSeriesRef.current) {
+        hlcSeriesRef.current.applyOptions({
+          highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(220, 38, 38, 0.4)',
+          lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(37, 99, 235, 0.4)',
+          closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(5, 150, 105, 0.4)',
+          areaBottomColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(220, 38, 38, 0.05)',
+          areaTopColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(5, 150, 105, 0.05)',
         });
       }
 
@@ -291,8 +234,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Update Bollinger Area colors theo theme
       if (bollingerAreaSeriesRef.current) {
         bollingerAreaSeriesRef.current.applyOptions({
-          topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(217, 119, 6, 0.1)',
-          bottomColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(217, 119, 6, 0.05)',
+          topColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(217, 119, 6, 0.15)',
+          bottomColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(217, 119, 6, 0.08)',
         });
       }
     }
@@ -301,19 +244,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   // Update data khi data thay đổi
   useEffect(() => {
     if (chartRef.current) {
-      // Update candlestick data
-      if (candlestickData.length > 0 && candlestickSeriesRef.current) {
-        candlestickSeriesRef.current.setData(candlestickData);
-      }
-      
       // Update HLC data
       if (hlcData.length > 0 && hlcSeriesRef.current) {
         hlcSeriesRef.current.setData(hlcData);
-      }
-
-      // Update volume data
-      if (volumeData.length > 0 && volumeSeriesRef.current) {
-        volumeSeriesRef.current.setData(volumeData);
       }
 
       // Update Bollinger Bands
@@ -357,7 +290,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       
       chartRef.current.timeScale().fitContent();
     }
-  }, [candlestickData, hlcData, volumeData]);
+  }, [hlcData]);
 
   // Handle resize
   useEffect(() => {
@@ -365,7 +298,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       if (chartRef.current && chartContainerRef.current) {
         chartRef.current.resize(
           chartContainerRef.current.clientWidth,
-          400
+          500
         );
       }
     };
@@ -379,31 +312,19 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">
         {title}
       </h2>
-      <div ref={chartContainerRef} className="chart-container" />
+      <div ref={chartContainerRef} className="chart-container" style={{ height: '500px' }} />
       <div className="mt-4 flex justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span>Candlestick (Up)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span>Candlestick (Down)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <div className="w-3 h-3 rounded-full bg-red-500 opacity-40"></div>
           <span>HLC High</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <div className="w-3 h-3 rounded-full bg-blue-500 opacity-40"></div>
           <span>HLC Low</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <div className="w-3 h-3 rounded-full bg-green-500 opacity-40"></div>
           <span>HLC Close</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span>Volume</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-orange-500 rounded"></div>
@@ -421,6 +342,13 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           <div className="w-3 h-3 bg-orange-200 rounded"></div>
           <span>Bollinger Area</span>
         </div>
+      </div>
+      <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p><strong>Bollinger Bands Analysis:</strong></p>
+        <p>• Vùng rộng = High volatility</p>
+        <p>• Vùng hẹp = Low volatility (squeeze)</p>
+        <p>• Price outside bands = Overbought/Oversold</p>
+        <p>• Middle band = 20-period SMA</p>
       </div>
     </div>
   );

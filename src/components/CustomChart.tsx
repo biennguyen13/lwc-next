@@ -1,19 +1,49 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { createChart, IChartApi } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
-import { HLCAreaSeries, HLCAreaData, HLCAreaSeriesOptions } from './HLCAreaSeries';
+import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
 
 interface CustomChartProps {
-  data: HLCAreaData[];
   title?: string;
+  hlcData?: HLCAreaData[];
 }
 
-export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomChartProps) {
+export default function CustomChart({ title = 'HLC Area Chart', hlcData }: CustomChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
+  const customSeriesRef = useRef<any>(null);
   const { theme } = useTheme();
+
+  // Generate sample data chỉ một lần nếu không có prop data
+  const data = useMemo(() => {
+    if (hlcData && hlcData.length > 0) {
+      return hlcData; // Sử dụng prop data nếu có
+    }
+    
+    // Tạo sample data chỉ một lần nếu không có prop
+    console.log('🔄 Generating HLC data in CustomChart...'); // Debug log
+    const sampleData: HLCAreaData[] = [];
+    let basePrice = 100;
+
+    for (let i = 0; i < 100; i++) {
+      const close = basePrice * (1 + (Math.random() - 0.5) * 0.02);
+      const high = close * (1 + Math.random() * 0.02);
+      const low = close * (1 - Math.random() * 0.02);
+
+      sampleData.push({
+        time: Math.floor((Date.now() - (100 - i) * 24 * 60 * 60 * 1000) / 1000) as any,
+        high,
+        low,
+        close,
+      });
+
+      basePrice = close;
+    }
+
+    return sampleData;
+  }, [hlcData]); // Dependency chỉ có hlcData
 
   useEffect(() => {
     if (chartContainerRef.current && !chartRef.current) {
@@ -50,7 +80,7 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
 
       // Thêm custom HLC Area series
       const customSeriesView = new HLCAreaSeries();
-      const myCustomSeries = chartRef.current.addCustomSeries(customSeriesView, {
+      customSeriesRef.current = chartRef.current.addCustomSeries(customSeriesView, {
         highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.8)' : 'rgba(220, 38, 38, 0.8)',
         lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.8)' : 'rgba(37, 99, 235, 0.8)',
         closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(5, 150, 105, 0.8)',
@@ -61,7 +91,10 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
         closeLineWidth: 2,
       });
 
-      myCustomSeries.setData(data);
+      // Set data
+      if (customSeriesRef.current) {
+        customSeriesRef.current.setData(data);
+      }
 
       // Fit content
       chartRef.current.timeScale().fitContent();
@@ -71,9 +104,20 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
+        customSeriesRef.current = null;
       }
     };
   }, []);
+
+  // Update data khi data thay đổi
+  useEffect(() => {
+    if (customSeriesRef.current && data.length > 0) {
+      customSeriesRef.current.setData(data);
+      if (chartRef.current) {
+        chartRef.current.timeScale().fitContent();
+      }
+    }
+  }, [data]);
 
   // Update theme khi theme thay đổi
   useEffect(() => {
@@ -100,6 +144,17 @@ export default function CustomChart({ data, title = 'HLC Area Chart' }: CustomCh
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
         },
       });
+
+      // Update custom series colors theo theme
+      if (customSeriesRef.current) {
+        customSeriesRef.current.applyOptions({
+          highLineColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.8)' : 'rgba(220, 38, 38, 0.8)',
+          lowLineColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.8)' : 'rgba(37, 99, 235, 0.8)',
+          closeLineColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(5, 150, 105, 0.8)',
+          areaBottomColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(220, 38, 38, 0.1)',
+          areaTopColor: theme === 'dark' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(5, 150, 105, 0.1)',
+        });
+      }
     }
   }, [theme]);
 

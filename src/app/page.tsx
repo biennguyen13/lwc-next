@@ -1,132 +1,209 @@
 'use client';
 
-import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { CandlestickData } from 'lightweight-charts';
+import { useState, useMemo } from 'react';
+import { CandlestickData, HistogramData } from 'lightweight-charts';
 import { HLCAreaData } from '@/components/HLCAreaSeries';
 
-// Dynamic import để tránh SSR issues
-const Chart = dynamic(() => import('@/components/Chart'), {
-  ssr: false,
-  loading: () => <div className="chart-container flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Loading chart...</div>
-});
+// Dynamic imports để tránh SSR issues
+const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
+const CustomChart = dynamic(() => import('@/components/CustomChart'), { ssr: false });
+const BollingerChart = dynamic(() => import('@/components/BollingerChart'), { ssr: false });
 
-const CustomChart = dynamic(() => import('@/components/CustomChart'), {
-  ssr: false,
-  loading: () => <div className="chart-container flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Loading custom chart...</div>
-});
+// Helper functions để tạo sample data
+const getDateString = (index: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (100 - index));
+  return Math.floor(date.getTime() / 1000) as any;
+};
 
-// Sample data
-const sampleCandlestickData: CandlestickData[] = [
-  { time: '2023-01-01', open: 100, high: 110, low: 90, close: 105 },
-  { time: '2023-01-02', open: 105, high: 115, low: 95, close: 110 },
-  { time: '2023-01-03', open: 110, high: 120, low: 100, close: 108 },
-  { time: '2023-01-04', open: 108, high: 118, low: 98, close: 112 },
-  { time: '2023-01-05', open: 112, high: 122, low: 102, close: 118 },
-  { time: '2023-01-06', open: 118, high: 128, low: 108, close: 115 },
-  { time: '2023-01-07', open: 115, high: 125, low: 105, close: 120 },
-  { time: '2023-01-08', open: 120, high: 130, low: 110, close: 125 },
-  { time: '2023-01-09', open: 125, high: 135, low: 115, close: 122 },
-  { time: '2023-01-10', open: 122, high: 132, low: 112, close: 128 },
-];
+const generatePrice = (basePrice: number, volatility: number = 0.02) => {
+  return basePrice * (1 + (Math.random() - 0.5) * volatility);
+};
 
-const sampleHLCData: HLCAreaData[] = [
-  { time: '2023-01-01', high: 110, low: 90, close: 105 },
-  { time: '2023-01-02', high: 115, low: 95, close: 110 },
-  { time: '2023-01-03', high: 120, low: 100, close: 108 },
-  { time: '2023-01-04', high: 118, low: 98, close: 112 },
-  { time: '2023-01-05', high: 122, low: 102, close: 118 },
-  { time: '2023-01-06', high: 128, low: 108, close: 115 },
-  { time: '2023-01-07', high: 125, low: 105, close: 120 },
-  { time: '2023-01-08', high: 130, low: 110, close: 125 },
-  { time: '2023-01-09', high: 135, low: 115, close: 122 },
-  { time: '2023-01-10', high: 132, low: 112, close: 128 },
-];
+const generateVolume = (baseVolume: number = 1000000) => {
+  return Math.floor(baseVolume * (0.5 + Math.random() * 1.5));
+};
 
-export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'combined' | 'candlestick' | 'custom'>('combined');
+// Generate sample data
+const generateCandlestickData = (): CandlestickData[] => {
+  const data: CandlestickData[] = [];
+  let basePrice = 100;
+
+  for (let i = 0; i < 100; i++) {
+    const open = generatePrice(basePrice);
+    const high = open * (1 + Math.random() * 0.03);
+    const low = open * (1 - Math.random() * 0.03);
+    const close = generatePrice(open, 0.02);
+
+    data.push({
+      time: getDateString(i),
+      open,
+      high,
+      low,
+      close,
+    });
+
+    basePrice = close;
+  }
+
+  return data;
+};
+
+const generateHLCData = (): HLCAreaData[] => {
+  const data: HLCAreaData[] = [];
+  let basePrice = 100;
+
+  for (let i = 0; i < 100; i++) {
+    const close = generatePrice(basePrice);
+    const high = close * (1 + Math.random() * 0.02);
+    const low = close * (1 - Math.random() * 0.02);
+
+    data.push({
+      time: getDateString(i),
+      high,
+      low,
+      close,
+    });
+
+    basePrice = close;
+  }
+
+  return data;
+};
+
+const generateVolumeData = (candlestickData: CandlestickData[]): HistogramData[] => {
+  return candlestickData.map((item, index) => ({
+    time: item.time,
+    value: generateVolume(),
+    color: item.close >= item.open ? '#26a69a' : '#ef5350',
+  }));
+};
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState<'candlestick' | 'hlc' | 'combined' | 'bollinger'>('candlestick');
+  
+  // Generate sample data chỉ một lần khi khởi tạo page
+  const { candlestickData, hlcData, volumeData } = useMemo(() => {
+    console.log('🔄 Generating datasets...'); // Debug log
+    const candlestick = generateCandlestickData();
+    const hlc = generateHLCData();
+    const volume = generateVolumeData(candlestick);
+    
+    return {
+      candlestickData: candlestick,
+      hlcData: hlc,
+      volumeData: volume,
+    };
+  }, []); // Empty dependency array = chỉ chạy một lần
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <div className="container mx-auto px-4 py-8">
+    <main className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors">
+      <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white transition-colors">
-          Lightweight Charts với Next.js
+          Lightweight Charts với Next.js 14
         </h1>
         
-        <div className="mb-6">
-          <div className="flex space-x-4 justify-center">
+        <p className="text-center mb-8 text-gray-600 dark:text-gray-300 transition-colors">
+          Demo các loại biểu đồ tài chính sử dụng Lightweight Charts và Next.js 14
+        </p>
+
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="flex space-x-1 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
+            <button
+              onClick={() => setActiveTab('candlestick')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'candlestick'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              Candlestick
+            </button>
+            <button
+              onClick={() => setActiveTab('hlc')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'hlc'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              HLC Area
+            </button>
+         
+            <button
+              onClick={() => setActiveTab('bollinger')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'bollinger'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              Bollinger Bands
+            </button>
+
             <button
               onClick={() => setActiveTab('combined')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                 activeTab === 'combined'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               Combined Chart
             </button>
-            <button
-              onClick={() => setActiveTab('candlestick')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                activeTab === 'candlestick'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-              }`}
-            >
-              Candlestick Only
-            </button>
-            <button
-              onClick={() => setActiveTab('custom')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                activeTab === 'custom'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-              }`}
-            >
-              HLC Area Only
-            </button>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300">
-          {activeTab === 'combined' && (
-            <Chart 
-              candlestickData={sampleCandlestickData}
-              hlcData={sampleHLCData}
-              title="Combined Chart - Candlestick + HLC Area" 
-            />
-          )}
-          
+        {/* Chart Content */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors">
           {activeTab === 'candlestick' && (
             <Chart 
-              candlestickData={sampleCandlestickData}
+              candlestickData={candlestickData}
               hlcData={[]}
-              title="Candlestick Chart Only" 
+              volumeData={[]}
+              title="Candlestick Chart (100 data points)"
             />
           )}
           
-          {activeTab === 'custom' && (
+          {activeTab === 'hlc' && (
             <CustomChart 
-              data={sampleHLCData} 
-              title="HLC Area Chart Only" 
+              hlcData={hlcData}
+              title="HLC Area Chart (100 data points)"
+            />
+          )}
+          
+          {activeTab === 'combined' && (
+            <Chart 
+              candlestickData={candlestickData}
+              hlcData={hlcData}
+              volumeData={volumeData}
+              title="Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (100 data points)"
+            />
+          )}
+
+          {activeTab === 'bollinger' && (
+            <BollingerChart 
+              hlcData={hlcData}
+              title="Bollinger Bands Chart (100 data points)"
             />
           )}
         </div>
 
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors duration-300">
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">
-            Thông tin
-          </h2>
-          <div className="space-y-2 text-gray-600 dark:text-gray-300 transition-colors">
-            <p>• <strong className="text-gray-900 dark:text-white">Combined Chart:</strong> Hiển thị cả Candlestick và HLC Area trên cùng một chart</p>
-            <p>• <strong className="text-gray-900 dark:text-white">Candlestick Chart:</strong> Biểu đồ nến truyền thống với dữ liệu OHLC</p>
-            <p>• <strong className="text-gray-900 dark:text-white">HLC Area Chart:</strong> Biểu đồ tùy chỉnh hiển thị High, Low, Close với vùng được tô màu</p>
-            <p>• <strong className="text-gray-900 dark:text-white">Responsive:</strong> Tự động điều chỉnh kích thước khi thay đổi màn hình</p>
-            <p>• <strong className="text-gray-900 dark:text-white">Interactive:</strong> Hỗ trợ zoom, pan, và crosshair</p>
-            <p>• <strong className="text-gray-900 dark:text-white">Dark Mode:</strong> Hỗ trợ chế độ tối với toggle button</p>
-          </div>
+        {/* Description */}
+        <div className="mt-8 text-center text-gray-600 dark:text-gray-300 transition-colors">
+          <p className="mb-4">
+            <strong>Features:</strong> Candlestick Chart, HLC Area Series, Volume Histogram, Bollinger Bands
+          </p>
+          <p className="text-sm">
+            <strong>Tech Stack:</strong> Next.js 14, React 18, TypeScript, Lightweight Charts 4.2.0, Tailwind CSS
+          </p>
+          <p className="text-xs mt-2 text-gray-500 dark:text-gray-400">
+            💡 Dataset được generate một lần khi khởi tạo page, chuyển tab không generate lại
+          </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 } 
