@@ -244,89 +244,17 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
-          <div className="flex space-x-1 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
-            <button
-              onClick={() => setActiveTab('candlestick')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'candlestick'
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              Candlestick
-            </button>
-            <button
-              onClick={() => setActiveTab('hlc')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'hlc'
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              HLC Area
-            </button>
-            <button
-              onClick={() => setActiveTab('bollinger')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'bollinger'
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              Bollinger Bands
-            </button>
-            <button
-              onClick={() => setActiveTab('combined')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'combined'
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              Combined Chart
-            </button>
-          </div>
-        </div>
+   
 
         {/* Chart Content */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors">
-          {activeTab === 'candlestick' && (
-            <Chart 
-              candlestickData={finalCandlestickData}
-              hlcData={[]}
-              volumeData={finalVolumeData}
-              title={`${symbol} Candlestick Chart (${interval}) - 150 data points`}
-            />
-          )}
-          
-          {activeTab === 'hlc' && (
-            <Chart 
-            candlestickData={finalCandlestickData}
-              hlcData={[]}
-              volumeData={finalVolumeData}
-              title={`${symbol} HLC Area Chart (${interval}) - 150 data points`}
-            />
-          )}
-          
-          {activeTab === 'bollinger' && (
-            <Chart 
-            candlestickData={finalCandlestickData}
-              hlcData={[]}
-              volumeData={finalVolumeData}
-              title={`${symbol} Bollinger Bands Chart (${interval}) - 150 data points`}
-            />
-          )}
 
-          {activeTab === 'combined' && (
-            <Chart 
+        <Chart 
               candlestickData={finalCandlestickData}
               hlcData={[]}
               volumeData={finalVolumeData}
               title={`${symbol} Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (${interval}) - 150 data points`}
             />
-          )}
         </div>
 
         {/* Description */}

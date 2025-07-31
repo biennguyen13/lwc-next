@@ -186,20 +186,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         highLineWidth: 2,
         lowLineWidth: 2,
         closeLineWidth: 2,
-      });
-
-      // Thêm MA7 line series
-      ma7SeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? '#10b981' : '#059669', // Green color
-        lineWidth: 2,
-        title: 'MA7',
-      });
-
-      // Thêm MA25 line series
-      ma25SeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? 'purple' : 'purple', // Orange color
-        lineWidth: 2,
-        title: 'MA25',
+        title: 'Bollinger Bands',
       });
 
       // Thêm volume histogram series
@@ -219,6 +206,80 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           bottom: 0,
         },
       });
+
+      // Thêm MA7 series
+      ma7SeriesRef.current = chartRef.current.addLineSeries({
+        color: theme === 'dark' ? '#10b981' : '#059669', // Green
+        lineWidth: 2,
+        title: 'MA7',
+      });
+
+      // Thêm MA25 series
+      ma25SeriesRef.current = chartRef.current.addLineSeries({
+        color: theme === 'dark' ? 'purple' : 'purple', // Purple
+        lineWidth: 2,
+        title: 'MA25',
+      });
+    }
+
+    // Set data và update theme chỉ khi chart đã được tạo
+    if (chartRef.current) {
+      // Update theme
+      chartRef.current.applyOptions({
+        layout: {
+          background: { 
+            color: theme === 'dark' ? '#1f2937' : '#ffffff' 
+          },
+          textColor: theme === 'dark' ? '#f9fafb' : '#333',
+        },
+        grid: {
+          vertLines: { 
+            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
+          },
+          horzLines: { 
+            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
+          },
+        },
+        rightPriceScale: {
+          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
+        },
+        timeScale: {
+          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
+        },
+      });
+
+      // Update HLC series colors theo theme
+      if (hlcSeriesRef.current) {
+        const bollingerColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(217, 119, 6, 0.8)';
+        const bollingerAreaColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.2)';
+        hlcSeriesRef.current.applyOptions({
+          highLineColor: bollingerAreaColor,
+          lowLineColor: bollingerAreaColor,
+          closeLineColor: bollingerColor,
+          areaBottomColor: bollingerAreaColor,
+          areaTopColor: bollingerAreaColor,
+        });
+      }
+
+      // Update MA series colors theo theme
+      if (ma7SeriesRef.current) {
+        ma7SeriesRef.current.applyOptions({
+          color: theme === 'dark' ? '#10b981' : '#059669', // Green
+        });
+      }
+
+      if (ma25SeriesRef.current) {
+        ma25SeriesRef.current.applyOptions({
+          color: theme === 'dark' ? 'purple' : 'purple', // Purple
+        });
+      }
+
+      // Update volume series color theo theme
+      if (volumeSeriesRef.current) {
+        volumeSeriesRef.current.applyOptions({
+          color: theme === 'dark' ? '#3b82f6' : '#2563eb',
+        });
+      }
 
       // Set data cho tất cả series - chỉ lấy 150 items cuối cùng
       if (candlestickData.length > 0) {
@@ -291,132 +352,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         ma25SeriesRef.current = null;
       }
     };
-  }, []);
-
-  // Update theme khi theme thay đổi
-  useEffect(() => {
-    if (chartRef.current) {
-      chartRef.current.applyOptions({
-        layout: {
-          background: { 
-            color: theme === 'dark' ? '#1f2937' : '#ffffff' 
-          },
-          textColor: theme === 'dark' ? '#f9fafb' : '#333',
-        },
-        grid: {
-          vertLines: { 
-            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
-          },
-          horzLines: { 
-            color: theme === 'dark' ? '#374151' : '#f0f0f0' 
-          },
-        },
-        rightPriceScale: {
-          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
-        },
-        timeScale: {
-          borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
-        },
-      });
-
-      // Update HLC series colors theo theme
-      if (hlcSeriesRef.current) {
-        const bollingerColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(217, 119, 6, 0.8)';
-        const bollingerAreaColor = theme === 'dark' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.2)';
-        hlcSeriesRef.current.applyOptions({
-          highLineColor: bollingerAreaColor,
-          lowLineColor: bollingerAreaColor,
-          closeLineColor: bollingerColor,
-          areaBottomColor: bollingerAreaColor,
-          areaTopColor: bollingerAreaColor,
-        });
-      }
-
-      // Update MA series colors theo theme
-      if (ma7SeriesRef.current) {
-        ma7SeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#10b981' : '#059669', // Green
-        });
-      }
-
-      if (ma25SeriesRef.current) {
-        ma25SeriesRef.current.applyOptions({
-          color: theme === 'dark' ? 'purple' : 'purple', // Orange
-        });
-      }
-
-      // Update volume series color theo theme
-      if (volumeSeriesRef.current) {
-        volumeSeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#3b82f6' : '#2563eb',
-        });
-      }
-    }
-  }, [theme]);
-
-  // Update data khi data thay đổi
-  useEffect(() => {
-    if (chartRef.current) {
-      // Update candlestick data - chỉ lấy 150 items cuối cùng
-      if (candlestickData.length > 0 && candlestickSeriesRef.current) {
-        const last150Candlestick = candlestickData.slice(-150);
-        candlestickSeriesRef.current.setData(last150Candlestick);
-        
-        // Update MA data
-        const ma7Data = calculateMA(candlestickData, 7);
-        const ma25Data = calculateMA(candlestickData, 25);
-        
-        const last150MA7 = ma7Data.slice(-150);
-        const last150MA25 = ma25Data.slice(-150);
-        
-        if (ma7SeriesRef.current) {
-          ma7SeriesRef.current.setData(last150MA7);
-        }
-        if (ma25SeriesRef.current) {
-          ma25SeriesRef.current.setData(last150MA25);
-        }
-        
-        // Tối ưu price scale cho data mới
-        const prices = last150Candlestick.map(item => [item.high, item.low]).flat();
-        const maxPrice = Math.max(...prices);
-        const minPrice = Math.min(...prices);
-        const priceRange = maxPrice - minPrice;
-        const padding = priceRange * 0.05; // 5% padding
-        
-        chartRef.current.priceScale('right').applyOptions({
-          autoScale: false,
-          scaleMargins: {
-            top: 0.1,
-            bottom: 0.1,
-          },
-          minValue: minPrice - padding,
-          maxValue: maxPrice + padding,
-        });
-      }
-      
-      // Update HLC data - xử lý logic convert
-      if (hlcSeriesRef.current) {
-        let finalHLCData = hlcData;
-        if (hlcData.length === 0 && candlestickData.length > 0) {
-          // Convert candlestick thành bollinger data
-          finalHLCData = convertCandlestickToBollinger(candlestickData);
-        }
-        
-        if (finalHLCData.length > 0) {
-          console.log('📊 Updating HLC data:', finalHLCData.length, 'items');
-          hlcSeriesRef.current.setData(finalHLCData);
-        }
-      }
-
-      // Update volume data - chỉ lấy 150 items cuối cùng
-      if (volumeData.length > 0 && volumeSeriesRef.current) {
-        const last150Volume = volumeData.slice(-150);
-        volumeSeriesRef.current.setData(last150Volume);
-      }
-      
-      chartRef.current.timeScale().fitContent();
-    }
-  }, [candlestickData, hlcData, volumeData]);
+  }, [theme, candlestickData, hlcData, volumeData]); // Thêm dependency
 
   // Handle resize
   useEffect(() => {
