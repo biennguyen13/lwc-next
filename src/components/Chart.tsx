@@ -100,6 +100,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   const hlcSeriesRef = useRef<any>(null);
   const volumeSeriesRef = useRef<any>(null);
   const ma7SeriesRef = useRef<any>(null);
+  const ma10SeriesRef = useRef<any>(null);
   const ma25SeriesRef = useRef<any>(null);
   const { theme } = useTheme();
 
@@ -124,7 +125,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           },
         },
         crosshair: {
-          mode: 1,
+          mode: 0, // Tắt crosshair để bỏ các đường ngang và label
         },
         rightPriceScale: {
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
@@ -167,7 +168,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         borderUpColor: '#26a69a',
         wickDownColor: '#ef5350',
         wickUpColor: '#26a69a',
-        title: 'Candlestick',
+        title: '',
+        priceLineVisible: true,
+        lastValueVisible: true,
       });
 
       // Thêm HLC Area series
@@ -180,13 +183,15 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       hlcSeriesRef.current = chartRef.current.addCustomSeries(customSeriesView, {
         highLineColor: bollingerAreaColor,      // Upper band
         lowLineColor: bollingerAreaColor,       // Lower band
-        closeLineColor: bollingerColor,     // Middle band
+        closeLineColor: bollingerAreaColor,     // Middle band
         areaBottomColor: bollingerAreaColor, // Area fill
         areaTopColor: bollingerAreaColor,   // Area fill
         highLineWidth: 2,
         lowLineWidth: 2,
         closeLineWidth: 2,
-        title: 'Bollinger Bands',
+        title: '',
+        priceLineVisible: false,
+        lastValueVisible: false,
       });
 
       // Thêm volume histogram series
@@ -196,7 +201,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           type: 'volume',
         },
         priceScaleId: '', // Tạo price scale riêng cho volume
-        title: 'Volume',
+        title: '',
+        priceLineVisible: false,
+        lastValueVisible: false,
       });
 
       // Tạo price scale riêng cho volume
@@ -211,14 +218,27 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       ma7SeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? '#10b981' : '#059669', // Green
         lineWidth: 2,
-        title: 'MA7',
+        title: '',
+        priceLineVisible: false,
+        lastValueVisible: false,
+      });
+
+      // Thêm MA10 series
+      ma10SeriesRef.current = chartRef.current.addLineSeries({
+        color: theme === 'dark' ? '#f59e0b' : '#d97706', // Orange
+        lineWidth: 2,
+        title: '',
+        priceLineVisible: false,
+        lastValueVisible: false,
       });
 
       // Thêm MA25 series
       ma25SeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? 'purple' : 'purple', // Purple
         lineWidth: 2,
-        title: 'MA25',
+        title: '',
+        priceLineVisible: false,
+        lastValueVisible: false,
       });
     }
 
@@ -255,7 +275,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         hlcSeriesRef.current.applyOptions({
           highLineColor: bollingerAreaColor,
           lowLineColor: bollingerAreaColor,
-          closeLineColor: bollingerColor,
+          closeLineColor: bollingerAreaColor,
           areaBottomColor: bollingerAreaColor,
           areaTopColor: bollingerAreaColor,
         });
@@ -265,6 +285,12 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       if (ma7SeriesRef.current) {
         ma7SeriesRef.current.applyOptions({
           color: theme === 'dark' ? '#10b981' : '#059669', // Green
+        });
+      }
+
+      if (ma10SeriesRef.current) {
+        ma10SeriesRef.current.applyOptions({
+          color: theme === 'dark' ? '#f59e0b' : '#d97706', // Orange
         });
       }
 
@@ -289,14 +315,18 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         
         // Tính toán và set MA data
         const ma7Data = calculateMA(candlestickData, 7);
+        const ma10Data = calculateMA(candlestickData, 10);
         const ma25Data = calculateMA(candlestickData, 25);
         
         const last150MA7 = ma7Data.slice(-150);
+        const last150MA10 = ma10Data.slice(-150);
         const last150MA25 = ma25Data.slice(-150);
         
         console.log('📊 Setting MA7 data:', last150MA7.length, 'items');
+        console.log('📊 Setting MA10 data:', last150MA10.length, 'items');
         console.log('📊 Setting MA25 data:', last150MA25.length, 'items');
         ma7SeriesRef.current.setData(last150MA7);
+        ma10SeriesRef.current.setData(last150MA10);
         ma25SeriesRef.current.setData(last150MA25);
       }
       
@@ -349,6 +379,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         hlcSeriesRef.current = null;
         volumeSeriesRef.current = null;
         ma7SeriesRef.current = null;
+        ma10SeriesRef.current = null;
         ma25SeriesRef.current = null;
       }
     };

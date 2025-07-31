@@ -12,31 +12,40 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme | undefined>(undefined);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Kiểm tra localStorage trước
     const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       setTheme(savedTheme);
     } else {
       // Nếu không có, detect system preference
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       setTheme(systemTheme);
     }
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    // Apply theme to document
-    const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    if (theme) {
+      // Apply theme to document
+      const root = document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+      localStorage.setItem('theme', theme);
+    }
   }, [theme]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
+
+  // Không render cho đến khi đã mount và có theme
+  if (!mounted || !theme) {
+    return <div className="min-h-screen bg-white dark:bg-gray-900" />;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
