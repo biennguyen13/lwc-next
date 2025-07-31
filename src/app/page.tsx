@@ -296,7 +296,7 @@ export default function Home() {
             <Chart 
               candlestickData={finalCandlestickData}
               hlcData={[]}
-              volumeData={[]}
+              volumeData={finalVolumeData}
               title={`${symbol} Candlestick Chart (${interval}) - 150 data points`}
             />
           )}
@@ -305,7 +305,7 @@ export default function Home() {
             <Chart 
             candlestickData={finalCandlestickData}
               hlcData={[]}
-              volumeData={[]}
+              volumeData={finalVolumeData}
               title={`${symbol} HLC Area Chart (${interval}) - 150 data points`}
             />
           )}
@@ -314,7 +314,7 @@ export default function Home() {
             <Chart 
             candlestickData={finalCandlestickData}
               hlcData={[]}
-              volumeData={[]}
+              volumeData={finalVolumeData}
               title={`${symbol} Bollinger Bands Chart (${interval}) - 150 data points`}
             />
           )}

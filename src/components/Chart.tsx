@@ -75,12 +75,19 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
   const bollingerBands = calculateBollingerBands(candlestickData, 10, 2);
   
   // Convert thành HLC format và chỉ lấy 150 items cuối cùng
-  const allBollingerData = bollingerBands.map((band, index) => ({
-    time: candlestickData[index].time,
-    high: band.upper,    // Upper band làm high
-    low: band.lower,     // Lower band làm low  
-    close: band.middle,  // Middle band (SMA) làm close
-  }));
+  const allBollingerData = bollingerBands.map((band, index) => {
+    // Tính toán khoảng cách giữa upper và lower band
+    const bandWidth = band.upper - band.lower;
+    const expansionFactor = 0.3; // Mở rộng thêm 30%
+    const expansion = bandWidth * expansionFactor;
+    
+    return {
+      time: candlestickData[index].time,
+      high: band.upper + expansion,    // Upper band + expansion làm high
+      low: band.lower - expansion,     // Lower band - expansion làm low  
+      close: band.middle,              // Middle band (SMA) làm close
+    };
+  });
   
   // Chỉ trả về 150 items cuối cùng
   return allBollingerData.slice(-150);
@@ -137,6 +144,18 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
             top: 0.1,
             bottom: 0.1,
           },
+        },
+        // Disable zoom và pan
+        handleScroll: {
+          mouseWheel: false, // Disable mouse wheel zoom
+          pressedMouseMove: false, // Disable drag zoom
+          horzTouchDrag: false, // Disable kéo ngang
+          vertTouchDrag: false, // Disable kéo dọc
+        },
+        handleScale: {
+          axisPressedMouseMove: false, // Disable axis drag zoom
+          mouseWheel: false, // Disable mouse wheel zoom
+          pinch: false, // Disable pinch zoom
         },
       });
 
@@ -204,6 +223,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Set data cho tất cả series - chỉ lấy 150 items cuối cùng
       if (candlestickData.length > 0) {
         const last150Candlestick = candlestickData.slice(-150);
+        console.log('📊 Setting candlestick data:', last150Candlestick.length, 'items');
         candlestickSeriesRef.current.setData(last150Candlestick);
         
         // Tính toán và set MA data
@@ -213,6 +233,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         const last150MA7 = ma7Data.slice(-150);
         const last150MA25 = ma25Data.slice(-150);
         
+        console.log('📊 Setting MA7 data:', last150MA7.length, 'items');
+        console.log('📊 Setting MA25 data:', last150MA25.length, 'items');
         ma7SeriesRef.current.setData(last150MA7);
         ma25SeriesRef.current.setData(last150MA25);
       }
