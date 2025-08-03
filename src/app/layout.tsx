@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import ThemeToggle from '@/components/ThemeToggle'
+import { StoreEventManager } from '@/stores/store-communication-usage'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <ThemeToggle />
+          <StoreEventManager />
           {children}
         </ThemeProvider>
       </body>

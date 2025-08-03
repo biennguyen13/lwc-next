@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { CandlestickData, HistogramData } from 'lightweight-charts';
 import { HLCAreaData } from '@/components/HLCAreaSeries';
 import { fetchBinanceCandlestick, extractVolumeData, BINANCE_INTERVALS, BinanceInterval } from '@/services/binanceApi';
+import { Binance30sTest } from '@/components/Binance30sTest';
 
 // Dynamic imports để tránh SSR issues
 const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
@@ -165,6 +166,11 @@ export default function Home() {
         <p className="text-center mb-8 text-gray-600 dark:text-gray-300 transition-colors">
           Demo các loại biểu đồ tài chính sử dụng Lightweight Charts và Next.js 14
         </p>
+
+        {/* Binance 30s Test Component */}
+        <div className="mb-8">
+          <Binance30sTest />
+        </div>
 
         {/* Controls */}
         <div className="flex justify-center mb-6 space-x-4">
