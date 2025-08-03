@@ -6,6 +6,7 @@ import { CandlestickData, HistogramData } from 'lightweight-charts';
 import { HLCAreaData } from '@/components/HLCAreaSeries';
 import { fetchBinanceCandlestick, extractVolumeData, BINANCE_INTERVALS, BinanceInterval } from '@/services/binanceApi';
 import { Binance30sTest } from '@/components/Binance30sTest';
+import Binance30sChart from '@/components/Binance30sChart';
 
 // Dynamic imports để tránh SSR issues
 const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
@@ -170,6 +171,11 @@ export default function Home() {
         {/* Binance 30s Test Component */}
         <div className="mb-8">
           <Binance30sTest />
+        </div>
+
+        {/* Binance 30s Chart Component */}
+        <div className="mb-8">
+          <Binance30sChart symbol="BTCUSDT" limit={150} title="Binance 30s Real-time Chart" />
         </div>
 
         {/* Controls */}

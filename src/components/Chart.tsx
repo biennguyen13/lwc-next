@@ -10,7 +10,11 @@ interface ChartProps {
   hlcData: HLCAreaData[];
   volumeData: HistogramData[];
   title?: string;
+  preserveZoom?: boolean; // Thêm prop để control việc giữ zoom
 }
+
+const OFFSET = 55
+const expansionFactor = 0; // Mở rộng thêm 30%
 
 // Hàm tính toán Bollinger Bands
 const calculateBollingerBands = (data: CandlestickData[], period: number = 20, multiplier: number = 2) => {
@@ -74,11 +78,10 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
   // Tính toán Bollinger Bands từ toàn bộ data (200 items)
   const bollingerBands = calculateBollingerBands(candlestickData, 10, 2);
   
-  // Convert thành HLC format và chỉ lấy 150 items cuối cùng
+  // Convert thành HLC format và chỉ lấy OFFSET items cuối cùng
   const allBollingerData = bollingerBands.map((band, index) => {
     // Tính toán khoảng cách giữa upper và lower band
     const bandWidth = band.upper - band.lower;
-    const expansionFactor = 0.3; // Mở rộng thêm 30%
     const expansion = bandWidth * expansionFactor;
     
     return {
@@ -89,15 +92,16 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
     };
   });
   
-  // Chỉ trả về 150 items cuối cùng
-  return allBollingerData.slice(-150);
+  // Chỉ trả về OFFSET items cuối cùng
+  return allBollingerData.slice(-OFFSET);
 };
 
-export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá' }: ChartProps) {
+export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá', preserveZoom = false }: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
   const hlcSeriesRef = useRef<any>(null);
+  const visibleRangeRef = useRef<any>(null); // Lưu visible range hiện tại
   const volumeSeriesRef = useRef<any>(null);
   const ma7SeriesRef = useRef<any>(null);
   const ma10SeriesRef = useRef<any>(null);
@@ -307,9 +311,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         });
       }
 
-      // Set data cho tất cả series - chỉ lấy 150 items cuối cùng
+      // Set data cho tất cả series - chỉ lấy OFFSET items cuối cùng
       if (candlestickData.length > 0) {
-        const last150Candlestick = candlestickData.slice(-150);
+        const last150Candlestick = candlestickData.slice(-OFFSET);
         console.log('📊 Setting candlestick data:', last150Candlestick.length, 'items');
         candlestickSeriesRef.current.setData(last150Candlestick);
         
@@ -318,9 +322,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         const ma10Data = calculateMA(candlestickData, 10);
         const ma25Data = calculateMA(candlestickData, 25);
         
-        const last150MA7 = ma7Data.slice(-150);
-        const last150MA10 = ma10Data.slice(-150);
-        const last150MA25 = ma25Data.slice(-150);
+        const last150MA7 = ma7Data.slice(-OFFSET);
+        const last150MA10 = ma10Data.slice(-OFFSET);
+        const last150MA25 = ma25Data.slice(-OFFSET);
         
         console.log('📊 Setting MA7 data:', last150MA7.length, 'items');
         console.log('📊 Setting MA10 data:', last150MA10.length, 'items');
@@ -343,12 +347,22 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       }
       
       if (volumeData.length > 0) {
-        const last150Volume = volumeData.slice(-150);
+        const last150Volume = volumeData.slice(-OFFSET);
         volumeSeriesRef.current.setData(last150Volume);
       }
 
-      // Fit content để hiển thị tất cả dữ liệu
-      chartRef.current.timeScale().fitContent();
+      // Lưu visible range hiện tại trước khi update data
+      if (preserveZoom && chartRef.current) {
+        const currentVisibleRange = chartRef.current.timeScale().getVisibleRange();
+        if (currentVisibleRange) {
+          visibleRangeRef.current = currentVisibleRange;
+        }
+      }
+
+      // Fit content để hiển thị tất cả dữ liệu (chỉ khi không preserve zoom)
+      if (!preserveZoom) {
+        chartRef.current.timeScale().fitContent();
+      }
       
       // Tối ưu price scale để loại bỏ khoảng trống
       if (candlestickData.length > 0) {
@@ -367,6 +381,11 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           minValue: minPrice - padding,
           maxValue: maxPrice + padding,
         });
+      }
+
+      // Khôi phục visible range sau khi set data (nếu preserve zoom)
+      if (preserveZoom && visibleRangeRef.current && chartRef.current) {
+        chartRef.current.timeScale().setVisibleRange(visibleRangeRef.current);
       }
     }
 
