@@ -88,12 +88,13 @@ const getLast120Items = <T,>(data: T[]): T[] => {
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'candlestick' | 'hlc' | 'combined' | 'bollinger'>('candlestick');
+  const [activeTab, setActiveTab] = useState<'candlestick' | 'hlc' | 'combined' | 'bollinger' | 'realtime'>('candlestick');
   const [symbol, setSymbol] = useState<string>('BTCUSDT');
   const [interval, setInterval] = useState<BinanceInterval>('1m'); // Đổi thành 1m
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false); // Auto-refresh toggle
+  const [realTimeMode, setRealTimeMode] = useState<boolean>(false); // Real-time mode toggle
   
   // Generate sample data chỉ một lần khi khởi tạo page (fallback)
   const { candlestickData, hlcData, volumeData } = useMemo(() => {
@@ -175,7 +176,7 @@ export default function Home() {
 
         {/* Binance 30s Chart Component */}
         <div className="mb-8">
-          <Binance30sChart symbol="BTCUSDT" limit={150} title="Binance 30s Real-time Chart" />
+          <Binance30sChart symbol="BTCUSDT" title="Binance 30s Real-time Chart" />
         </div>
 
         {/* Controls */}
@@ -242,6 +243,27 @@ export default function Home() {
               </span>
             )}
           </div>
+
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Real-time:
+            </label>
+            <button
+              onClick={() => setRealTimeMode(!realTimeMode)}
+              className={`px-4 py-1 rounded-md text-sm font-medium transition-colors ${
+                realTimeMode
+                  ? 'bg-purple-500 text-white hover:bg-purple-600'
+                  : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500'
+              }`}
+            >
+              {realTimeMode ? 'ON' : 'OFF'}
+            </button>
+            {realTimeMode && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                (Socket)
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Error Message */}
@@ -255,35 +277,6 @@ export default function Home() {
             </p>
           </div>
         )}
-
-   
-
-        {/* Chart Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-colors">
-
-        <Chart 
-              candlestickData={finalCandlestickData}
-              hlcData={[]}
-              volumeData={finalVolumeData}
-              title={`${symbol} Combined Chart - Candlestick + HLC Area + Volume + Bollinger Bands (${interval}) - 150 data points`}
-            />
-        </div>
-
-        {/* Description */}
-        <div className="mt-8 text-center text-gray-600 dark:text-gray-300 transition-colors">
-          <p className="mb-4">
-            <strong>Features:</strong> Real-time data from Binance API, Candlestick Chart, HLC Area Series, Volume Histogram, Bollinger Bands, MA7, MA25
-          </p>
-          <p className="text-sm">
-            <strong>Tech Stack:</strong> Next.js 14, React 18, TypeScript, Lightweight Charts 4.2.0, Tailwind CSS, Binance API
-          </p>
-          <p className="text-xs mt-2 text-gray-500 dark:text-gray-400">
-            💡 Data được fetch từ Binance API, có fallback data nếu API không hoạt động
-          </p>
-          <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-            ⚠️ Binance API chỉ hỗ trợ interval tối thiểu 1 phút. Auto-refresh mỗi 30s để cập nhật data gần nhất.
-          </p>
-        </div>
       </div>
     </main>
   );

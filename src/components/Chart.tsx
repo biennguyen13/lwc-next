@@ -1,9 +1,31 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, CandlestickData, HistogramData } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
 import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
+import { useBinance30sStore } from '@/stores';
+
+// Types for socket data
+interface KlineData {
+  symbol: string;
+  openTime: number;
+  closeTime: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  quoteVolume: number;
+  trades: number;
+  isClosed: boolean;
+}
+
+interface SocketData {
+  type: string;
+  data: KlineData;
+  timestamp: string;
+}
 
 interface ChartProps {
   candlestickData: CandlestickData[];
@@ -11,9 +33,11 @@ interface ChartProps {
   volumeData: HistogramData[];
   title?: string;
   preserveZoom?: boolean; // Thêm prop để control việc giữ zoom
+  enableRealTime?: boolean; // Thêm prop để enable/disable real-time updates
+  symbol?: string; // Thêm prop để filter symbol
 }
 
-const OFFSET = 120
+const OFFSET = 22
 const expansionFactor = 0; // Mở rộng thêm 30%
 
 // Hàm tính toán Bollinger Bands
@@ -96,7 +120,17 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
   return allBollingerData.slice(-OFFSET);
 };
 
-export default function Chart({ candlestickData, hlcData, volumeData, title = 'Biểu đồ giá', preserveZoom = false }: ChartProps) {
+let lastCandlestickData: CandlestickData | null = null;
+
+export default function Chart({ 
+  candlestickData, 
+  hlcData, 
+  volumeData, 
+  title = 'Biểu đồ giá', 
+  preserveZoom = false,
+  enableRealTime = false,
+  symbol = 'BTCUSDT'
+}: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
@@ -107,6 +141,165 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   const ma15SeriesRef = useRef<any>(null);
   const ma10SeriesRef = useRef<any>(null);
   const { theme } = useTheme();
+  const { fetchCandles } = useBinance30sStore();
+
+  // Socket state
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [realTimeStats, setRealTimeStats] = useState({
+    totalMessages: 0,
+    lastMessageTime: null as string | null
+  });
+  const socketRef = useRef<any>(null);
+
+  // Hover state
+  const [hoverData, setHoverData] = useState<{
+    time?: string;
+    candlestick?: any;
+    volume?: any;
+  } | null>(null);
+
+  // Convert KlineData to CandlestickData format
+  const convertKlineToCandlestick = (kline: KlineData): CandlestickData => {
+    // Convert kline.openTime to DateTime and adjust seconds
+    const dateTime = new Date(kline.openTime);
+    const seconds = dateTime.getSeconds();
+    
+    // Adjust seconds based on the logic:
+    // - If seconds 0-29: set to 0
+    // - If seconds 30-59: set to 30
+    if (seconds >= 0 && seconds < 30) {
+      dateTime.setSeconds(0);
+    } else if (seconds >= 30 && seconds <= 59) {
+      dateTime.setSeconds(30);
+    }
+    
+    // Convert back to milliseconds and then to seconds for chart
+    const adjustedTime = Math.floor(dateTime.getTime() / 1000);
+    
+    // If we have lastCandlestickData, combine with new data
+    if (lastCandlestickData) {
+      lastCandlestickData.volume = (lastCandlestickData.volume || 0) + kline.volume;
+      return {
+        time: lastCandlestickData.time, // Keep time from lastCandlestickData
+        open: lastCandlestickData.open, // Keep open from lastCandlestickData
+        close: kline.close, // Use close from new data
+        high: Math.max(lastCandlestickData.high, kline.high), // Take the higher value
+        low: Math.min(lastCandlestickData.low, kline.low), // Take the lower value
+        volume: lastCandlestickData.volume, // Accumulate volume
+      };
+    }
+    
+    // If no lastCandlestickData, return original data
+    return {
+      time: adjustedTime as any,
+      open: kline.open,
+      high: kline.high,
+      low: kline.low,
+      close: kline.close,
+      volume: kline.volume,
+    };
+  };
+
+  useEffect(() => {
+    lastCandlestickData = candlestickData[candlestickData.length - 1];
+    console.log('lastCandlestickData', JSON.stringify(lastCandlestickData,null,2));
+  }, [candlestickData]);
+
+  // Socket connection effect
+  useEffect(() => {
+    if (!enableRealTime) return;
+
+    const initSocket = async () => {
+      try {
+        const { io } = await import('socket.io-client');
+        
+        socketRef.current = io('http://localhost:3002', {
+          transports: ['websocket', 'polling']
+        });
+
+        socketRef.current.on('connect', () => {
+          console.log('🔌 Chart: Connected to Socket.IO server');
+          setIsSocketConnected(true);
+        });
+
+        socketRef.current.on('disconnect', (reason: string) => {
+          console.log('🔌 Chart: Disconnected from Socket.IO server:', reason);
+          setIsSocketConnected(false);
+        });
+
+        socketRef.current.on('kline-update', (data: SocketData) => {
+          // console.log('📊 Chart: Received kline update:', data);
+          
+          // Filter by symbol if specified
+          if (symbol && data.data.symbol !== symbol) {
+            return;
+          }
+
+          setRealTimeStats(prev => ({
+            ...prev,
+            totalMessages: prev.totalMessages + 1,
+            lastMessageTime: new Date().toISOString()
+          }));
+
+          // Check if timestamp has seconds 30 or 00 to trigger fetchCandles
+          if (data.timestamp) {
+            const timestamp = new Date(data.timestamp);
+            const seconds = timestamp.getSeconds();
+            
+            if (seconds === 31 || seconds === 1) {
+              console.log('🔄 Triggering fetchCandles at seconds:', seconds, 'for symbol:', symbol);
+              fetchCandles({ 
+                symbol: symbol || 'BTCUSDT', 
+                limit: 150 
+              });
+            }
+          }
+
+          // Update chart with real-time data
+          if (chartRef.current && candlestickSeriesRef.current) {
+            const candleData = convertKlineToCandlestick(data.data);
+            // Update the latest candle or add new one
+            candlestickSeriesRef.current.update(candleData);
+            
+            // Update volume if available
+            if (volumeSeriesRef.current) {
+              const volumeData = {
+                time: candleData.time,
+                value: candleData.volume,
+                color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
+              };
+              volumeSeriesRef.current.update(volumeData);
+            }
+
+            // Update MA lines if available
+            if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
+              // For real-time updates, we need to get all current data and recalculate
+              // This is a simplified approach - in production you might want to maintain a data buffer
+              // console.log('📊 Updating MA lines for real-time data');
+            }
+          }
+        });
+
+        socketRef.current.on('connect_error', (error: any) => {
+          console.error('❌ Chart: Socket.IO connection error:', error);
+          setIsSocketConnected(false);
+        });
+
+      } catch (error) {
+        console.error('❌ Chart: Failed to initialize socket:', error);
+      }
+    };
+
+    initSocket();
+
+    // Cleanup socket on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [enableRealTime, symbol]);
 
   useEffect(() => {
     if (chartContainerRef.current && !chartRef.current) {
@@ -177,6 +370,41 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         lastValueVisible: true,
       });
 
+      // Subscribe to chart crosshair move events (for all series)
+      chartRef.current.subscribeCrosshairMove((param) => {
+        if (param.time && param.seriesData) {
+          const candlestickData = param.seriesData.get(candlestickSeriesRef.current);
+          const volumeData = param.seriesData.get(volumeSeriesRef.current);
+          
+          if (candlestickData || volumeData) {
+            const hoverInfo: any = {
+              time: new Date(param.time * 1000).toLocaleString(),
+            };
+            
+            if (candlestickData) {
+              hoverInfo.candlestick = {
+                open: candlestickData.open,
+                high: candlestickData.high,
+                low: candlestickData.low,
+                close: candlestickData.close,
+                volume: candlestickData.volume
+              };
+              // console.log('🕯️ Candlestick Hover:', hoverInfo);
+            }
+            
+            if (volumeData) {
+              hoverInfo.volume = {
+                value: volumeData.value,
+                color: volumeData.color
+              };
+              // console.log('📊 Volume Hover:', hoverInfo);
+            }
+            
+            setHoverData(hoverInfo);
+          }
+        }
+      });
+
       // Thêm HLC Area series
       const customSeriesView = new HLCAreaSeries();
       
@@ -209,6 +437,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         priceLineVisible: false,
         lastValueVisible: false,
       });
+
+
 
       // Tạo price scale riêng cho volume
       chartRef.current.priceScale('').applyOptions({
@@ -314,7 +544,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       // Set data cho tất cả series - chỉ lấy OFFSET items cuối cùng
       if (candlestickData.length > 0) {
         const last150Candlestick = candlestickData.slice(-OFFSET);
-        console.log('📊 Setting candlestick data:', last150Candlestick.length, 'items');
+        // console.log('📊 Setting candlestick data:', last150Candlestick.length, 'items');
         candlestickSeriesRef.current.setData(last150Candlestick);
         
         // Tính toán và set MA data
@@ -326,9 +556,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         const last150MA15 = ma15Data.slice(-OFFSET);
         const last150MA10 = ma10Data.slice(-OFFSET);
         
-        console.log('📊 Setting MA5 data:', last150MA5.length, 'items');
-        console.log('📊 Setting MA15 data:', last150MA15.length, 'items');
-        console.log('📊 Setting MA10 data:', last150MA10.length, 'items');
+        // console.log('📊 Setting MA5 data:', last150MA5.length, 'items');
+        // console.log('📊 Setting MA15 data:', last150MA15.length, 'items');
+        // console.log('📊 Setting MA10 data:', last150MA10.length, 'items');
         ma5SeriesRef.current.setData(last150MA5);
         ma15SeriesRef.current.setData(last150MA15);
         ma10SeriesRef.current.setData(last150MA10);
@@ -342,7 +572,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       }
       
       if (finalHLCData.length > 0) {
-        console.log('📊 Setting HLC data:', finalHLCData.length, 'items');
+        // console.log('📊 Setting HLC data:', finalHLCData.length, 'items');
         hlcSeriesRef.current.setData(finalHLCData);
       }
       
@@ -424,7 +654,80 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">
         {title}
       </h2>
+      
+      {/* Real-time Status */}
+      {enableRealTime && (
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div 
+                  className={`w-3 h-3 rounded-full ${
+                    isSocketConnected ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Real-time: {isSocketConnected ? 'Connected' : 'Disconnected'}
+                </span>
+              </div>
+              {isSocketConnected && (
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Messages: {realTimeStats.totalMessages}
+                </div>
+              )}
+            </div>
+            {realTimeStats.lastMessageTime && (
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Last update: {new Date(realTimeStats.lastMessageTime).toLocaleTimeString()}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       <div ref={chartContainerRef} className="chart-container" />
+      
+      {/* Hover Info Display */}
+      {hoverData && (
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="text-sm">
+            <div className="font-semibold text-gray-900 dark:text-white mb-2">
+              📊 Hover Info - {hoverData.time}
+            </div>
+            {hoverData.candlestick && (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Open:</span>
+                  <span className="font-mono text-green-600">{hoverData.candlestick.open?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">High:</span>
+                  <span className="font-mono text-green-600">{hoverData.candlestick.high?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Low:</span>
+                  <span className="font-mono text-red-600">{hoverData.candlestick.low?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Close:</span>
+                  <span className="font-mono text-blue-600">{hoverData.candlestick.close?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Volume:</span>
+                  <span className="font-mono text-purple-600">{hoverData.candlestick.volume?.toFixed(4)}</span>
+                </div>
+              </div>
+            )}
+            {hoverData.volume && (
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Volume:</span>
+                <span className="font-mono text-purple-600">{hoverData.volume.value?.toFixed(4)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       <div className="mt-4 flex justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-green-500 rounded"></div>
@@ -458,6 +761,12 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
           <span>Volume</span>
         </div>
+        {enableRealTime && (
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse"></div>
+            <span>Real-time Updates</span>
+          </div>
+        )}
       </div>
     </div>
   );

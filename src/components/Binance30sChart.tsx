@@ -171,6 +171,7 @@ export default function Binance30sChart({
         volumeData={chartData.volumeData}
         title={`${symbol} 30s Candles - ${candles.length} data points`}
         preserveZoom={true} // Giữ nguyên zoom khi refresh
+        enableRealTime={true}
       />
       
       {/* Data Info */}
