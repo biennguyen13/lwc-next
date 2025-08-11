@@ -13,7 +13,7 @@ interface ChartProps {
   preserveZoom?: boolean; // Thêm prop để control việc giữ zoom
 }
 
-const OFFSET = 55
+const OFFSET = 120
 const expansionFactor = 0; // Mở rộng thêm 30%
 
 // Hàm tính toán Bollinger Bands
@@ -103,9 +103,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
   const hlcSeriesRef = useRef<any>(null);
   const visibleRangeRef = useRef<any>(null); // Lưu visible range hiện tại
   const volumeSeriesRef = useRef<any>(null);
-  const ma7SeriesRef = useRef<any>(null);
+  const ma5SeriesRef = useRef<any>(null);
+  const ma15SeriesRef = useRef<any>(null);
   const ma10SeriesRef = useRef<any>(null);
-  const ma25SeriesRef = useRef<any>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -187,7 +187,7 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
       hlcSeriesRef.current = chartRef.current.addCustomSeries(customSeriesView, {
         highLineColor: bollingerAreaColor,      // Upper band
         lowLineColor: bollingerAreaColor,       // Lower band
-        closeLineColor: bollingerAreaColor,     // Middle band
+        closeLineColor: 'transparent',     // Middle band
         areaBottomColor: bollingerAreaColor, // Area fill
         areaTopColor: bollingerAreaColor,   // Area fill
         highLineWidth: 2,
@@ -218,8 +218,8 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         },
       });
 
-      // Thêm MA7 series
-      ma7SeriesRef.current = chartRef.current.addLineSeries({
+      // Thêm MA15 series
+      ma15SeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? '#10b981' : '#059669', // Green
         lineWidth: 2,
         title: '',
@@ -236,9 +236,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         lastValueVisible: false,
       });
 
-      // Thêm MA25 series
-      ma25SeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? 'purple' : 'purple', // Purple
+      // Thêm MA5 series
+      ma5SeriesRef.current = chartRef.current.addLineSeries({
+        color: theme === 'dark' ? '#a84bff' : '#a84bff', // Purple
         lineWidth: 2,
         title: '',
         priceLineVisible: false,
@@ -279,15 +279,15 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         hlcSeriesRef.current.applyOptions({
           highLineColor: bollingerAreaColor,
           lowLineColor: bollingerAreaColor,
-          closeLineColor: bollingerAreaColor,
+          closeLineColor: 'transparent',
           areaBottomColor: bollingerAreaColor,
           areaTopColor: bollingerAreaColor,
         });
       }
 
       // Update MA series colors theo theme
-      if (ma7SeriesRef.current) {
-        ma7SeriesRef.current.applyOptions({
+      if (ma15SeriesRef.current) {
+        ma15SeriesRef.current.applyOptions({
           color: theme === 'dark' ? '#10b981' : '#059669', // Green
         });
       }
@@ -298,9 +298,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         });
       }
 
-      if (ma25SeriesRef.current) {
-        ma25SeriesRef.current.applyOptions({
-          color: theme === 'dark' ? 'purple' : 'purple', // Purple
+      if (ma5SeriesRef.current) {
+        ma5SeriesRef.current.applyOptions({
+          color: theme === 'dark' ? '#a84bff' : '#a84bff', // Purple
         });
       }
 
@@ -318,20 +318,20 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         candlestickSeriesRef.current.setData(last150Candlestick);
         
         // Tính toán và set MA data
-        const ma7Data = calculateMA(candlestickData, 7);
+        const ma5Data = calculateMA(candlestickData, 5);
+        const ma15Data = calculateMA(candlestickData, 15);
         const ma10Data = calculateMA(candlestickData, 10);
-        const ma25Data = calculateMA(candlestickData, 25);
         
-        const last150MA7 = ma7Data.slice(-OFFSET);
+        const last150MA5 = ma5Data.slice(-OFFSET);
+        const last150MA15 = ma15Data.slice(-OFFSET);
         const last150MA10 = ma10Data.slice(-OFFSET);
-        const last150MA25 = ma25Data.slice(-OFFSET);
         
-        console.log('📊 Setting MA7 data:', last150MA7.length, 'items');
+        console.log('📊 Setting MA5 data:', last150MA5.length, 'items');
+        console.log('📊 Setting MA15 data:', last150MA15.length, 'items');
         console.log('📊 Setting MA10 data:', last150MA10.length, 'items');
-        console.log('📊 Setting MA25 data:', last150MA25.length, 'items');
-        ma7SeriesRef.current.setData(last150MA7);
+        ma5SeriesRef.current.setData(last150MA5);
+        ma15SeriesRef.current.setData(last150MA15);
         ma10SeriesRef.current.setData(last150MA10);
-        ma25SeriesRef.current.setData(last150MA25);
       }
       
       // Xử lý HLC data - nếu có hlcData thì dùng, không thì convert từ candlestick
@@ -397,9 +397,9 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         candlestickSeriesRef.current = null;
         hlcSeriesRef.current = null;
         volumeSeriesRef.current = null;
-        ma7SeriesRef.current = null;
+        ma5SeriesRef.current = null;
+        ma15SeriesRef.current = null;
         ma10SeriesRef.current = null;
-        ma25SeriesRef.current = null;
       }
     };
   }, [theme, candlestickData, hlcData, volumeData]); // Thêm dependency
@@ -448,11 +448,11 @@ export default function Chart({ candlestickData, hlcData, volumeData, title = 'B
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-green-600"></div>
-          <span>MA7</span>
+          <span>MA15</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-orange-600"></div>
-          <span>MA25</span>
+          <span>MA5</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-blue-500 rounded"></div>
