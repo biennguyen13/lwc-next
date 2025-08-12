@@ -160,7 +160,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[100vw] mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white transition-colors">
           Lightweight Charts với Next.js 14
         </h1>
@@ -176,7 +176,7 @@ export default function Home() {
 
         {/* Binance 30s Chart Component */}
         <div className="mb-8">
-          <Binance30sChart symbol="BTCUSDT" title="Binance 30s Real-time Chart" />
+          <Binance30sChart limit={200} symbol="BTCUSDT" title="Binance 30s Real-time Chart" />
         </div>
 
         {/* Controls */}
