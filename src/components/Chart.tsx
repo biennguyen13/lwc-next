@@ -37,7 +37,8 @@ interface ChartProps {
   symbol?: string; // Thêm prop để filter symbol
 }
 
-const OFFSET = 22
+const OFFSET = 30
+const STEPS = 10
 const expansionFactor = 0; // Mở rộng thêm 30%
 
 // Hàm tính toán Bollinger Bands
@@ -121,6 +122,7 @@ const convertCandlestickToBollinger = (candlestickData: CandlestickData[]): HLCA
 };
 
 let lastCandlestickData: CandlestickData | null = null;
+let isUpdating = false; // Flag to prevent multiple simultaneous updates
 
 export default function Chart({ 
   candlestickData, 
@@ -158,8 +160,8 @@ export default function Chart({
     volume?: any;
   } | null>(null);
 
-  // Convert KlineData to CandlestickData format
-  const convertKlineToCandlestick = (kline: KlineData): CandlestickData => {
+  // Convert KlineData to CandlestickData format with smooth animation
+  const convertKlineToCandlestick = (kline: KlineData): { main: CandlestickData; smoothSteps: CandlestickData[] } => {
     // Convert kline.openTime to DateTime and adjust seconds
     const dateTime = new Date(kline.openTime);
     const seconds = dateTime.getSeconds();
@@ -178,19 +180,56 @@ export default function Chart({
     
     // If we have lastCandlestickData, combine with new data
     if (lastCandlestickData) {
+      // Ensure the new time is not older than the last candlestick time
+      const lastTime = typeof lastCandlestickData.time === 'number' ? lastCandlestickData.time : lastCandlestickData.time;
+      const newTime = adjustedTime;
+      
+      // If new time is older than last time, use the last time + 1 second
+      const finalTime = newTime >= lastTime ? newTime : lastTime + 1;
+      
       lastCandlestickData.volume = (lastCandlestickData.volume || 0) + kline.volume;
-      return {
-        time: lastCandlestickData.time, // Keep time from lastCandlestickData
+      
+      const targetData = {
+        time: finalTime, // Use the validated time
         open: lastCandlestickData.open, // Keep open from lastCandlestickData
         close: kline.close, // Use close from new data
         high: Math.max(lastCandlestickData.high, kline.high), // Take the higher value
         low: Math.min(lastCandlestickData.low, kline.low), // Take the lower value
         volume: lastCandlestickData.volume, // Accumulate volume
       };
+
+      // Create 10 smooth steps for animation
+      const smoothSteps: CandlestickData[] = [];
+      
+      for (let i = 1; i <= STEPS; i++) {
+        const progress = i / STEPS;
+        
+        // Interpolate values between lastCandlestickData and targetData
+        const interpolatedData: CandlestickData = {
+          time: targetData.time,
+          open: targetData.open, // Keep open unchanged
+          close: lastCandlestickData.close + (targetData.close - lastCandlestickData.close) * progress,
+          high: lastCandlestickData.high + (targetData.high - lastCandlestickData.high) * progress,
+          low: lastCandlestickData.low + (targetData.low - lastCandlestickData.low) * progress,
+          volume: lastCandlestickData.volume + (targetData.volume - lastCandlestickData.volume) * progress,
+        };
+        
+        smoothSteps.push(interpolatedData);
+      }
+      
+      // Update lastCandlestickData with the new validated data
+      lastCandlestickData = {
+        ...targetData
+      };
+      
+      return {
+        main: targetData,
+        smoothSteps: smoothSteps
+      };
     }
     
-    // If no lastCandlestickData, return original data
-    return {
+    // If no lastCandlestickData, return original data with no smooth steps
+    const originalData = {
       time: adjustedTime as any,
       open: kline.open,
       high: kline.high,
@@ -198,11 +237,24 @@ export default function Chart({
       close: kline.close,
       volume: kline.volume,
     };
+    
+    // Update lastCandlestickData for future updates
+    lastCandlestickData = { ...originalData };
+    
+    return {
+      main: originalData,
+      smoothSteps: [originalData] // Single step for new candle
+    };
   };
 
   useEffect(() => {
-    lastCandlestickData = candlestickData[candlestickData.length - 1];
-    console.log('lastCandlestickData', JSON.stringify(lastCandlestickData,null,2));
+    // Reset lastCandlestickData when new data comes from API
+    // This ensures we don't have conflicts between API data and real-time updates
+    if (candlestickData.length > 0) {
+      const lastData = candlestickData[candlestickData.length - 1];
+      lastCandlestickData = { ...lastData };
+      console.log('🔄 Reset lastCandlestickData from API data:', JSON.stringify(lastCandlestickData, null, 2));
+    }
   }, [candlestickData]);
 
   // Socket connection effect
@@ -213,7 +265,7 @@ export default function Chart({
       try {
         const { io } = await import('socket.io-client');
         
-        socketRef.current = io('http://localhost:3002', {
+        socketRef.current = io(process.env.API_BASE_URL, {
           transports: ['websocket', 'polling']
         });
 
@@ -252,32 +304,82 @@ export default function Chart({
                 symbol: symbol || 'BTCUSDT', 
                 limit: 150 
               });
+            }else {
+                    // Update chart with real-time data
+              if (chartRef.current && candlestickSeriesRef.current && !isUpdating) {
+                isUpdating = true; // Set flag to prevent multiple updates
+                
+                const { main: candleData, smoothSteps } = convertKlineToCandlestick(data.data);
+                
+                // Check if the new data timestamp is valid (not older than the last data point)
+                try {
+                  // Update volume if available
+                  if (volumeSeriesRef.current) {
+                    const volumeData = {
+                      time: candleData.time,
+                      value: candleData.volume,
+                      color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
+                    };
+                    // volumeSeriesRef.current.update(volumeData);
+                  }
+                  
+                  // Animate through smooth steps only if the main update was successful
+                  let stepIndex = 0;
+                  const animateStep = () => {
+                    if (stepIndex < smoothSteps.length) {
+                      const stepData = smoothSteps[stepIndex];
+                      
+                      try {
+                        candlestickSeriesRef.current.update(stepData);
+                        
+                        // Update volume if available
+                        if (volumeSeriesRef.current) {
+                          const volumeData = {
+                            time: stepData.time,
+                            value: stepData.volume,
+                            color: stepData.close >= stepData.open ? '#26a69a' : '#ef5350',
+                          };
+                          volumeSeriesRef.current.update(volumeData);
+                        }
+                      } catch (stepError) {
+                        // If step update fails, stop animation
+                        console.warn('⚠️ Step animation update failed:', stepError);
+                        return;
+                      }
+                      
+                      stepIndex++;
+                      // Schedule next step with small delay for smooth animation
+                      setTimeout(animateStep, parseInt(1000 * 0.75 / STEPS));
+                    }
+                  };
+                  
+                  // Start animation
+                  animateStep();
+
+                  // Update MA lines if available
+                  if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
+                    // For real-time updates, we need to get all current data and recalculate
+                    // This is a simplified approach - in production you might want to maintain a data buffer
+                    // console.log('📊 Updating MA lines for real-time data');
+                  }
+                } catch (updateError) {
+                  // If the main update fails, it means the timestamp is invalid
+                  console.warn('⚠️ Real-time update failed - invalid timestamp:', updateError);
+                  console.log('📊 Candle data that failed:', candleData);
+                  
+                  // Optionally, you can trigger a full data refresh here
+                  // fetchCandles({ symbol: symbol || 'BTCUSDT', limit: 150 });
+                } finally {
+                  // Reset the updating flag after a short delay to allow for smooth animations
+                  setTimeout(() => {
+                    isUpdating = false;
+                  }, 100);
+                }
+              }
             }
           }
 
-          // Update chart with real-time data
-          if (chartRef.current && candlestickSeriesRef.current) {
-            const candleData = convertKlineToCandlestick(data.data);
-            // Update the latest candle or add new one
-            candlestickSeriesRef.current.update(candleData);
-            
-            // Update volume if available
-            if (volumeSeriesRef.current) {
-              const volumeData = {
-                time: candleData.time,
-                value: candleData.volume,
-                color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
-              };
-              volumeSeriesRef.current.update(volumeData);
-            }
-
-            // Update MA lines if available
-            if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
-              // For real-time updates, we need to get all current data and recalculate
-              // This is a simplified approach - in production you might want to maintain a data buffer
-              // console.log('📊 Updating MA lines for real-time data');
-            }
-          }
+    
         });
 
         socketRef.current.on('connect_error', (error: any) => {
