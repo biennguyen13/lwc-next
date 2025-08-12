@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { createChart, IChartApi, CandlestickData, HistogramData } from 'lightweight-charts';
+import { createChart, IChartApi, CandlestickData, HistogramData, LineStyle } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
 import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
 import { useBinance30sStore } from '@/stores';
@@ -569,6 +569,7 @@ export default function Chart({
         title: '',
         priceLineVisible: true,
         lastValueVisible: true,
+        priceLineStyle: LineStyle.Solid
       });
 
       // Subscribe to chart crosshair move events (for all series)
