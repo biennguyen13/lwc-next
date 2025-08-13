@@ -108,6 +108,28 @@ const calculateMA = (data: CandlestickData[], period: number) => {
   return maData;
 };
 
+// Hàm tạo fake data để mở rộng trục ngang
+const generateFakeData = (candlestickData: CandlestickData[], numberOfItems: number = 1) => {
+  if (candlestickData.length === 0) return [];
+  
+  const fakeData: { time: any; value: number }[] = [];
+  
+  // Lấy item cuối cùng của candlestickData
+  const lastItem = candlestickData[candlestickData.length - 1];
+  
+  // Tạo nhiều item fake với time tăng dần 30 giây mỗi item
+  for (let i = 1; i <= numberOfItems; i++) {
+    const fakeItem = {
+      time: lastItem.time + (30 * i), // Cộng thêm 30 * i giây
+      value: lastItem.close // Sử dụng giá close của item cuối cùng
+    };
+    
+    fakeData.push(fakeItem);
+  }
+  
+  return fakeData;
+};
+
 
 
 let lastCandlestickData: CandlestickData | null = null;
@@ -140,11 +162,11 @@ export default function Chart({
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
   const hlcSeriesRef = useRef<any>(null);
-  const visibleRangeRef = useRef<any>(null); // Lưu visible range hiện tại
   const volumeSeriesRef = useRef<any>(null);
   const ma5SeriesRef = useRef<any>(null);
   const ma15SeriesRef = useRef<any>(null);
   const ma10SeriesRef = useRef<any>(null);
+  const fakeSeriesRef = useRef<any>(null); // Thêm ref cho fake series
   const { theme } = useTheme();
   const { fetchCandles } = useBinance30sStore();
   const [isMounted, setIsMounted] = useState(false);
@@ -363,7 +385,6 @@ export default function Chart({
         });
 
         socketRef.current.on('kline-update', (data: SocketData) => {
-          // console.log('📊 Chart: Received kline update:', data);
           
           // Filter by symbol if specified
           if (symbol && data.data.symbol !== symbol) {
@@ -376,13 +397,10 @@ export default function Chart({
             lastMessageTime: new Date().toISOString()
           }));
 
-          // Check if timestamp has seconds 30 or 00 to trigger fetchCandles
-          if (data.timestamp) {
-            const timestamp = new Date(data.timestamp);
-            const seconds = timestamp.getSeconds();
+          if (data.data.openTime) {
+            const seconds = new Date(data.data.openTime).getSeconds()
             
-            if (seconds === 31 || seconds === 1) {
-              console.log('🔄 Triggering fetchCandles at seconds:', seconds, 'for symbol:', symbol);
+            if (seconds === 30 || seconds === 0) {
               fetchCandles({ 
                 symbol: symbol || 'BTCUSDT', 
                 limit: limit 
@@ -450,8 +468,6 @@ export default function Chart({
                   console.warn('⚠️ Real-time update failed - invalid timestamp:', updateError);
                   console.log('📊 Candle data that failed:', candleData);
                   
-                  // Optionally, you can trigger a full data refresh here
-                  // fetchCandles({ symbol: symbol || 'BTCUSDT', limit: limit });
                 } finally {
                   // Reset the updating flag after a short delay to allow for smooth animations
                   setTimeout(() => {
@@ -516,7 +532,8 @@ export default function Chart({
         timeScale: {
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
           timeVisible: true,
-          secondsVisible: false,
+          secondsVisible: true,
+          barSpacing: candleWidth,
         },
         // Thêm options để tối ưu không gian
         overlayPriceScales: {
@@ -527,15 +544,15 @@ export default function Chart({
         },
         // Disable zoom và pan
         handleScroll: {
-          // mouseWheel: false, // Disable mouse wheel zoom
-          // pressedMouseMove: false, // Disable drag zoom
-          // horzTouchDrag: false, // Disable kéo ngang
-          // vertTouchDrag: false, // Disable kéo dọc
+          mouseWheel: false, // Disable mouse wheel zoom
+          pressedMouseMove: false, // Disable drag zoom
+          horzTouchDrag: false, // Disable kéo ngang
+          vertTouchDrag: false, // Disable kéo dọc
         },
         handleScale: {
-          // axisPressedMouseMove: false, // Disable axis drag zoom
-          // mouseWheel: false, // Disable mouse wheel zoom
-          // pinch: false, // Disable pinch zoom
+          axisPressedMouseMove: false, // Disable axis drag zoom
+          mouseWheel: false, // Disable mouse wheel zoom
+          pinch: false, // Disable pinch zoom
         },
       });
 
@@ -621,8 +638,6 @@ export default function Chart({
         lastValueVisible: false,
       });
 
-
-
       // Tạo price scale riêng cho volume
       chartRef.current.priceScale('volume').applyOptions({
         scaleMargins: {
@@ -653,6 +668,15 @@ export default function Chart({
       ma5SeriesRef.current = chartRef.current.addLineSeries({
         color: theme === 'dark' ? '#a84bff' : '#a84bff', // Purple
         lineWidth: 2,
+        title: '',
+        priceLineVisible: false,
+        lastValueVisible: false,
+      });
+
+      // Thêm fake series để mở rộng trục ngang
+      fakeSeriesRef.current = chartRef.current.addLineSeries({
+        color: 'transparent', // Màu trong suốt
+        lineWidth: 0,
         title: '',
         priceLineVisible: false,
         lastValueVisible: false,
@@ -746,6 +770,12 @@ export default function Chart({
         ma5SeriesRef.current.setData(lastMA5);
         ma15SeriesRef.current.setData(lastMA15);
         ma10SeriesRef.current.setData(lastMA10);
+        
+        // Tạo và set fake data để mở rộng trục ngang
+        const fakeData = generateFakeData(candlestickData, 2); // Tạo 5 item fake với time tăng dần 30s
+        if (fakeSeriesRef.current && fakeData.length > 0) {
+          fakeSeriesRef.current.setData(fakeData);
+        }
       }
       
       // Xử lý HLC data - nếu có hlcData thì dùng, không thì convert từ candlestick
@@ -766,12 +796,10 @@ export default function Chart({
       }
 
       // Lưu visible range hiện tại trước khi update data
-      if (preserveZoom && chartRef.current) {
-        const currentVisibleRange = chartRef.current.timeScale().getVisibleRange();
-        if (currentVisibleRange) {
-          visibleRangeRef.current = currentVisibleRange;
-        }
-        console.log('currentVisibleRange', currentVisibleRange)
+      if (candlestickData.length > 0 && chartRef.current) {
+        // const currentVisibleRange = chartRef.current.timeScale().getVisibleRange();
+        const timeScale = chartRef.current.timeScale();
+        timeScale.scrollToPosition(-2, true);
       }
 
       // Fit content để hiển thị tất cả dữ liệu (chỉ khi không preserve zoom)
@@ -806,6 +834,7 @@ export default function Chart({
         ma5SeriesRef.current = null;
         ma15SeriesRef.current = null;
         ma10SeriesRef.current = null;
+        fakeSeriesRef.current = null;
       }
     };
   },[])
