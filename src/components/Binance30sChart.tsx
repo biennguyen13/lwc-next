@@ -147,7 +147,7 @@ export default function Binance30sChart({
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-between">
+      {/* <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           {title} - {symbol}
         </h2>
@@ -163,7 +163,7 @@ export default function Binance30sChart({
             {candlesLoading ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
-      </div>
+      </div> */}
       
       <Chart 
         candlestickData={chartData.candlestickData}
@@ -172,7 +172,7 @@ export default function Binance30sChart({
         title={`${symbol} 30s Candles - ${candles.length} data points`}
         preserveZoom={true} // Giữ nguyên zoom khi refresh
         enableRealTime={true}
-        candleWidth={10}
+        candleWidth={15}
         limit={limit}
       />
       

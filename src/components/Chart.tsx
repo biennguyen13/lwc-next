@@ -147,11 +147,11 @@ export default function Chart({
   const ma10SeriesRef = useRef<any>(null);
   const { theme } = useTheme();
   const { fetchCandles } = useBinance30sStore();
+  const [isMounted, setIsMounted] = useState(false);
   
   // State for dynamic offset
-  const [currentOffset, setCurrentOffset] = useState(90);
+  const [currentOffset, setCurrentOffset] = useState(175);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [forceUpdate, setForceUpdate] = useState(0); // Force re-render counter
 
   // Get background configuration
   const getBackgroundConfig = () => {
@@ -201,25 +201,6 @@ export default function Chart({
           scaleMargins: { top: 0.1, bottom: 0.1 }
         };
     }
-  };
-
-  // Dynamic offset calculation based on container width and candle width
-  const calculateOffset = (containerWidth: number): number => {
-    // Use props for configuration
-    const TOTAL_CANDLE_WIDTH = candleWidth + candleSpacing; // Total space per candle
-    
-    // Account for chart margins and padding
-    const AVAILABLE_WIDTH = containerWidth - chartMargins;
-    
-    // Calculate how many candles can fit in the available width
-    const maxCandles = Math.floor(AVAILABLE_WIDTH / TOTAL_CANDLE_WIDTH);
-    
-    // Return the calculated number of candles within limits
-    const calculatedCandles = Math.max(minCandles, Math.min(maxCandles, maxCandles));
-    
-    // console.log(`📏 Container: ${containerWidth}px, Available: ${AVAILABLE_WIDTH}px, Candles: ${calculatedCandles} (${TOTAL_CANDLE_WIDTH}px each)`);
-    
-    return calculatedCandles > 120 ? 120 : calculatedCandles;
   };
 
   // Hàm convert candlestick data thành bollinger data format
@@ -546,15 +527,15 @@ export default function Chart({
         },
         // Disable zoom và pan
         handleScroll: {
-          mouseWheel: false, // Disable mouse wheel zoom
-          pressedMouseMove: false, // Disable drag zoom
-          horzTouchDrag: false, // Disable kéo ngang
-          vertTouchDrag: false, // Disable kéo dọc
+          // mouseWheel: false, // Disable mouse wheel zoom
+          // pressedMouseMove: false, // Disable drag zoom
+          // horzTouchDrag: false, // Disable kéo ngang
+          // vertTouchDrag: false, // Disable kéo dọc
         },
         handleScale: {
-          axisPressedMouseMove: false, // Disable axis drag zoom
-          mouseWheel: false, // Disable mouse wheel zoom
-          pinch: false, // Disable pinch zoom
+          // axisPressedMouseMove: false, // Disable axis drag zoom
+          // mouseWheel: false, // Disable mouse wheel zoom
+          // pinch: false, // Disable pinch zoom
         },
       });
 
@@ -634,7 +615,7 @@ export default function Chart({
         priceFormat: {
           type: 'volume',
         },
-        priceScaleId: '', // Tạo price scale riêng cho volume
+        priceScaleId: 'volume', // Tạo price scale riêng cho volume
         title: '',
         priceLineVisible: false,
         lastValueVisible: false,
@@ -643,9 +624,9 @@ export default function Chart({
 
 
       // Tạo price scale riêng cho volume
-      chartRef.current.priceScale('').applyOptions({
+      chartRef.current.priceScale('volume').applyOptions({
         scaleMargins: {
-          top: 0.8, // Volume ở dưới 20% của chart
+          top: 0.9, // Volume ở dưới 20% của chart
           bottom: 0,
         },
       });
@@ -681,6 +662,7 @@ export default function Chart({
     // Set data và update theme chỉ khi chart đã được tạo
     if (chartRef.current) {
       // Update theme
+      if(!isMounted) {
       chartRef.current.applyOptions({
         layout: {
           background: getBackgroundConfig(),
@@ -702,8 +684,10 @@ export default function Chart({
         },
         timeScale: {
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
+          barSpacing: candleWidth,
         },
       });
+    }
 
       // Update HLC series colors theo theme
       if (hlcSeriesRef.current) {
@@ -787,11 +771,12 @@ export default function Chart({
         if (currentVisibleRange) {
           visibleRangeRef.current = currentVisibleRange;
         }
+        console.log('currentVisibleRange', currentVisibleRange)
       }
 
       // Fit content để hiển thị tất cả dữ liệu (chỉ khi không preserve zoom)
       if (!preserveZoom) {
-        chartRef.current.timeScale().fitContent();
+        // chartRef.current.timeScale().fitContent();
       }
       
       // Tối ưu price scale để loại bỏ khoảng trống
@@ -801,26 +786,17 @@ export default function Chart({
         const minPrice = Math.min(...prices);
         const priceRange = maxPrice - minPrice;
         const padding = priceRange * 0.05; // 5% padding
-        
-        chartRef.current.priceScale('right').applyOptions({
-          autoScale: false,
-          scaleMargins: {
-            top: 0.1,
-            bottom: 0.1,
-          },
-          minValue: minPrice - padding,
-          maxValue: maxPrice + padding,
-        });
-      }
-
-      // Khôi phục visible range sau khi set data (nếu preserve zoom)
-      if (preserveZoom && visibleRangeRef.current && chartRef.current) {
-        chartRef.current.timeScale().setVisibleRange(visibleRangeRef.current);
       }
     }
+  }, [theme, candlestickData,]); // Thêm dependency
 
+
+  useEffect(()=>{
     // Cleanup khi component unmount
+    console.log("Mounted")
+    setIsMounted(true);
     return () => {
+      console.log("Unmounted")
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
@@ -832,27 +808,18 @@ export default function Chart({
         ma10SeriesRef.current = null;
       }
     };
-  }, [theme, candlestickData, hlcData, volumeData, currentOffset, containerWidth, forceUpdate, horizontalGridStyle, horizontalGridColor, gridDensity, backgroundTransparent, backgroundColor]); // Thêm dependency
+  },[])
 
   // Handle resize with dynamic offset calculation
   useEffect(() => {
     const handleResize = () => {
       if (chartContainerRef.current) {
         const newContainerWidth = chartContainerRef.current.clientWidth;
-        const newOffset = calculateOffset(newContainerWidth);
-        
         // Always update container width to trigger re-render
         setContainerWidth(newContainerWidth);
         
         // Update offset if it changed
-        if (newOffset !== currentOffset) {
-          setCurrentOffset(newOffset);
-          console.log(`📱 Container width: ${newContainerWidth}px, New offset: ${newOffset} candles`);
-        } else {
-          // Force re-render even if offset is the same (e.g., when width is very large)
-          console.log(`🔄 Container width changed to ${newContainerWidth}px, forcing re-render with ${newOffset} candles`);
-          setForceUpdate(prev => prev + 1); // Trigger re-render
-        }
+          console.log(`📱 Container width: ${newContainerWidth}px`);
         
         // Resize chart
         if (chartRef.current) {
@@ -868,44 +835,6 @@ export default function Chart({
     return () => window.removeEventListener('resize', handleResize);
   }, [currentOffset, containerWidth]);
 
-  // Force re-render when container width changes significantly
-  useEffect(() => {
-    if (forceUpdate > 0 && chartRef.current && candlestickData.length > 0) {
-      console.log(`🔄 Force re-rendering chart with ${currentOffset} candles`);
-      
-      // Re-apply data to trigger re-render
-      const lastCandlestick = candlestickData.slice(-currentOffset);
-      candlestickSeriesRef.current.setData(lastCandlestick);
-      
-      // Re-apply other series data
-      if (volumeData.length > 0) {
-        const lastVolume = volumeData.slice(-currentOffset);
-        volumeSeriesRef.current.setData(lastVolume);
-      }
-      
-      // Re-apply MA data
-      const ma5Data = calculateMA(candlestickData, 5);
-      const ma15Data = calculateMA(candlestickData, 15);
-      const ma10Data = calculateMA(candlestickData, 10);
-      
-      const lastMA5 = ma5Data.slice(-currentOffset);
-      const lastMA15 = ma15Data.slice(-currentOffset);
-      const lastMA10 = ma10Data.slice(-currentOffset);
-      
-      ma5SeriesRef.current.setData(lastMA5);
-      ma15SeriesRef.current.setData(lastMA15);
-      ma10SeriesRef.current.setData(lastMA10);
-      
-      // Re-apply HLC data
-      if (hlcData.length === 0 && candlestickData.length > 0) {
-        const finalHLCData = convertCandlestickToBollinger(candlestickData, currentOffset);
-        hlcSeriesRef.current.setData(finalHLCData);
-      }
-      
-      // Fit content to ensure proper display
-      chartRef.current.timeScale().fitContent();
-    }
-  }, [forceUpdate, currentOffset, candlestickData, hlcData, volumeData]);
 
   return (
     <div className="w-full">
@@ -1041,12 +970,6 @@ export default function Chart({
           <div className="w-3 h-3 rounded-full bg-gray-200"></div>
           <span>Container: {containerWidth}px</span>
         </div>
-        {forceUpdate > 0 && (
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
-            <span>Updates: {forceUpdate}</span>
-          </div>
-        )}
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-gray-100"></div>
           <span>Grid: {gridDensity}</span>
