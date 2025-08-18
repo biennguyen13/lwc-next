@@ -160,7 +160,7 @@ export default function Home() {
   const finalVolumeData = realVolumeData.length > 0 ? realVolumeData : volumeData;
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors">
+    <main className="min-h-screen p-2 md:p-8 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
         {/* Binance 30s Test Component */}
         {/* <div className="mb-8">
@@ -168,100 +168,13 @@ export default function Home() {
         </div> */}
 
         {/* Binance 30s Chart Component */}
-        <div className="mb-8">
+        <div className="mb-2 md:mb-8">
           <Binance30sChart limit={200} symbol="BTCUSDT" title="Binance 30s Real-time Chart" />
         </div>
 
         {/* Candle Tables Component */}
-        <div className="mb-8">
+        <div className="mb-2 md:mb-8">
           <CandleTables symbol="BTCUSDT" autoRefresh={false} refreshInterval={30000} />
-        </div>
-
-        {/* Controls */}
-        <div className="flex justify-center mb-6 space-x-4">
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Symbol:
-            </label>
-            <select
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-            >
-              <option value="BTCUSDT">BTCUSDT</option>
-              <option value="ETHUSDT">ETHUSDT</option>
-              <option value="ADAUSDT">ADAUSDT</option>
-              <option value="DOTUSDT">DOTUSDT</option>
-              <option value="LINKUSDT">LINKUSDT</option>
-            </select>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Interval:
-            </label>
-            <select
-              value={interval}
-              onChange={(e) => setInterval(e.target.value as BinanceInterval)}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-            >
-              {Object.entries(BINANCE_INTERVALS).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <button
-            onClick={fetchData}
-            disabled={isLoading}
-            className="px-4 py-1 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? 'Loading...' : 'Refresh'}
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Auto-refresh:
-            </label>
-            <button
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`px-4 py-1 rounded-md text-sm font-medium transition-colors ${
-                autoRefresh
-                  ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500'
-              }`}
-            >
-              {autoRefresh ? 'ON' : 'OFF'}
-            </button>
-            {autoRefresh && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                (30s)
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Real-time:
-            </label>
-            <button
-              onClick={() => setRealTimeMode(!realTimeMode)}
-              className={`px-4 py-1 rounded-md text-sm font-medium transition-colors ${
-                realTimeMode
-                  ? 'bg-purple-500 text-white hover:bg-purple-600'
-                  : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500'
-              }`}
-            >
-              {realTimeMode ? 'ON' : 'OFF'}
-            </button>
-            {realTimeMode && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                (Socket)
-              </span>
-            )}
-          </div>
         </div>
 
         {/* Error Message */}

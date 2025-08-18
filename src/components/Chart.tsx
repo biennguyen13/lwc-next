@@ -52,7 +52,16 @@ interface ChartProps {
 
 const STEPS = 10
 const expansionFactor = 0; // Mở rộng thêm 30%
-const CHART_HEIGHT = 800;
+
+// Function to calculate dynamic chart height based on browser viewport
+const getChartHeight = (): number => {
+  const viewportHeight = window.innerHeight;
+  const calculatedHeight = viewportHeight * 0.75; // 75% of viewport height
+  const maxHeight = 800;
+  const minHeight = 350;
+  
+  return Math.min(Math.max(calculatedHeight, minHeight), maxHeight);
+};
 
 // Hàm tính toán Bollinger Bands
 const calculateBollingerBands = (data: CandlestickData[], period: number = 20, multiplier: number = 2) => {
@@ -509,7 +518,7 @@ export default function Chart({
       // Tạo chart với theme
       chartRef.current = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: CHART_HEIGHT, // Tăng từ 400 lên 600
+        height: getChartHeight(), // Dynamic height based on viewport
         layout: {
           background: getBackgroundConfig(),
           textColor: theme === 'dark' ? '#f9fafb' : '#333',
@@ -848,7 +857,7 @@ export default function Chart({
         
         // Resize chart
         if (chartRef.current) {
-          chartRef.current.resize(newContainerWidth, CHART_HEIGHT);
+          chartRef.current.resize(newContainerWidth, getChartHeight());
         }
       }
     };
