@@ -143,8 +143,8 @@ export default function TradingPanel({
         </button>
 
         {/* Place Order Button */}
-        <div className="w-full py-3 bg-gray-600 text-white rounded-lg">
-          <div className="text-center font-bold text-base">Hãy đặt lệnh</div>
+        <div className="w-full py-2 bg-gray-600 text-white rounded-lg">
+          <div className="text-center  text-sm">Hãy đặt lệnh</div>
           <div className="text-center text-sm mt-1">{countdownTime}s</div>
         </div>
 

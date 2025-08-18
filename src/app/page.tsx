@@ -188,7 +188,7 @@ export default function Home() {
     realVolumeData.length > 0 ? realVolumeData : volumeData
 
   return (
-    <main className="min-h-screen p-2 bg-gray-100 dark:bg-gray-900 transition-colors">
+    <main className="min-h-screen p-2 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
         {/* Binance 30s Test Component */}
         {/* <div className="mb-8">
@@ -213,8 +213,8 @@ export default function Home() {
                   onClick={() => setActiveMainTab("gauges")}
                   className={`text-lg font-medium transition-colors ${
                     activeMainTab === "gauges"
-                      ? "text-white border-b-2 border-orange-500 pb-1"
-                      : "text-gray-400 hover:text-white"
+                      ? "text-foreground border-b-2 border-orange-500 pb-1"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   Indicators
@@ -223,8 +223,8 @@ export default function Home() {
                   onClick={() => setActiveMainTab("candles")}
                   className={`text-lg font-medium transition-colors ${
                     activeMainTab === "candles"
-                      ? "text-white border-b-2 border-orange-500 pb-1"
-                      : "text-gray-400 hover:text-white"
+                      ? "text-foreground border-b-2 border-orange-500 pb-1"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   Last Results
