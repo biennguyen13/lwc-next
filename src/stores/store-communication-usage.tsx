@@ -162,11 +162,11 @@ export const StoreEventManager: React.FC = () => {
       <Binance30sLatestListener />
       
       {/* Auto-refresh example */}
-      <div className="p-4">
+      {/* <div className="p-4">
         <h3 className="font-semibold mb-2">Auto Refresh Example</h3>
         <div className="space-x-2">
           <button 
-            onClick={() => fetchCandles({ symbol: "BTCUSDT", limit: 10 })}
+            onClick={() => fetchCandles({ symbol: "BTCUSDT", limit: 10000 })}
             className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
           >
             Fetch Candles
@@ -184,7 +184,7 @@ export const StoreEventManager: React.FC = () => {
             Fetch Latest
           </button>
         </div>
-      </div>
+      </div> */}
     </>
   )
 }

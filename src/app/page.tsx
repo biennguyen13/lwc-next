@@ -162,18 +162,10 @@ export default function Home() {
   return (
     <main className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white transition-colors">
-          Lightweight Charts với Next.js 14
-        </h1>
-        
-        <p className="text-center mb-8 text-gray-600 dark:text-gray-300 transition-colors">
-          Demo các loại biểu đồ tài chính sử dụng Lightweight Charts và Next.js 14
-        </p>
-
         {/* Binance 30s Test Component */}
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <Binance30sTest />
-        </div>
+        </div> */}
 
         {/* Binance 30s Chart Component */}
         <div className="mb-8">

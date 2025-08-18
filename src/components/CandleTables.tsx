@@ -282,43 +282,6 @@ export default function CandleTables({
   return (
     <div className="w-full max-w-7xl mx-auto p-6">
       <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 shadow-2xl border border-gray-200 dark:border-gray-800 transition-colors duration-200">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors">
-              Candle Tables - {currentSymbol}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 text-sm transition-colors">
-              5 bảng nến gần nhất, mỗi bảng 20 nến 30s (10 phút)
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mt-1 transition-colors">
-              💡 Chỉ hiển thị nến đã đóng hoàn toàn
-            </p>
-          </div>
-          
-          {/* <div className="flex items-center space-x-4">
-            <select
-              value={currentSymbol}
-              onChange={(e) => handleSymbolChange(e.target.value)}
-              className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
-            >
-              <option value="BTCUSDT">BTCUSDT</option>
-              <option value="ETHUSDT">ETHUSDT</option>
-              <option value="ADAUSDT">ADAUSDT</option>
-              <option value="DOTUSDT">DOTUSDT</option>
-              <option value="LINKUSDT">LINKUSDT</option>
-            </select>
-            
-            <button
-              onClick={handleRefresh}
-              disabled={candleTablesLoading}
-              className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {candleTablesLoading ? 'Loading...' : 'Refresh'}
-            </button>
-          </div> */}
-        </div>
-
         {/* Error Message */}
         {candleTablesError && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-md transition-colors">

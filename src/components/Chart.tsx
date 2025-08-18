@@ -142,7 +142,7 @@ export default function Chart({
   volumeData, 
   title = 'Biểu đồ giá', 
   preserveZoom = false,
-  enableRealTime = false,
+  enableRealTime = true,
   symbol = 'BTCUSDT',
   // Candle configuration with defaults
   candleWidth = 5,
@@ -863,12 +863,8 @@ export default function Chart({
 
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white transition-colors">
-        {title}
-      </h2>
-      
       {/* Real-time Status */}
-      {enableRealTime && (
+      {/* {enableRealTime && (
         <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -895,7 +891,7 @@ export default function Chart({
             )}
           </div>
         </div>
-      )}
+      )} */}
       
       <div className="relative">
         {/* Hover Info Display - Overlay ở góc trái-trên */}
@@ -935,71 +931,6 @@ export default function Chart({
           className="chart-container relative z-10"
           onMouseLeave={() => setHoverData(null)}
         />
-      </div>
-      
-      <div className="mt-4 flex justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span>Candlestick (Up)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span>Candlestick (Down)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-          <span>Upper Band</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-          <span>Lower Band</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-          <span>Middle Band (SMA)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-green-600"></div>
-          <span>MA15</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-600"></div>
-          <span>MA5</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span>Volume</span>
-        </div>
-        {enableRealTime && (
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse"></div>
-            <span>Real-time Updates</span>
-          </div>
-        )}
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-gray-500"></div>
-          <span>Candles: {currentOffset}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-          <span>Width: {candleWidth}px</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-          <span>Spacing: {candleSpacing}px</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-          <span>Container: {containerWidth}px</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-gray-100"></div>
-          <span>Grid: {gridDensity}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-transparent border border-gray-300"></div>
-          <span>BG: {backgroundTransparent ? 'Transparent' : 'Solid'}</span>
-        </div>
       </div>
     </div>
   );
