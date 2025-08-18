@@ -35,7 +35,7 @@ const CandleCell = ({
   const color = getCandleColor(candle);
   
   return (
-    <div className="relative">
+    <div className="relative group">
       <div 
         className={`
           w-6 h-6 rounded-full border-2 transition-all duration-200
@@ -50,11 +50,72 @@ const CandleCell = ({
           ${isActive ? 'shadow-md dark:shadow-gray-900' : 'shadow-sm'}
           hover:scale-110 cursor-pointer
         `}
-        title={`Index: ${index} | ${candle.start_time_formatted || new Date(candle.open_time).toLocaleTimeString()}: ${candle.close_price}`}
       />
+      
       {/* Index indicator */}
-      <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-800 text-xxs rounded-full flex items-center justify-center  border border-white dark:border-gray-800 shadow-sm">
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-800 text-xxs rounded-full flex items-center justify-center border border-white dark:border-gray-800 shadow-sm">
         {index}
+      </div>
+      
+      {/* Tooltip */}
+      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-4 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-20 min-w-[200px] border border-gray-700 dark:border-gray-300">
+        <div className="font-mono space-y-1">
+          <div className="flex justify-between items-center pb-2 border-b border-gray-600 dark:border-gray-400">
+            <span className="text-blue-400 dark:text-blue-600 font-bold">Index: {index}</span>
+            <span className="text-gray-400 dark:text-gray-500 text-xxs">
+              {isActive && candle && candle.open_time > 0 ? 
+                `${((candle.close_time - candle.open_time) / 1000).toFixed(0)}s` : 
+                'Empty'
+              }
+            </span>
+          </div>
+          
+          {isActive && candle && candle.open_time > 0 ? (
+            <>
+              <div className="flex justify-between items-center text-xxs text-gray-400 dark:text-gray-500">
+                <span>Time:</span>
+                <span>{new Date(candle.open_time).toLocaleTimeString()} - {new Date(candle.close_time).toLocaleTimeString()}</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2">
+                <div className="flex justify-between">
+                  <span className="text-green-400 dark:text-green-600">O:</span>
+                  <span className="font-bold">{candle.open_price?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-green-400 dark:text-green-600">H:</span>
+                  <span className="font-bold">{candle.high_price?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-400 dark:text-red-600">L:</span>
+                  <span className="font-bold">{candle.low_price?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-400 dark:text-blue-600">C:</span>
+                  <span className="font-bold">{candle.close_price?.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-gray-600 dark:border-gray-400">
+                <div className="flex justify-between items-center">
+                  <span className="text-purple-400 dark:text-purple-600">Vol:</span>
+                  <span className="font-bold">{candle.volume?.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-yellow-400 dark:text-yellow-600">Trades:</span>
+                  <span className="font-bold">{candle.number_of_trades}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-2 text-gray-400 dark:text-gray-500">
+              No data available
+            </div>
+          )}
+        </div>
+        
+        {/* Arrow */}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-t-6 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
       </div>
     </div>
   );

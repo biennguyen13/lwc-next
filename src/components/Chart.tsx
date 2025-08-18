@@ -898,12 +898,6 @@ export default function Chart({
       )}
       
       <div className="relative">
-        <div 
-          ref={chartContainerRef} 
-          className="chart-container"
-          onMouseLeave={() => setHoverData(null)}
-        />
-        
         {/* Hover Info Display - Overlay ở góc trái-trên */}
         {hoverData && (
           <div className="absolute top-2 left-2 z-10 bg-transparent p-2 rounded border border-gray-300 dark:border-gray-600 shadow-lg">
@@ -935,6 +929,12 @@ export default function Chart({
             )}
           </div>
         )}
+
+        <div 
+          ref={chartContainerRef} 
+          className="chart-container relative z-10"
+          onMouseLeave={() => setHoverData(null)}
+        />
       </div>
       
       <div className="mt-4 flex justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
