@@ -146,17 +146,15 @@ export default function Binance30sChart({
   }
 
   return (
-    <div className="w-full">
-      <Chart 
-        candlestickData={chartData.candlestickData}
-        hlcData={[]}
-        volumeData={chartData.volumeData}
-        title={`${symbol} 30s Candles - ${candles.length} data points`}
-        preserveZoom={true} // Giữ nguyên zoom khi refresh
-        enableRealTime={true}
-        candleWidth={15}
-        limit={limit}
-      />
-    </div>
+    <Chart 
+      candlestickData={chartData.candlestickData}
+      hlcData={[]}
+      volumeData={chartData.volumeData}
+      title={`${symbol} 30s Candles - ${candles.length} data points`}
+      preserveZoom={true} // Giữ nguyên zoom khi refresh
+      enableRealTime={true}
+      candleWidth={15}
+      limit={limit}
+    />
   );
 } 
