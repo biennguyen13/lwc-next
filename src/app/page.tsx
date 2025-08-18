@@ -8,6 +8,7 @@ import { fetchBinanceCandlestick, extractVolumeData, BINANCE_INTERVALS, BinanceI
 import { Binance30sTest } from '@/components/Binance30sTest';
 import Binance30sChart from '@/components/Binance30sChart';
 import CandleTables from '@/components/CandleTables';
+import GaugeIndicators from '@/components/GaugeIndicators';
 
 // Dynamic imports để tránh SSR issues
 const Chart = dynamic(() => import('@/components/Chart'), { ssr: false });
@@ -96,6 +97,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false); // Auto-refresh toggle
   const [realTimeMode, setRealTimeMode] = useState<boolean>(false); // Real-time mode toggle
+  const [activeMainTab, setActiveMainTab] = useState<'gauges' | 'candles'>('gauges'); // Main tab state
   
   // Generate sample data chỉ một lần khi khởi tạo page (fallback)
   const { candlestickData, hlcData, volumeData } = useMemo(() => {
@@ -168,13 +170,50 @@ export default function Home() {
         </div> */}
 
         {/* Binance 30s Chart Component */}
-        <div className="mb-2 md:mb-8">
+        <div className="mb-6 md:mb-8">
           <Binance30sChart limit={200} symbol="BTCUSDT" title="Binance 30s Real-time Chart" />
         </div>
 
-        {/* Candle Tables Component */}
+        {/* Tabs Container */}
         <div className="mb-2 md:mb-8">
-          <CandleTables symbol="BTCUSDT" autoRefresh={false} refreshInterval={30000} />
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-6 mb-6">
+            <button
+              onClick={() => setActiveMainTab('gauges')}
+              className={`text-lg font-medium transition-colors ${
+                activeMainTab === 'gauges'
+                  ? 'text-white border-b-2 border-orange-500 pb-1'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Indicators
+            </button>
+            <button
+              onClick={() => setActiveMainTab('candles')}
+              className={`text-lg font-medium transition-colors ${
+                activeMainTab === 'candles'
+                  ? 'text-white border-b-2 border-orange-500 pb-1'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Last Results
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeMainTab === 'gauges' && (
+              <div>
+                <GaugeIndicators />
+              </div>
+            )}
+            
+            {activeMainTab === 'candles' && (
+              <div>
+                <CandleTables symbol="BTCUSDT" autoRefresh={false} refreshInterval={30000} />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Error Message */}
