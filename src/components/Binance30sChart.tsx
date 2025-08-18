@@ -177,7 +177,7 @@ export default function Binance30sChart({
       />
       
       {/* Data Info */}
-      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+      <div hidden className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
         <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Data Info:</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>

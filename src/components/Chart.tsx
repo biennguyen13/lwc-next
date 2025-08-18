@@ -52,6 +52,7 @@ interface ChartProps {
 
 const STEPS = 10
 const expansionFactor = 0; // Mở rộng thêm 30%
+const CHART_HEIGHT = 800;
 
 // Hàm tính toán Bollinger Bands
 const calculateBollingerBands = (data: CandlestickData[], period: number = 20, multiplier: number = 2) => {
@@ -168,7 +169,7 @@ export default function Chart({
   const ma10SeriesRef = useRef<any>(null);
   const fakeSeriesRef = useRef<any>(null); // Thêm ref cho fake series
   const { theme } = useTheme();
-  const { fetchCandles } = useBinance30sStore();
+  const { fetchCandles, fetchCandleTables } = useBinance30sStore();
   const [isMounted, setIsMounted] = useState(false);
   
   // State for dynamic offset
@@ -405,6 +406,7 @@ export default function Chart({
                 symbol: symbol || 'BTCUSDT', 
                 limit: limit 
               });
+              fetchCandleTables(symbol || 'BTCUSDT');
             }else {
                     // Update chart with real-time data
               if (chartRef.current && candlestickSeriesRef.current && !isUpdating) {
@@ -507,7 +509,7 @@ export default function Chart({
       // Tạo chart với theme
       chartRef.current = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: 800, // Tăng từ 400 lên 600
+        height: CHART_HEIGHT, // Tăng từ 400 lên 600
         layout: {
           background: getBackgroundConfig(),
           textColor: theme === 'dark' ? '#f9fafb' : '#333',
@@ -589,7 +591,7 @@ export default function Chart({
                 close: candlestickData.close,
                 volume: candlestickData.volume
               };
-              // console.log('🕯️ Candlestick Hover:', hoverInfo);
+              // console.log('🕯️ Candlestick Hover:', hoverInfo.candlestick);
             }
             
             if (volumeData) {
@@ -597,7 +599,7 @@ export default function Chart({
                 value: volumeData.value,
                 color: volumeData.color
               };
-              // console.log('📊 Volume Hover:', hoverInfo);
+              // console.log('📊 Volume Hover:', hoverInfo.volume);
             }
             
             setHoverData(hoverInfo);
@@ -686,7 +688,6 @@ export default function Chart({
     // Set data và update theme chỉ khi chart đã được tạo
     if (chartRef.current) {
       // Update theme
-      if(!isMounted) {
       chartRef.current.applyOptions({
         layout: {
           background: getBackgroundConfig(),
@@ -708,10 +709,8 @@ export default function Chart({
         },
         timeScale: {
           borderColor: theme === 'dark' ? '#4b5563' : '#cccccc',
-          barSpacing: candleWidth,
         },
       });
-    }
 
       // Update HLC series colors theo theme
       if (hlcSeriesRef.current) {
@@ -847,12 +846,9 @@ export default function Chart({
         // Always update container width to trigger re-render
         setContainerWidth(newContainerWidth);
         
-        // Update offset if it changed
-          console.log(`📱 Container width: ${newContainerWidth}px`);
-        
         // Resize chart
         if (chartRef.current) {
-          chartRef.current.resize(newContainerWidth, 800);
+          chartRef.current.resize(newContainerWidth, CHART_HEIGHT);
         }
       }
     };
@@ -901,48 +897,45 @@ export default function Chart({
         </div>
       )}
       
-      <div ref={chartContainerRef} className="chart-container" />
-      
-      {/* Hover Info Display */}
-      {hoverData && (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div className="text-sm">
-            <div className="font-semibold text-gray-900 dark:text-white mb-2">
-              📊 Hover Info - {hoverData.time}
-            </div>
+      <div className="relative">
+        <div 
+          ref={chartContainerRef} 
+          className="chart-container"
+          onMouseLeave={() => setHoverData(null)}
+        />
+        
+        {/* Hover Info Display - Overlay ở góc trái-trên */}
+        {hoverData && (
+          <div className="absolute top-2 left-2 z-10 bg-transparent p-2 rounded border border-gray-300 dark:border-gray-600 shadow-lg">
             {hoverData.candlestick && (
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+              <div className="grid grid-cols-2 gap-1 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Open:</span>
-                  <span className="font-mono text-green-600">{hoverData.candlestick.open?.toFixed(2)}</span>
+                  <span className="text-gray-600 dark:text-gray-300">O:</span>
+                  <span className="font-mono text-gray-900 dark:text-white">{hoverData.candlestick.open?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">High:</span>
-                  <span className="font-mono text-green-600">{hoverData.candlestick.high?.toFixed(2)}</span>
+                  <span className="text-gray-600 dark:text-gray-300">C:</span>
+                  <span className="font-mono text-gray-900 dark:text-white">{hoverData.candlestick.close?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Low:</span>
-                  <span className="font-mono text-red-600">{hoverData.candlestick.low?.toFixed(2)}</span>
+                  <span className="text-gray-600 dark:text-gray-300">H:</span>
+                  <span className="font-mono text-gray-900 dark:text-white">{hoverData.candlestick.high?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Close:</span>
-                  <span className="font-mono text-blue-600">{hoverData.candlestick.close?.toFixed(2)}</span>
+                  <span className="text-gray-600 dark:text-gray-300">L:</span>
+                  <span className="font-mono text-gray-900 dark:text-white">{hoverData.candlestick.low?.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Volume:</span>
-                  <span className="font-mono text-purple-600">{hoverData.candlestick.volume?.toFixed(4)}</span>
+                <div className="flex justify-between col-span-2">
+                  <span className="text-gray-600 dark:text-gray-300">Vol:</span>
+                  <span className="font-mono text-gray-900 dark:text-white">
+                    {hoverData.volume?.value ? hoverData.volume.value.toFixed(2) : hoverData.candlestick.volume?.toFixed(2) || '0.00'}
+                  </span>
                 </div>
-              </div>
-            )}
-            {hoverData.volume && (
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Volume:</span>
-                <span className="font-mono text-purple-600">{hoverData.volume.value?.toFixed(4)}</span>
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
       
       <div className="mt-4 flex justify-center space-x-3 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
         <div className="flex items-center space-x-2">

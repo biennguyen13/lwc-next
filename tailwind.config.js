@@ -13,6 +13,9 @@ module.exports = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      fontSize: {
+        'xxs': ['0.65rem', { lineHeight: '0.75rem' }], // 10px với line-height 12px
+      },
       colors: {
         // Custom colors for charts
         chart: {

@@ -29,6 +29,27 @@ export interface Binance30sStats {
   total_volume: string
 }
 
+// Types cho Candle Tables
+export interface CandleTable {
+  table_index: number
+  table_key: string
+  start_time: number
+  end_time: number
+  start_time_formatted: string
+  end_time_formatted: string
+  candles_count: number
+  candles: Binance30sCandle[]
+  open_price: number
+  close_price: number
+  high_price: number
+  low_price: number
+  total_volume: number
+  total_quote_volume: number
+  total_trades: number
+  has_incomplete_candles: boolean
+  incomplete_candles_count: number
+}
+
 // ==================== BINANCE 30S API ====================
 export const binance30sAPI = {
   // Lấy danh sách nến 30s
@@ -74,6 +95,16 @@ export const binance30sAPI = {
     })
     if (!response.data.success)
       throw new Error(response.data.message || "Lấy nến 30s gần nhất thất bại")
+    return response.data.data
+  },
+
+  // Lấy 5 bảng nến gần nhất
+  getCandleTables: async (symbol: string = "BTCUSDT"): Promise<CandleTable[]> => {
+    const response: AxiosResponse = await apiClient.get("/binance/30s/tables", {
+      params: { symbol },
+    })
+    if (!response.data.success)
+      throw new Error(response.data.message || "Lấy bảng nến thất bại")
     return response.data.data
   },
 } 

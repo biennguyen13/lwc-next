@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { binance30sAPI, Binance30sCandle, Binance30sStats } from "@/lib/api/binance-30s"
+import { binance30sAPI, Binance30sCandle, Binance30sStats, CandleTable } from "@/lib/api/binance-30s"
 import { storeCommunication } from "./store-communication"
 
 interface Binance30sStoreState {
@@ -7,16 +7,19 @@ interface Binance30sStoreState {
   candles: Binance30sCandle[] | null
   stats: Binance30sStats | null
   latestCandles: Binance30sCandle[] | null
+  candleTables: CandleTable[] | null
   
   // Loading states
   candlesLoading: boolean
   statsLoading: boolean
   latestCandlesLoading: boolean
+  candleTablesLoading: boolean
   
   // Error states
   candlesError: string | null
   statsError: string | null
   latestCandlesError: string | null
+  candleTablesError: string | null
   
   // Actions
   fetchCandles: (params?: {
@@ -27,9 +30,11 @@ interface Binance30sStoreState {
   }) => Promise<void>
   fetchStats: (symbol?: string) => Promise<void>
   fetchLatestCandles: (params?: { symbol?: string; count?: number }) => Promise<void>
+  fetchCandleTables: (symbol?: string) => Promise<void>
   clearCandlesError: () => void
   clearStatsError: () => void
   clearLatestCandlesError: () => void
+  clearCandleTablesError: () => void
   clearAll: () => void
 }
 
@@ -38,12 +43,15 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
   candles: null,
   stats: null,
   latestCandles: null,
+  candleTables: null,
   candlesLoading: false,
   statsLoading: false,
   latestCandlesLoading: false,
+  candleTablesLoading: false,
   candlesError: null,
   statsError: null,
   latestCandlesError: null,
+  candleTablesError: null,
 
   // Fetch candles
   fetchCandles: async (params = {}) => {
@@ -96,10 +104,28 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
     }
   },
 
+  // Fetch candle tables
+  fetchCandleTables: async (symbol = "BTCUSDT") => {
+    set({ candleTablesLoading: true, candleTablesError: null })
+    try {
+      const data = await binance30sAPI.getCandleTables(symbol)
+      set({ candleTables: data, candleTablesLoading: false })
+      
+      // Emit event khi fetch candle tables thành công
+      storeCommunication.emitBinance30sTablesUpdated(data)
+    } catch (error: any) {
+      set({
+        candleTablesLoading: false,
+        candleTablesError: error?.message || "Lấy bảng nến thất bại",
+      })
+    }
+  },
+
   // Clear errors
   clearCandlesError: () => set({ candlesError: null }),
   clearStatsError: () => set({ statsError: null }),
   clearLatestCandlesError: () => set({ latestCandlesError: null }),
+  clearCandleTablesError: () => set({ candleTablesError: null }),
 
   // Clear all
   clearAll: () => {
@@ -107,12 +133,15 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
       candles: null,
       stats: null,
       latestCandles: null,
+      candleTables: null,
       candlesLoading: false,
       statsLoading: false,
       latestCandlesLoading: false,
+      candleTablesLoading: false,
       candlesError: null,
       statsError: null,
       latestCandlesError: null,
+      candleTablesError: null,
     })
   },
 })) 

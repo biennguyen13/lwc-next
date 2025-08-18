@@ -21,7 +21,7 @@ export const Binance30sTest: React.FC = () => {
 
   const handleTestCandles = () => {
     console.log("🔄 Fetching candles...")
-    fetchCandles({ symbol: "BTCUSDT", limit: 3000 })
+    fetchCandles({ symbol: "BTCUSDT", limit: 10000 })
   }
 
   const handleTestStats = () => {
