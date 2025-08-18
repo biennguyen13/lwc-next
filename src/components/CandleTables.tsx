@@ -38,7 +38,7 @@ const CandleCell = ({
     <div className="relative group">
       <div
         className={`
-          w-4 h-4 lg:w-6 lg:h-6 rounded-full border-2 transition-all duration-200
+          w-4 h-4 xl:w-6 xl:h-6 rounded-full border-2 transition-all duration-200
           ${
             isActive
               ? color === "green"
@@ -302,7 +302,7 @@ export default function CandleTables({
   }
 
   return (
-    <div className="w-full mx-auto p-2 lg:p-6">
+    <div className="w-full mx-auto p-2 xl:p-6">
       <div className="">
         {/* Error Message */}
         {candleTablesError && (
@@ -322,7 +322,7 @@ export default function CandleTables({
 
         {/* Tables Grid */}
         {candleTables && candleTables.length > 0 && (
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-8 md:gap-2 lg:gap-4">
+          <div className="grid grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-4">
             {candleTables.map((table, index) => (
               <CandleTableComponent
                 key={table.table_key}

@@ -204,57 +204,57 @@ export default function Home() {
               symbol="BTCUSDT"
               title="Binance 30s Real-time Chart"
             />
+
+            {/* Tabs Container */}
+            <div className="my-2 md:my-8 px-6">
+              {/* Tab Navigation */}
+              <div className="flex items-center gap-6 mb-6">
+                <button
+                  onClick={() => setActiveMainTab("gauges")}
+                  className={`text-lg font-medium transition-colors ${
+                    activeMainTab === "gauges"
+                      ? "text-white border-b-2 border-orange-500 pb-1"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  Indicators
+                </button>
+                <button
+                  onClick={() => setActiveMainTab("candles")}
+                  className={`text-lg font-medium transition-colors ${
+                    activeMainTab === "candles"
+                      ? "text-white border-b-2 border-orange-500 pb-1"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  Last Results
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="">
+                {activeMainTab === "gauges" && (
+                  <div>
+                    <GaugeIndicators />
+                  </div>
+                )}
+
+                {activeMainTab === "candles" && (
+                  <div>
+                    <CandleTables
+                      symbol="BTCUSDT"
+                      autoRefresh={false}
+                      refreshInterval={30000}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Trading Panel */}
           <div className="flex-shrink-0 w-[210px]">
             <TradingPanel currentPrice={116360.96} countdownTime={20} />
-          </div>
-        </div>
-
-        {/* Tabs Container */}
-        <div className="my-2 md:my-8 px-6">
-          {/* Tab Navigation */}
-          <div className="flex items-center gap-6 mb-6">
-            <button
-              onClick={() => setActiveMainTab("gauges")}
-              className={`text-lg font-medium transition-colors ${
-                activeMainTab === "gauges"
-                  ? "text-white border-b-2 border-orange-500 pb-1"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Indicators
-            </button>
-            <button
-              onClick={() => setActiveMainTab("candles")}
-              className={`text-lg font-medium transition-colors ${
-                activeMainTab === "candles"
-                  ? "text-white border-b-2 border-orange-500 pb-1"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Last Results
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          <div className="">
-            {activeMainTab === "gauges" && (
-              <div>
-                <GaugeIndicators />
-              </div>
-            )}
-
-            {activeMainTab === "candles" && (
-              <div>
-                <CandleTables
-                  symbol="BTCUSDT"
-                  autoRefresh={false}
-                  refreshInterval={30000}
-                />
-              </div>
-            )}
           </div>
         </div>
 
