@@ -5,8 +5,10 @@ import { createChart, IChartApi, CandlestickData, HistogramData, LineStyle } fro
 import { useTheme } from './ThemeProvider';
 import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
 import { useBinance30sStore } from '@/stores';
+import { SocketKlineMessage, BinanceCandle } from '@/lib/api/binance-30s';
+import { io } from 'socket.io-client';
 
-// Types for socket data
+// Types for socket data (legacy - keeping for backward compatibility)
 interface KlineData {
   symbol: string;
   openTime: number;
@@ -25,6 +27,8 @@ interface SocketData {
   type: string;
   data: KlineData;
   timestamp: string;
+  second: number;
+  is_bet: boolean;
 }
 
 interface ChartProps {
@@ -178,7 +182,7 @@ export default function Chart({
   const ma10SeriesRef = useRef<any>(null);
   const fakeSeriesRef = useRef<any>(null); // Thêm ref cho fake series
   const { theme } = useTheme();
-  const { fetchCandles, fetchCandleTables } = useBinance30sStore();
+  const { fetchCandles, fetchCandleTables, handleSocketMessage } = useBinance30sStore();
   const [isMounted, setIsMounted] = useState(false);
   
   // State for dynamic offset
@@ -267,6 +271,203 @@ export default function Chart({
     lastMessageTime: null as string | null
   });
   const socketRef = useRef<any>(null);
+
+  // Socket message handlers
+  const handleLegacyKlineUpdate = (data: SocketData) => {
+    // Filter by symbol if specified
+    if (symbol && data.data.symbol !== symbol) {
+      return;
+    }
+
+    setRealTimeStats(prev => ({
+      ...prev,
+      totalMessages: prev.totalMessages + 1,
+      lastMessageTime: new Date().toISOString()
+    }));
+
+    if (data.data.openTime) {
+      // Update store with realtime data
+      handleSocketMessage(data);
+
+      const seconds = new Date(data.data.openTime).getSeconds()
+      
+      if (seconds === 30 || seconds === 0) {
+        fetchCandles({ 
+          symbol: symbol || 'BTCUSDT', 
+          limit: limit 
+        });
+        fetchCandleTables(symbol || 'BTCUSDT');
+      } else {
+        // Update chart with real-time data
+        if (chartRef.current && candlestickSeriesRef.current && !isUpdating) {
+          isUpdating = true; // Set flag to prevent multiple updates
+          
+          const { main: candleData, smoothSteps } = convertKlineToCandlestick(data.data);
+          
+          // Check if the new data timestamp is valid (not older than the last data point)
+          try {
+            // Update volume if available
+            if (volumeSeriesRef.current) {
+              const volumeData = {
+                time: candleData.time,
+                value: candleData.volume,
+                color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
+              };
+              // volumeSeriesRef.current.update(volumeData);
+            }
+            
+            // Animate through smooth steps only if the main update was successful
+            let stepIndex = 0;
+            const animateStep = () => {
+              if (stepIndex < smoothSteps.length) {
+                const stepData = smoothSteps[stepIndex];
+                
+                try {
+                  candlestickSeriesRef.current.update(stepData);
+                  
+                  // Update volume if available
+                  if (volumeSeriesRef.current) {
+                    const volumeData = {
+                      time: stepData.time,
+                      value: stepData.volume,
+                      color: stepData.close >= stepData.open ? '#26a69a' : '#ef5350',
+                    };
+                    volumeSeriesRef.current.update(volumeData);
+                  }
+                } catch (stepError) {
+                  // If step update fails, stop animation
+                  console.warn('⚠️ Step animation update failed:', stepError);
+                  return;
+                }
+                
+                stepIndex++;
+                // Schedule next step with small delay for smooth animation
+                setTimeout(animateStep, parseInt(1000 * 0.75 / STEPS));
+              }
+            };
+            
+            // Start animation
+            animateStep();
+
+            // Update MA lines if available
+            if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
+              // For real-time updates, we need to get all current data and recalculate
+              // This is a simplified approach - in production you might want to maintain a data buffer
+              // console.log('📊 Updating MA lines for real-time data');
+            }
+          } catch (updateError) {
+            // If the main update fails, it means the timestamp is invalid
+            console.warn('⚠️ Real-time update failed - invalid timestamp:', updateError);
+            console.log('📊 Candle data that failed:', candleData);
+            
+          } finally {
+            // Reset the updating flag after a short delay to allow for smooth animations
+            setTimeout(() => {
+              isUpdating = false;
+            }, 100);
+          }
+        }
+      }
+    }
+  };
+
+  const handleNewKlineUpdate = (message: SocketKlineMessage) => {
+    // Filter by symbol if specified
+    if (symbol && message.data.symbol !== symbol) {
+      return;
+    }
+
+    setRealTimeStats(prev => ({
+      ...prev,
+      totalMessages: prev.totalMessages + 1,
+      lastMessageTime: new Date().toISOString()
+    }));
+
+    // Handle different message types
+    if (message.type === 'kline-30s') {
+      // Fetch new data when 30s candle completes
+      fetchCandles({ 
+        symbol: symbol || 'BTCUSDT', 
+        limit: limit 
+      });
+      fetchCandleTables(symbol || 'BTCUSDT');
+    } else if (message.type === 'kline-1s') {
+      // Update chart with real-time 1s data
+      if (chartRef.current && candlestickSeriesRef.current && !isUpdating) {
+        isUpdating = true;
+        
+        // Convert BinanceCandle to KlineData format for existing chart logic
+        const klineData: KlineData = {
+          symbol: message.data.symbol,
+          openTime: message.data.open_time,
+          closeTime: message.data.close_time,
+          open: message.data.open_price,
+          high: message.data.high_price,
+          low: message.data.low_price,
+          close: message.data.close_price,
+          volume: message.data.volume,
+          quoteVolume: message.data.quote_volume,
+          trades: message.data.number_of_trades,
+          isClosed: false
+        };
+        
+        const { main: candleData, smoothSteps } = convertKlineToCandlestick(klineData);
+        
+        try {
+          // Update volume if available
+          if (volumeSeriesRef.current) {
+            const volumeData = {
+              time: candleData.time,
+              value: candleData.volume,
+              color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
+            };
+            volumeSeriesRef.current.update(volumeData);
+          }
+          
+          // Animate through smooth steps
+          let stepIndex = 0;
+          const animateStep = () => {
+            if (stepIndex < smoothSteps.length) {
+              const stepData = smoothSteps[stepIndex];
+              
+              try {
+                candlestickSeriesRef.current.update(stepData);
+                
+                if (volumeSeriesRef.current) {
+                  const volumeData = {
+                    time: stepData.time,
+                    value: stepData.volume,
+                    color: stepData.close >= stepData.open ? '#26a69a' : '#ef5350',
+                  };
+                  volumeSeriesRef.current.update(volumeData);
+                }
+              } catch (stepError) {
+                console.warn('⚠️ Step animation update failed:', stepError);
+                return;
+              }
+              
+              stepIndex++;
+              setTimeout(animateStep, parseInt(1000 * 0.75 / STEPS));
+            }
+          };
+          
+          animateStep();
+
+          // Update MA lines if available
+          if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
+            // console.log('📊 Updating MA lines for real-time data');
+          }
+        } catch (updateError) {
+          console.warn('⚠️ Real-time update failed - invalid timestamp:', updateError);
+          console.log('📊 Candle data that failed:', candleData);
+        } finally {
+          setTimeout(() => {
+            isUpdating = false;
+          }, 100);
+        }
+      }
+    }
+  };
 
   // Hover state
   const [hoverData, setHoverData] = useState<{
@@ -368,7 +569,7 @@ export default function Chart({
     if (candlestickData.length > 0) {
       const lastData = candlestickData[candlestickData.length - 1];
       lastCandlestickData = { ...lastData };
-      console.log('🔄 Reset lastCandlestickData from API data:', JSON.stringify(lastCandlestickData, null, 2));
+      // console.log('🔄 Reset lastCandlestickData from API data:', JSON.stringify(lastCandlestickData, null, 2));
     }
   }, [candlestickData]);
 
@@ -378,8 +579,6 @@ export default function Chart({
 
     const initSocket = async () => {
       try {
-        const { io } = await import('socket.io-client');
-        
         socketRef.current = io(process.env.API_BASE_URL, {
           transports: ['websocket', 'polling']
         });
@@ -394,102 +593,18 @@ export default function Chart({
           setIsSocketConnected(false);
         });
 
+        // Handle legacy kline-update events
         socketRef.current.on('kline-update', (data: SocketData) => {
-          
-          // Filter by symbol if specified
-          if (symbol && data.data.symbol !== symbol) {
-            return;
-          }
+          handleLegacyKlineUpdate(data);
+        });
 
-          setRealTimeStats(prev => ({
-            ...prev,
-            totalMessages: prev.totalMessages + 1,
-            lastMessageTime: new Date().toISOString()
-          }));
+        // Handle new kline-1s and kline-30s events
+        socketRef.current.on('kline-1s', (message: SocketKlineMessage) => {
+          handleNewKlineUpdate(message);
+        });
 
-          if (data.data.openTime) {
-            const seconds = new Date(data.data.openTime).getSeconds()
-            
-            if (seconds === 30 || seconds === 0) {
-              fetchCandles({ 
-                symbol: symbol || 'BTCUSDT', 
-                limit: limit 
-              });
-              fetchCandleTables(symbol || 'BTCUSDT');
-            }else {
-                    // Update chart with real-time data
-              if (chartRef.current && candlestickSeriesRef.current && !isUpdating) {
-                isUpdating = true; // Set flag to prevent multiple updates
-                
-                const { main: candleData, smoothSteps } = convertKlineToCandlestick(data.data);
-                
-                // Check if the new data timestamp is valid (not older than the last data point)
-                try {
-                  // Update volume if available
-                  if (volumeSeriesRef.current) {
-                    const volumeData = {
-                      time: candleData.time,
-                      value: candleData.volume,
-                      color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
-                    };
-                    // volumeSeriesRef.current.update(volumeData);
-                  }
-                  
-                  // Animate through smooth steps only if the main update was successful
-                  let stepIndex = 0;
-                  const animateStep = () => {
-                    if (stepIndex < smoothSteps.length) {
-                      const stepData = smoothSteps[stepIndex];
-                      
-                      try {
-                        candlestickSeriesRef.current.update(stepData);
-                        
-                        // Update volume if available
-                        if (volumeSeriesRef.current) {
-                          const volumeData = {
-                            time: stepData.time,
-                            value: stepData.volume,
-                            color: stepData.close >= stepData.open ? '#26a69a' : '#ef5350',
-                          };
-                          volumeSeriesRef.current.update(volumeData);
-                        }
-                      } catch (stepError) {
-                        // If step update fails, stop animation
-                        console.warn('⚠️ Step animation update failed:', stepError);
-                        return;
-                      }
-                      
-                      stepIndex++;
-                      // Schedule next step with small delay for smooth animation
-                      setTimeout(animateStep, parseInt(1000 * 0.75 / STEPS));
-                    }
-                  };
-                  
-                  // Start animation
-                  animateStep();
-
-                  // Update MA lines if available
-                  if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
-                    // For real-time updates, we need to get all current data and recalculate
-                    // This is a simplified approach - in production you might want to maintain a data buffer
-                    // console.log('📊 Updating MA lines for real-time data');
-                  }
-                } catch (updateError) {
-                  // If the main update fails, it means the timestamp is invalid
-                  console.warn('⚠️ Real-time update failed - invalid timestamp:', updateError);
-                  console.log('📊 Candle data that failed:', candleData);
-                  
-                } finally {
-                  // Reset the updating flag after a short delay to allow for smooth animations
-                  setTimeout(() => {
-                    isUpdating = false;
-                  }, 100);
-                }
-              }
-            }
-          }
-
-    
+        socketRef.current.on('kline-30s', (message: SocketKlineMessage) => {
+          handleNewKlineUpdate(message);
         });
 
         socketRef.current.on('connect_error', (error: any) => {

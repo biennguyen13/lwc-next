@@ -264,7 +264,7 @@ const CandleTableComponent = ({
 
 export default function CandleTables({
   symbol = "BTCUSDT",
-  autoRefresh = true,
+  autoRefresh = false,
   refreshInterval = 30000,
 }: CandleTablesProps) {
   const {

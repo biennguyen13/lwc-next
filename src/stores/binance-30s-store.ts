@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { binance30sAPI, Binance30sCandle, Binance30sStats, CandleTable } from "@/lib/api/binance-30s"
+import { binance30sAPI, Binance30sCandle, Binance30sStats, CandleTable, SocketKlineMessage, BinanceCandle } from "@/lib/api/binance-30s"
 import { storeCommunication } from "./store-communication"
 
 interface Binance30sStoreState {
@@ -8,6 +8,11 @@ interface Binance30sStoreState {
   stats: Binance30sStats | null
   latestCandles: Binance30sCandle[] | null
   candleTables: CandleTable[] | null
+  
+  // Real-time data
+  realtimeCandle: BinanceCandle | null
+  isBettingTime: boolean
+  currentSecond: number
   
   // Loading states
   candlesLoading: boolean
@@ -31,6 +36,11 @@ interface Binance30sStoreState {
   fetchStats: (symbol?: string) => Promise<void>
   fetchLatestCandles: (params?: { symbol?: string; count?: number }) => Promise<void>
   fetchCandleTables: (symbol?: string) => Promise<void>
+  
+  // Socket actions
+  handleSocketMessage: (message: SocketKlineMessage) => void
+  updateRealtimeData: (candle: BinanceCandle, second: number, isBet: boolean) => void
+  
   clearCandlesError: () => void
   clearStatsError: () => void
   clearLatestCandlesError: () => void
@@ -44,6 +54,9 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
   stats: null,
   latestCandles: null,
   candleTables: null,
+  realtimeCandle: null,
+  isBettingTime: false,
+  currentSecond: 0,
   candlesLoading: false,
   statsLoading: false,
   latestCandlesLoading: false,
@@ -127,6 +140,33 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
   clearLatestCandlesError: () => set({ latestCandlesError: null }),
   clearCandleTablesError: () => set({ candleTablesError: null }),
 
+  // Socket actions
+  handleSocketMessage: (message: SocketKlineMessage) => {
+    // console.log('handleSocketMessage', message)
+    if (message.type === 'kline-1s' || message.type === 'kline-30s') {
+      set({
+        realtimeCandle: message.data,
+        currentSecond: message.second,
+        isBettingTime: message.is_bet
+      })
+      
+      // Emit event cho realtime data
+      storeCommunication.emitBinance30sRealtimeUpdated({
+        candle: message.data,
+        second: message.second,
+        isBet: message.is_bet
+      })
+    }
+  },
+
+  updateRealtimeData: (candle: BinanceCandle, second: number, isBet: boolean) => {
+    set({
+      realtimeCandle: candle,
+      currentSecond: second,
+      isBettingTime: isBet
+    })
+  },
+
   // Clear all
   clearAll: () => {
     set({
@@ -134,6 +174,9 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
       stats: null,
       latestCandles: null,
       candleTables: null,
+      realtimeCandle: null,
+      isBettingTime: false,
+      currentSecond: 0,
       candlesLoading: false,
       statsLoading: false,
       latestCandlesLoading: false,

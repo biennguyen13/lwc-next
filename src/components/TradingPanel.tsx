@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
+import { useStoreCommunication } from "@/stores/store-communication"
 
 interface TradingPanelProps {
   currentPrice?: number
@@ -14,7 +15,7 @@ export default function TradingPanel({
 }: TradingPanelProps) {
   const [value, setValue] = useState<number>(10)
   const [profit, setProfit] = useState<number>(19.5)
-  const [profitPercentage, setProfitPercentage] = useState<number>(95)
+  const [profitPercentage, setProfitPercentage] = useState<number>(195)
   const [sentiment, setSentiment] = useState<{
     bearish: number
     bullish: number
@@ -22,12 +23,55 @@ export default function TradingPanel({
     bearish: 49,
     bullish: 51,
   })
+  
+  // Real-time countdown state
+  const [currentCountdown, setCurrentCountdown] = useState<number>(0)
+  const [isBettingTime, setIsBettingTime] = useState<boolean>(false)
+  
+  // Store communication
+  const { subscribe } = useStoreCommunication()
+
+  // Listen to realtime updates
+  useEffect(() => {
+    const unsubscribe = subscribe('BINANCE_30S_REALTIME_UPDATED', (event) => {
+      // console.log('TradingPanel: Real-time update received:', event)
+      const realtimeData = event.payload
+      
+      if (realtimeData) {
+        const currentSecond = realtimeData.second || 0
+        const isBetting = realtimeData.isBet || false
+        
+        setIsBettingTime(isBetting)
+        
+        if (isBetting) {
+          setCurrentCountdown(currentSecond)
+        } else {
+          setCurrentCountdown(currentSecond)
+        }
+        
+        // Update current price if available
+        if (realtimeData.realtimeCandle) {
+          // You can update currentPrice here if needed
+          console.log('🔄 TradingPanel: Real-time price updated:', realtimeData.realtimeCandle.close_price)
+        }
+      }
+    })
+
+    // Cleanup subscription on unmount
+    return unsubscribe
+  }, [subscribe])
 
   const quickValues = [5, 10, 20, 50, 100]
 
   const handleValueChange = (newValue: number) => {
     setValue(newValue)
   }
+
+  // Calculate profit when value changes
+  useEffect(() => {
+    const calculatedProfit = value * (profitPercentage / 100)
+    setProfit(calculatedProfit)
+  }, [value, profitPercentage])
 
   const handleQuickValue = (quickValue: number) => {
     setValue((prev) => prev + quickValue)
@@ -38,12 +82,20 @@ export default function TradingPanel({
   }
 
   const handleIncrease = () => {
-    console.log("TĂNG - Buy order placed with value:", value)
+    if (!isBettingTime) {
+      console.log("❌ Cannot place order - betting time is over")
+      return
+    }
+    console.log("✅ TĂNG - Buy order placed with value:", value)
     // Add your buy logic here
   }
 
   const handleDecrease = () => {
-    console.log("GIẢM - Sell order placed with value:", value)
+    if (!isBettingTime) {
+      console.log("❌ Cannot place order - betting time is over")
+      return
+    }
+    console.log("✅ GIẢM - Sell order placed with value:", value)
     // Add your sell logic here
   }
 
@@ -105,7 +157,9 @@ export default function TradingPanel({
           <div className="text-cyan-500 dark:text-cyan-400">{profitPercentage}%</div>
         </div>
         <div className="flex items-center justify-center">
-          <div className="text-red-500 font-bold text-2xl">+${profit}</div>
+          <div className="text-red-500 font-bold text-2xl">
+            +${profit.toFixed(2)}
+          </div>
         </div>
       </div>
 
@@ -137,21 +191,33 @@ export default function TradingPanel({
         {/* TĂNG Button */}
         <button
           onClick={handleIncrease}
-          className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2"
+          disabled={!isBettingTime}
+          className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
+            isBettingTime 
+              ? 'bg-green-600 hover:bg-green-500 text-white' 
+              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+          }`}
         >
           TĂNG <TrendingUp className="w-5 h-5" />
         </button>
 
         {/* Place Order Button */}
         <div className="w-full py-2 bg-gray-600 text-white rounded-lg">
-          <div className="text-center  text-sm">Hãy đặt lệnh</div>
-          <div className="text-center text-sm mt-1">{countdownTime}s</div>
+          <div className="text-center text-sm">
+            {isBettingTime ? "Hãy đặt lệnh" : "Đang chờ kết quả"}
+          </div>
+          <div className="text-center text-sm mt-1">{currentCountdown}s</div>
         </div>
 
         {/* GIẢM Button */}
         <button
           onClick={handleDecrease}
-          className="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2"
+          disabled={!isBettingTime}
+          className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
+            isBettingTime 
+              ? 'bg-red-500 hover:bg-red-600 text-white' 
+              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+          }`}
         >
           GIẢM <TrendingDown className="w-5 h-5" />
         </button>

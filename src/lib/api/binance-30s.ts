@@ -1,8 +1,8 @@
 import { AxiosResponse } from "axios"
 import apiClient from "../api"
 
-// Types cho Binance 30s candles
-export interface Binance30sCandle {
+// Types cho Binance candles
+export interface BinanceCandle {
   key: string
   symbol: string
   interval: string
@@ -17,6 +17,26 @@ export interface Binance30sCandle {
   number_of_trades: number
   second: number
   klines_count: number
+}
+
+// Types cho Binance 30s candles (backward compatibility)
+export interface Binance30sCandle extends BinanceCandle {}
+
+// Types cho Socket messages
+export interface SocketKlineMessage {
+  type: 'kline-1s' | 'kline-30s'
+  data: BinanceCandle
+  timestamp: number
+  second: number
+  is_bet: boolean
+}
+
+export interface SocketMessage {
+  type: string
+  data: any
+  timestamp: number
+  second?: number
+  is_bet?: boolean
 }
 
 export interface Binance30sStats {

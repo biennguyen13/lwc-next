@@ -6,6 +6,7 @@ export type StoreEventType =
   | 'BINANCE_30S_STATS_UPDATED'
   | 'BINANCE_30S_LATEST_UPDATED'
   | 'BINANCE_30S_TABLES_UPDATED'
+  | 'BINANCE_30S_REALTIME_UPDATED'
   | 'USER_LOGGED_IN'
   | 'USER_LOGGED_OUT'
   | 'ERROR_OCCURRED'
@@ -93,6 +94,15 @@ class StoreCommunication {
     })
   }
 
+  emitBinance30sRealtimeUpdated(realtimeData: any) {
+    this.emit({
+      type: 'BINANCE_30S_REALTIME_UPDATED',
+      payload: realtimeData,
+      source: 'binance-30s-store',
+      timestamp: Date.now()
+    })
+  }
+
   emitError(error: string, source: string) {
     this.emit({
       type: 'ERROR_OCCURRED',
@@ -115,6 +125,7 @@ export const useStoreCommunication = () => {
     emitBinance30sStatsUpdated: storeCommunication.emitBinance30sStatsUpdated.bind(storeCommunication),
     emitBinance30sLatestUpdated: storeCommunication.emitBinance30sLatestUpdated.bind(storeCommunication),
     emitBinance30sTablesUpdated: storeCommunication.emitBinance30sTablesUpdated.bind(storeCommunication),
+    emitBinance30sRealtimeUpdated: storeCommunication.emitBinance30sRealtimeUpdated.bind(storeCommunication),
     emitError: storeCommunication.emitError.bind(storeCommunication),
   }
 } 
