@@ -39,6 +39,102 @@ const defaultData: GaugeData[] = [
   },
 ]
 
+// Demo scenarios for different market conditions
+const demoScenarios = {
+  bullish: [
+    {
+      title: "Oscillators",
+      sentiment: "STRONG BUY" as const,
+      sell: 1,
+      neutral: 1,
+      buy: 8,
+    },
+    {
+      title: "Summary",
+      sentiment: "STRONG BUY" as const,
+      sell: 2,
+      neutral: 1,
+      buy: 18,
+    },
+    {
+      title: "Moving Averages",
+      sentiment: "STRONG BUY" as const,
+      sell: 0,
+      neutral: 0,
+      buy: 15,
+    },
+  ],
+  bearish: [
+    {
+      title: "Oscillators",
+      sentiment: "STRONG SELL" as const,
+      sell: 8,
+      neutral: 1,
+      buy: 1,
+    },
+    {
+      title: "Summary",
+      sentiment: "STRONG SELL" as const,
+      sell: 18,
+      neutral: 1,
+      buy: 2,
+    },
+    {
+      title: "Moving Averages",
+      sentiment: "STRONG SELL" as const,
+      sell: 15,
+      neutral: 0,
+      buy: 0,
+    },
+  ],
+  neutral: [
+    {
+      title: "Oscillators",
+      sentiment: "NEUTRAL" as const,
+      sell: 3,
+      neutral: 5,
+      buy: 2,
+    },
+    {
+      title: "Summary",
+      sentiment: "NEUTRAL" as const,
+      sell: 6,
+      neutral: 10,
+      buy: 5,
+    },
+    {
+      title: "Moving Averages",
+      sentiment: "NEUTRAL" as const,
+      sell: 5,
+      neutral: 8,
+      buy: 2,
+    },
+  ],
+  mixed: [
+    {
+      title: "Oscillators",
+      sentiment: "BUY" as const,
+      sell: 2,
+      neutral: 3,
+      buy: 5,
+    },
+    {
+      title: "Summary",
+      sentiment: "SELL" as const,
+      sell: 8,
+      neutral: 4,
+      buy: 3,
+    },
+    {
+      title: "Moving Averages",
+      sentiment: "BUY" as const,
+      sell: 1,
+      neutral: 2,
+      buy: 7,
+    },
+  ],
+}
+
 // Helper function to convert sentiment to speedometer value
 const getSentimentValue = (sentiment: string): number => {
   switch (sentiment) {
@@ -96,6 +192,7 @@ const GaugeIndicator = ({
   const startAngle = 0 // degrees
   const endAngle = 180 // degrees
   const radius = speedometerWidth * (isMiddle ? 0.36 : 0.33) // Adjust radius as needed
+  const ringWidth = 4 // Define ringWidth constant
 
   // Calculate positions for 5 labels
   const labels = [
@@ -125,19 +222,20 @@ const GaugeIndicator = ({
       {/* Speedometer */}
       <div className="mb-4 relative">
         {/* Semi-circular gradient background */}
-        <div 
+        <div
           className="absolute inset-0 rounded-t-full"
           style={{
-            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(128,128,128,0.3) 50%, rgba(0,0,0,0.6) 100%)',
+            background:
+              "linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(128,128,128,0.3) 50%, rgba(0,0,0,0.6) 100%)",
             width: `${speedometerWidth * 0.8}px`,
             height: `${speedometerHeight * 0.67}px`,
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1,
           }}
         />
-        
+
         <ReactSpeedometer
           value={speedometerValue}
           minValue={0}
@@ -152,6 +250,7 @@ const GaugeIndicator = ({
           ]}
           needleColor="#9ca3af"
           needleHeightRatio={0.6}
+          needleBaseWidth={8}
           needleTransitionDuration={2000}
           needleTransition="easeElastic"
           width={speedometerWidth}
@@ -214,6 +313,79 @@ const GaugeIndicator = ({
             )
           })}
         </div>
+
+        {/* Segment separator lines */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            width: `${speedometerWidth * 0.8}px`,
+            height: `${speedometerHeight * 0.67}px`,
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1,
+          }}
+        >
+          {/* STRONG SELL to SELL separator */}
+          <div
+            className="absolute"
+            style={{
+              left: "52%",
+              top: "64%",
+              width: "2px",
+              height: `${ringWidth}px`,
+              backgroundColor: "#3f3f3f",
+              transform: `translate(-50%, -50%) rotate(-72deg) translateY(-${radius}px)`,
+              transformOrigin: "center bottom",
+              zIndex: 10,
+            }}
+          />
+
+          {/* SELL to NEUTRAL separator */}
+          <div
+            className="absolute"
+            style={{
+              left: "59%",
+              top: "71%",
+              width: "2px",
+              height: `${ringWidth}px`,
+              backgroundColor: "#3f3f3f",
+              transform: `translate(-50%, -50%) rotate(-36deg) translateY(-${radius}px)`,
+              transformOrigin: "center bottom",
+              zIndex: 10,
+            }}
+          />
+
+          {/* BUY to STRONG BUY separator */}
+          <div
+            className="absolute"
+            style={{
+              left: "40%",
+              top: "70%",
+              width: "2px",
+              height: `${ringWidth}px`,
+              backgroundColor: "#3f3f3f",
+              transform: `translate(-50%, -50%) rotate(36deg) translateY(-${radius}px)`,
+              transformOrigin: "center bottom",
+              zIndex: 10,
+            }}
+          />
+
+          {/* STRONG BUY to STRONG SELL separator (vertical line) */}
+          <div
+            className="absolute"
+            style={{
+              left: "48%",
+              top: "62%",
+              width: "2px",
+              height: `${ringWidth}px`,
+              backgroundColor: "#3f3f3f",
+              transform: `translate(-50%, -50%) rotate(72deg) translateY(-${radius}px)`,
+              transformOrigin: "center bottom",
+              zIndex: 10,
+            }}
+          />
+        </div>
       </div>
 
       {/* Sentiment */}
@@ -248,16 +420,97 @@ const GaugeIndicator = ({
 export default function GaugeIndicators({
   data = defaultData,
 }: GaugeIndicatorsProps) {
+  const [currentData, setCurrentData] = useState<GaugeData[]>(data)
+  const [currentScenario, setCurrentScenario] = useState<string>("default")
+
+  const handleScenarioChange = (
+    scenario: keyof typeof demoScenarios | "default"
+  ) => {
+    if (scenario === "default") {
+      setCurrentData(defaultData)
+    } else {
+      setCurrentData(demoScenarios[scenario])
+    }
+    setCurrentScenario(scenario)
+  }
+
   return (
     <div className="w-full">
+      {/* Demo Controls */}
+      <div className="mb-6 p-4 bg-card border border-border rounded-lg">
+        <h3 className="text-lg font-semibold mb-4 text-foreground">
+          Demo Market Scenarios
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handleScenarioChange("default")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentScenario === "default"
+                ? "bg-orange-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+            }`}
+          >
+            Default
+          </button>
+          <button
+            onClick={() => handleScenarioChange("bullish")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentScenario === "bullish"
+                ? "bg-green-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+            }`}
+          >
+            🚀 Bullish Market
+          </button>
+          <button
+            onClick={() => handleScenarioChange("bearish")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentScenario === "bearish"
+                ? "bg-red-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+            }`}
+          >
+            📉 Bearish Market
+          </button>
+          <button
+            onClick={() => handleScenarioChange("neutral")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentScenario === "neutral"
+                ? "bg-gray-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+            }`}
+          >
+            ↔️ Neutral Market
+          </button>
+          <button
+            onClick={() => handleScenarioChange("mixed")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentScenario === "mixed"
+                ? "bg-purple-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+            }`}
+          >
+            🔀 Mixed Signals
+          </button>
+        </div>
+
+        {/* Current Scenario Info */}
+        <div className="mt-4 p-3 bg-muted rounded-md">
+          <p className="text-sm text-muted-foreground">
+            <strong>Current Scenario:</strong>{" "}
+            {currentScenario.charAt(0).toUpperCase() + currentScenario.slice(1)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Click buttons above to see how gauges react to different market
+            conditions
+          </p>
+        </div>
+      </div>
+
       {/* Gauge indicators */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {data.map((gaugeData, index) => (
-          <GaugeIndicator
-            key={index}
-            data={gaugeData}
-            isMiddle={index === 1} // Middle gauge (Summary) is 10% larger
-          />
+        {currentData.map((gaugeData, index) => (
+          <GaugeIndicator key={index} data={gaugeData} />
         ))}
       </div>
     </div>
