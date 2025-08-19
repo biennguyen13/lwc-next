@@ -15,7 +15,7 @@ export default function TradingPanel({
 }: TradingPanelProps) {
   const [value, setValue] = useState<number>(10)
   const [profit, setProfit] = useState<number>(19.5)
-  const [profitPercentage, setProfitPercentage] = useState<number>(195)
+  const [profitPercentage, setProfitPercentage] = useState<number>(95)
   const [sentiment, setSentiment] = useState<{
     bearish: number
     bullish: number
@@ -69,7 +69,7 @@ export default function TradingPanel({
 
   // Calculate profit when value changes
   useEffect(() => {
-    const calculatedProfit = value * (profitPercentage / 100)
+    const calculatedProfit = value * ((100 + profitPercentage) / 100)
     setProfit(calculatedProfit)
   }, [value, profitPercentage])
 

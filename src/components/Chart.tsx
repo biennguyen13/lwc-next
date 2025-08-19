@@ -272,6 +272,10 @@ export default function Chart({
   });
   const socketRef = useRef<any>(null);
 
+  // Tab visibility state
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [lastHiddenTime, setLastHiddenTime] = useState<number | null>(null);
+
   // Socket message handlers
   const handleLegacyKlineUpdate = (data: SocketData) => {
     // Filter by symbol if specified
@@ -370,105 +374,7 @@ export default function Chart({
       }
     }
   };
-
-  const handleNewKlineUpdate = (message: SocketKlineMessage) => {
-    // Filter by symbol if specified
-    if (symbol && message.data.symbol !== symbol) {
-      return;
-    }
-
-    setRealTimeStats(prev => ({
-      ...prev,
-      totalMessages: prev.totalMessages + 1,
-      lastMessageTime: new Date().toISOString()
-    }));
-
-    // Handle different message types
-    if (message.type === 'kline-30s') {
-      // Fetch new data when 30s candle completes
-      fetchCandles({ 
-        symbol: symbol || 'BTCUSDT', 
-        limit: limit 
-      });
-      fetchCandleTables(symbol || 'BTCUSDT');
-    } else if (message.type === 'kline-1s') {
-      // Update chart with real-time 1s data
-      if (chartRef.current && candlestickSeriesRef.current && !isUpdating) {
-        isUpdating = true;
-        
-        // Convert BinanceCandle to KlineData format for existing chart logic
-        const klineData: KlineData = {
-          symbol: message.data.symbol,
-          openTime: message.data.open_time,
-          closeTime: message.data.close_time,
-          open: message.data.open_price,
-          high: message.data.high_price,
-          low: message.data.low_price,
-          close: message.data.close_price,
-          volume: message.data.volume,
-          quoteVolume: message.data.quote_volume,
-          trades: message.data.number_of_trades,
-          isClosed: false
-        };
-        
-        const { main: candleData, smoothSteps } = convertKlineToCandlestick(klineData);
-        
-        try {
-          // Update volume if available
-          if (volumeSeriesRef.current) {
-            const volumeData = {
-              time: candleData.time,
-              value: candleData.volume,
-              color: candleData.close >= candleData.open ? '#26a69a' : '#ef5350',
-            };
-            volumeSeriesRef.current.update(volumeData);
-          }
-          
-          // Animate through smooth steps
-          let stepIndex = 0;
-          const animateStep = () => {
-            if (stepIndex < smoothSteps.length) {
-              const stepData = smoothSteps[stepIndex];
-              
-              try {
-                candlestickSeriesRef.current.update(stepData);
-                
-                if (volumeSeriesRef.current) {
-                  const volumeData = {
-                    time: stepData.time,
-                    value: stepData.volume,
-                    color: stepData.close >= stepData.open ? '#26a69a' : '#ef5350',
-                  };
-                  volumeSeriesRef.current.update(volumeData);
-                }
-              } catch (stepError) {
-                console.warn('⚠️ Step animation update failed:', stepError);
-                return;
-              }
-              
-              stepIndex++;
-              setTimeout(animateStep, parseInt(1000 * 0.75 / STEPS));
-            }
-          };
-          
-          animateStep();
-
-          // Update MA lines if available
-          if (ma5SeriesRef.current || ma10SeriesRef.current || ma15SeriesRef.current) {
-            // console.log('📊 Updating MA lines for real-time data');
-          }
-        } catch (updateError) {
-          console.warn('⚠️ Real-time update failed - invalid timestamp:', updateError);
-          console.log('📊 Candle data that failed:', candleData);
-        } finally {
-          setTimeout(() => {
-            isUpdating = false;
-          }, 100);
-        }
-      }
-    }
-  };
-
+  
   // Hover state
   const [hoverData, setHoverData] = useState<{
     time?: string;
@@ -598,15 +504,6 @@ export default function Chart({
           handleLegacyKlineUpdate(data);
         });
 
-        // Handle new kline-1s and kline-30s events
-        socketRef.current.on('kline-1s', (message: SocketKlineMessage) => {
-          handleNewKlineUpdate(message);
-        });
-
-        socketRef.current.on('kline-30s', (message: SocketKlineMessage) => {
-          handleNewKlineUpdate(message);
-        });
-
         socketRef.current.on('connect_error', (error: any) => {
           console.error('❌ Chart: Socket.IO connection error:', error);
           setIsSocketConnected(false);
@@ -627,6 +524,48 @@ export default function Chart({
       }
     };
   }, [enableRealTime, symbol]);
+
+  // Handle tab visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      const currentTime = Date.now();
+      
+      if (!isVisible) {
+        // Tab became hidden - record the time
+        setLastHiddenTime(currentTime);
+        setIsTabVisible(false);
+      } else if (isVisible && !isTabVisible) {
+        // Tab became visible - check if inactive time >= 15s
+        const inactiveTime = lastHiddenTime ? (currentTime - lastHiddenTime) / 1000 : 0;
+        
+        if (inactiveTime >= 15) {
+          // Tab was inactive for >= 15 seconds - refresh data
+          console.log(`🔄 Tab became visible after ${inactiveTime.toFixed(1)}s inactive, refreshing data...`);
+          
+          // Fetch fresh data
+          fetchCandles({ 
+            symbol: symbol || 'BTCUSDT', 
+            limit: limit 
+          });
+          fetchCandleTables(symbol || 'BTCUSDT');
+        } else {
+          console.log(`⏭️ Tab became visible after ${inactiveTime.toFixed(1)}s inactive, skipping refresh (need >= 15s)`);
+        }
+        
+        setIsTabVisible(true);
+        setLastHiddenTime(null);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isTabVisible, lastHiddenTime, fetchCandles, fetchCandleTables, symbol, limit]);
 
   useEffect(() => {
     if (chartContainerRef.current && !chartRef.current) {
@@ -944,7 +883,6 @@ export default function Chart({
 
   useEffect(()=>{
     // Cleanup khi component unmount
-    console.log("Mounted")
     setIsMounted(true);
     return () => {
       console.log("Unmounted")

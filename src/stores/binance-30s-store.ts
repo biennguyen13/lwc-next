@@ -143,7 +143,7 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
   // Socket actions
   handleSocketMessage: (message: SocketKlineMessage) => {
     // console.log('handleSocketMessage', message)
-    if (message.type === 'kline-1s' || message.type === 'kline-30s') {
+    if (message.type === 'kline-1s') {
       set({
         realtimeCandle: message.data,
         currentSecond: message.second,

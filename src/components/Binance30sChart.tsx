@@ -80,17 +80,17 @@ export default function Binance30sChart({
   // Convert data khi candles thay đổi
   useEffect(() => {
     if (candles && candles.length > 0) {
-      console.log('🔄 Converting Binance 30s data to chart format...');
+      // console.log('🔄 Converting Binance 30s data to chart format...');
       
       const candlestickData = convertBinance30sToCandlestick(candles);
       const volumeData = convertBinance30sToVolume(candles);
       const hlcData = convertBinance30sToHLC(candles);
 
-      console.log('✅ Converted data:', {
-        candlesticks: candlestickData.length,
-        volume: volumeData.length,
-        hlc: hlcData.length,
-      });
+      // console.log('✅ Converted data:', {
+      //   candlesticks: candlestickData.length,
+      //   volume: volumeData.length,
+      //   hlc: hlcData.length,
+      // });
 
       setChartData({
         candlestickData,

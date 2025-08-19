@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import ReactSpeedometer from "react-d3-speedometer"
 
 interface GaugeData {
   title: string
@@ -38,21 +39,21 @@ const defaultData: GaugeData[] = [
   },
 ]
 
-// Helper function to calculate gauge angle based on sentiment
-const getSentimentAngle = (sentiment: string): number => {
+// Helper function to convert sentiment to speedometer value
+const getSentimentValue = (sentiment: string): number => {
   switch (sentiment) {
     case "STRONG SELL":
-      return 0
+      return 20
     case "SELL":
-      return 45
+      return 40
     case "NEUTRAL":
-      return 90
+      return 60
     case "BUY":
-      return 135
+      return 80
     case "STRONG BUY":
-      return 180
+      return 100
     default:
-      return 90
+      return 60
   }
 }
 
@@ -73,16 +74,44 @@ const getSentimentColor = (sentiment: string): string => {
   }
 }
 
-const GaugeIndicator = ({ data }: { data: GaugeData }) => {
-  const angle = getSentimentAngle(data.sentiment)
+const GaugeIndicator = ({
+  data,
+  isMiddle = false,
+}: {
+  data: GaugeData
+  isMiddle?: boolean
+}) => {
+  const speedometerValue = getSentimentValue(data.sentiment)
   const sentimentColor = getSentimentColor(data.sentiment)
 
+  // Speedometer dimensions - middle gauge is 10% larger
+  const baseWidth = 180
+  const baseHeight = 112
+  const speedometerWidth = isMiddle ? baseWidth * 1.2 : baseWidth
+  const speedometerHeight = isMiddle ? baseHeight * 1.2 : baseHeight
+  const centerX = speedometerWidth / 2
+  const centerY = speedometerHeight * 0.8 // Adjust based on arc position
+
+  // Arc parameters (semi-circle from 0° to 180°)
+  const startAngle = 0 // degrees
+  const endAngle = 180 // degrees
+  const radius = speedometerWidth * (isMiddle ? 0.36 : 0.33) // Adjust radius as needed
+
+  // Calculate positions for 5 labels
+  const labels = [
+    { text: "STRONG\nSELL", angle: 0 },
+    { text: "SELL", angle: 45 },
+    { text: "NEUTRAL", angle: 90 },
+    { text: "BUY", angle: 135 },
+    { text: "STRONG\nBUY", angle: 180 },
+  ]
+
   return (
-    <div className="flex flex-col items-center p-6 bg-card border border-border rounded-lg">
+    <div className="flex flex-col items-center justify-end p-2">
       {/* Title */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-4">
         <h3 className="text-lg font-semibold text-foreground">{data.title}</h3>
-        <button className="text-muted-foreground hover:text-foreground transition-colors">
+        {/* <button className="text-muted-foreground hover:text-foreground transition-colors">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -90,85 +119,110 @@ const GaugeIndicator = ({ data }: { data: GaugeData }) => {
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </button> */}
       </div>
 
-      {/* Gauge */}
-      <div className="relative w-40 h-20 mb-6">
-        {/* Gauge background */}
-        <svg className="w-full h-full" viewBox="0 0 120 60">
-          {/* Background arc */}
-          <path
-            d="M 15 50 A 45 45 0 0 1 105 50"
-            fill="none"
-            stroke="hsl(var(--muted))"
-            strokeWidth="10"
-            strokeLinecap="round"
-          />
+      {/* Speedometer */}
+      <div className="mb-4 relative">
+        {/* Semi-circular gradient background */}
+        <div 
+          className="absolute inset-0 rounded-t-full"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(128,128,128,0.3) 50%, rgba(0,0,0,0.6) 100%)',
+            width: `${speedometerWidth * 0.8}px`,
+            height: `${speedometerHeight * 0.67}px`,
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1,
+          }}
+        />
+        
+        <ReactSpeedometer
+          value={speedometerValue}
+          minValue={0}
+          maxValue={100}
+          segments={5}
+          segmentColors={[
+            "#ef5350", // STRONG SELL - Red
+            "#f59896", // SELL - Orange
+            "#a4a6ad", // NEUTRAL - Gray
+            "#75c8a8", // BUY - Green
+            "#31baa0", // STRONG BUY - Dark Green
+          ]}
+          needleColor="#9ca3af"
+          needleHeightRatio={0.6}
+          needleTransitionDuration={2000}
+          needleTransition="easeElastic"
+          width={speedometerWidth}
+          height={speedometerHeight + 10}
+          ringWidth={4}
+          textColor="#6b7280"
+          valueTextFontSize="14px"
+          labelFontSize="12px"
+          currentValueText={`${data.sentiment}`}
+          customSegmentLabels={[
+            { text: "", position: "OUTSIDE", color: "#ef4444" },
+            { text: "", position: "OUTSIDE", color: "#f97316" },
+            { text: "", position: "OUTSIDE", color: "#6b7280" },
+            { text: "", position: "OUTSIDE", color: "#10b981" },
+            { text: "", position: "OUTSIDE", color: "#059669" },
+          ]}
+        />
 
-          {/* Gradient definitions */}
-          <defs>
-            <linearGradient
-              id={`gauge-gradient-${data.title}`}
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-            >
-              <stop offset="0%" stopColor="#ef4444" />
-              <stop offset="25%" stopColor="#ef4444" />
-              <stop offset="25%" stopColor="#6b7280" />
-              <stop offset="50%" stopColor="#6b7280" />
-              <stop offset="50%" stopColor="#10b981" />
-              <stop offset="75%" stopColor="#10b981" />
-              <stop offset="75%" stopColor="#059669" />
-              <stop offset="100%" stopColor="#059669" />
-            </linearGradient>
-          </defs>
+        {/* Custom arc-aligned labels */}
+        <div className="absolute inset-0 pointer-events-none">
+          {labels.map((label, index) => {
+            // Convert angle to radians
+            const angleRad = (label.angle * Math.PI) / 180
 
-          {/* Main gauge arc with gradient */}
-          <path
-            d="M 15 50 A 45 45 0 0 1 105 50"
-            fill="none"
-            stroke="url(#gauge-gradient-${data.title})"
-            strokeWidth="10"
-            strokeLinecap="round"
-          />
+            // Calculate position on arc
+            const labelRadius = radius + 25 // Slightly outside the arc
+            let x = centerX + labelRadius * Math.cos(angleRad)
+            let y = centerY - labelRadius * Math.sin(angleRad)
 
-          {/* Needle */}
-          <line
-            x1="60"
-            y1="50"
-            x2={60 + 40 * Math.cos(((angle - 90) * Math.PI) / 180)}
-            y2={50 - 40 * Math.sin(((angle - 90) * Math.PI) / 180)}
-            stroke="#9ca3af"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
+            // Adjust first and last labels
+            if (index === 0) {
+              // STRONG SELL - move left
+              x -= -10
+              y -= 10
+            } else if (index === 4) {
+              // STRONG BUY - move right
+              x += -10
+              y -= 10
+            }
 
-          {/* Center point */}
-          <circle cx="60" cy="50" r="4" fill="#9ca3af" />
-        </svg>
-
-        {/* Labels */}
-        <div className="absolute bottom-0 left-0 text-xs text-red-500 font-medium">
-          SELL
-        </div>
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground font-medium">
-          NEUTRAL
-        </div>
-        <div className="absolute bottom-0 right-0 text-xs text-green-500 font-medium">
-          BUY
+            return (
+              <div
+                key={index}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  left: `${x}px`,
+                  top: `${y}px`,
+                }}
+              >
+                <span
+                  className="text-[10px] font-normal text-center leading-tight text-muted-foreground"
+                  style={{
+                    whiteSpace: "pre-line",
+                    display: "block",
+                  }}
+                >
+                  {label.text}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 
       {/* Sentiment */}
-      <div
+      {/* <div
         className="text-2xl font-bold mb-4"
         style={{ color: sentimentColor }}
       >
         {data.sentiment}
-      </div>
+      </div> */}
 
       {/* Numerical breakdown */}
       <div className="flex gap-8 text-sm">
@@ -199,7 +253,11 @@ export default function GaugeIndicators({
       {/* Gauge indicators */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {data.map((gaugeData, index) => (
-          <GaugeIndicator key={index} data={gaugeData} />
+          <GaugeIndicator
+            key={index}
+            data={gaugeData}
+            isMiddle={index === 1} // Middle gauge (Summary) is 10% larger
+          />
         ))}
       </div>
     </div>

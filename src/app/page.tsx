@@ -59,7 +59,7 @@ export default function Home() {
               {/* Tab Content */}
               <div className="">
                 {activeMainTab === "gauges" && (
-                  <div>
+                  <div className="flex justify-center max-w-[1000px] mx-auto">
                     <GaugeIndicators />
                   </div>
                 )}

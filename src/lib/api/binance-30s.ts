@@ -24,7 +24,7 @@ export interface Binance30sCandle extends BinanceCandle {}
 
 // Types cho Socket messages
 export interface SocketKlineMessage {
-  type: 'kline-1s' | 'kline-30s'
+  type: 'kline-1s'
   data: BinanceCandle
   timestamp: number
   second: number
