@@ -1,7 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import ReactSpeedometer from "react-d3-speedometer"
+import {
+  useBinance30sCandlesEvents,
+} from "../stores"
 
 interface GaugeData {
   title: string
@@ -135,21 +138,26 @@ const demoScenarios = {
   ],
 }
 
+const random = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 // Helper function to convert sentiment to speedometer value
 const getSentimentValue = (sentiment: string): number => {
+  console.log(sentiment)
   switch (sentiment) {
     case "STRONG SELL":
-      return 20
+      return random(9, 12)
     case "SELL":
-      return 40
+      return random(29, 32)
     case "NEUTRAL":
-      return 60
+      return random(49, 52)
     case "BUY":
-      return 80
+      return random(69, 72)
     case "STRONG BUY":
-      return 100
+      return random(89, 92)
     default:
-      return 60
+      return 50
   }
 }
 
@@ -196,11 +204,11 @@ const GaugeIndicator = ({
 
   // Calculate positions for 5 labels
   const labels = [
-    { text: "STRONG\nSELL", angle: 0 },
-    { text: "SELL", angle: 45 },
+    { text: "STRONG\nBUY", angle: 0 },
+    { text: "BUY", angle: 45 },
     { text: "NEUTRAL", angle: 90 },
-    { text: "BUY", angle: 135 },
-    { text: "STRONG\nBUY", angle: 180 },
+    { text: "SELL", angle: 135 },
+    { text: "STRONG\nSELL", angle: 180 },
   ]
 
   return (
@@ -251,8 +259,8 @@ const GaugeIndicator = ({
           needleColor="#9ca3af"
           needleHeightRatio={0.6}
           needleBaseWidth={8}
-          needleTransitionDuration={2000}
-          needleTransition="easeElastic"
+          needleTransitionDuration={500}
+          needleTransition="easeLinear"
           width={speedometerWidth}
           height={speedometerHeight + 10}
           ringWidth={4}
@@ -423,6 +431,260 @@ export default function GaugeIndicators({
   const [currentData, setCurrentData] = useState<GaugeData[]>(data)
   const [currentScenario, setCurrentScenario] = useState<string>("default")
 
+  // Function to generate gauge data based on candle data
+  const generateGaugeDataFromCandle = (candle: any, previousCandle?: any, movingAveragesCandles?: any[]): GaugeData[] => {
+    const newData = [...currentData]
+    
+    if (!candle || !candle.number_of_trades) {
+      return newData
+    }
+    
+    const totalTrades = candle.number_of_trades
+    const isBullish = candle.close_price > candle.open_price
+    const isBearish = candle.close_price < candle.open_price
+    const isNeutral = candle.close_price === candle.open_price
+    
+    // Calculate distribution for first gauge (Oscillators)
+    let oscillatorsSellRatio = 0.2
+    let oscillatorsNeutralRatio = 0.2
+    let oscillatorsBuyRatio = 0.6
+    
+    if (isBullish) {
+      // Oscillators: close price > open price -> buy 60%, neutral 20%, sell 20%
+      oscillatorsSellRatio = 0.33
+      oscillatorsNeutralRatio = 0.34
+      oscillatorsBuyRatio = 0.33
+    } else {
+      // Oscillators: close price <= open price -> buy 20%, neutral 20%, sell 60%
+      oscillatorsSellRatio = 0.33
+      oscillatorsNeutralRatio = 0.34
+      oscillatorsBuyRatio = 0.33
+    }
+    
+    // Calculate actual numbers for Oscillators
+    let oscillatorsSell = Math.round(totalTrades * oscillatorsSellRatio)
+    let oscillatorsNeutral = Math.round(totalTrades * oscillatorsNeutralRatio)
+    let oscillatorsBuy = Math.round(totalTrades * oscillatorsBuyRatio)
+    
+    // Ensure total equals number_of_trades for Oscillators
+    const oscillatorsTotal = oscillatorsSell + oscillatorsNeutral + oscillatorsBuy
+    const oscillatorsDifference = totalTrades - oscillatorsTotal
+    
+    // Distribute the difference for Oscillators
+    if (oscillatorsDifference > 0) {
+      if (oscillatorsSell >= oscillatorsNeutral && oscillatorsSell >= oscillatorsBuy) {
+        oscillatorsSell += oscillatorsDifference
+      } else if (oscillatorsNeutral >= oscillatorsSell && oscillatorsNeutral >= oscillatorsBuy) {
+        oscillatorsNeutral += oscillatorsDifference
+      } else {
+        oscillatorsBuy += oscillatorsDifference
+      }
+    }
+    
+    // Determine sentiment based on distribution
+    const determineSentiment = (sell: number, neutral: number, buy: number): "STRONG SELL" | "SELL" | "NEUTRAL" | "BUY" | "STRONG BUY" => {
+      if (buy > sell * 2) {
+        return "STRONG BUY"
+      } else if (buy > sell) {
+        return "BUY"
+      } else if (sell > buy * 2) {
+        return "STRONG SELL"
+      } else if (sell > buy) {
+        return "SELL"
+      } else {
+        return "NEUTRAL"
+      }
+    }
+    
+    // Update first gauge (Oscillators)
+    newData[0] = {
+      title: "Oscillators",
+      sentiment: determineSentiment(oscillatorsSell, oscillatorsNeutral, oscillatorsBuy),
+      sell: oscillatorsSell,
+      neutral: oscillatorsNeutral,
+      buy: oscillatorsBuy,
+    }
+    
+    // Initialize Summary with Oscillators values (will be updated after Moving Averages calculation)
+    let summarySell = oscillatorsSell
+    let summaryNeutral = oscillatorsNeutral
+    let summaryBuy = oscillatorsBuy
+    
+    // Calculate Moving Averages (third gauge) based on angle between two candles
+    if (previousCandle && previousCandle.close_price && movingAveragesCandles && movingAveragesCandles.length >= 5) {
+      const currentPrice = candle.close_price
+      const previousPrice = previousCandle.open_price
+      const timeDiff = (candle.open_time - previousCandle.close_time) / 1000 // seconds
+      
+      // Calculate total number_of_trades from 5 candles
+      const totalTradesForMovingAverages = movingAveragesCandles.reduce((sum, c) => sum + (c?.number_of_trades || 0), 0)
+      
+      // Calculate angle in degrees
+      const priceDiff = currentPrice - previousPrice
+      const angleRadians = Math.atan2(priceDiff, timeDiff)
+      const angleDegrees = (angleRadians * 180) / Math.PI
+      
+      console.log('📐 Moving Averages angle calculation:', {
+        previousPrice,
+        currentPrice,
+        priceDiff,
+        timeDiff,
+        angleDegrees,
+        totalTradesForMovingAverages
+      })
+      
+      // Determine sentiment based on angle
+      let movingAveragesSentiment: "STRONG SELL" | "SELL" | "NEUTRAL" | "BUY" | "STRONG BUY"
+      let movingAveragesSellRatio = 0.33
+      let movingAveragesNeutralRatio = 0.34
+      let movingAveragesBuyRatio = 0.33
+      
+      if (angleDegrees >= 46) {
+        // Strong Buy: >= 46 degrees
+        movingAveragesSentiment = "STRONG BUY"
+        movingAveragesSellRatio = 0.2
+        movingAveragesNeutralRatio = 0.2
+        movingAveragesBuyRatio = 0.6
+      } else if (angleDegrees >= 15 && angleDegrees < 46) {
+        // Buy: 17 to 53 degrees
+        movingAveragesSentiment = "BUY"
+        movingAveragesSellRatio = 0.3
+        movingAveragesNeutralRatio = 0.3
+        movingAveragesBuyRatio = 0.4
+      } else if (angleDegrees >= -15 && angleDegrees < 15) {
+        // Neutral: -17 to 16 degrees
+        movingAveragesSentiment = "NEUTRAL"
+        movingAveragesSellRatio = 0.33
+        movingAveragesNeutralRatio = 0.34
+        movingAveragesBuyRatio = 0.33
+      } else if (angleDegrees >= -46 && angleDegrees < -15) {
+        // Sell: -46 to -17 degrees
+        movingAveragesSentiment = "SELL"
+        movingAveragesSellRatio = 0.4
+        movingAveragesNeutralRatio = 0.3
+        movingAveragesBuyRatio = 0.3
+      } else {
+        // Strong Sell: -90 to -46 degrees
+        movingAveragesSentiment = "STRONG SELL"
+        movingAveragesSellRatio = 0.6
+        movingAveragesNeutralRatio = 0.2
+        movingAveragesBuyRatio = 0.2
+      }
+      
+      // Calculate actual numbers for Moving Averages using total trades from 5 candles
+      let movingAveragesSell = Math.round(totalTradesForMovingAverages * movingAveragesSellRatio)
+      let movingAveragesNeutral = Math.round(totalTradesForMovingAverages * movingAveragesNeutralRatio)
+      let movingAveragesBuy = Math.round(totalTradesForMovingAverages * movingAveragesBuyRatio)
+      
+      // Add random variation ±1-5% to each value
+      const addRandomVariation = (value: number) => {
+        const variationPercent = Math.random() * 1 + 1 // 1-5%
+        const variation = Math.random() < 0.5 ? 1 : -1 // Random positive or negative
+        const adjustment = Math.round(value * (variationPercent / 100) * variation)
+        return Math.max(0, value + adjustment) // Ensure non-negative
+      }
+      
+      movingAveragesSell = addRandomVariation(movingAveragesSell)
+      movingAveragesNeutral = addRandomVariation(movingAveragesNeutral)
+      movingAveragesBuy = addRandomVariation(movingAveragesBuy)
+      
+      // Ensure total equals totalTradesForMovingAverages for Moving Averages
+      const movingAveragesTotal = movingAveragesSell + movingAveragesNeutral + movingAveragesBuy
+      const movingAveragesDifference = totalTradesForMovingAverages - movingAveragesTotal
+      
+      // Distribute the difference for Moving Averages
+      if (movingAveragesDifference > 0) {
+        if (movingAveragesSell >= movingAveragesNeutral && movingAveragesSell >= movingAveragesBuy) {
+          movingAveragesSell += movingAveragesDifference
+        } else if (movingAveragesNeutral >= movingAveragesSell && movingAveragesNeutral >= movingAveragesBuy) {
+          movingAveragesNeutral += movingAveragesDifference
+        } else {
+          movingAveragesBuy += movingAveragesDifference
+        }
+      }
+      
+      // Update third gauge (Moving Averages)
+      newData[2] = {
+        title: "Moving Averages",
+        sentiment: movingAveragesSentiment,
+        sell: movingAveragesSell,
+        neutral: movingAveragesNeutral,
+        buy: movingAveragesBuy,
+      }
+      
+      console.log('📊 Moving Averages result:', {
+        angle: angleDegrees.toFixed(2) + '°',
+        sentiment: movingAveragesSentiment,
+        totalTrades: totalTradesForMovingAverages,
+        sell: movingAveragesSell,
+        neutral: movingAveragesNeutral,
+        buy: movingAveragesBuy,
+        totalAfterVariation: movingAveragesSell + movingAveragesNeutral + movingAveragesBuy
+      })
+      
+      // Add Moving Averages values to Summary
+      summarySell += movingAveragesSell
+      summaryNeutral += movingAveragesNeutral
+      summaryBuy += movingAveragesBuy
+      
+      console.log('📊 Summary calculation:', {
+        oscillators: { sell: oscillatorsSell, neutral: oscillatorsNeutral, buy: oscillatorsBuy },
+        movingAverages: { sell: movingAveragesSell, neutral: movingAveragesNeutral, buy: movingAveragesBuy },
+        summary: { sell: summarySell, neutral: summaryNeutral, buy: summaryBuy }
+      })
+    }
+    
+    // Update second gauge (Summary)
+    newData[1] = {
+      title: "Summary",
+      sentiment: determineSentiment(summarySell, summaryNeutral, summaryBuy),
+      sell: summarySell,
+      neutral: summaryNeutral,
+      buy: summaryBuy,
+    }
+    
+    return newData
+  }
+
+  // Listen for candle updates and trigger gauge updates based on candle data
+  useBinance30sCandlesEvents(({payload: candles}) => {
+    console.log("🔄 Candle update received, triggering gauge update based on candle data...")
+    const candle = candles[candles.length - 2]
+    const previousCandle = candles[candles.length - 6] // 4 candles back
+    
+    // Get 5 candles for Moving Averages calculation
+    const movingAveragesCandles = [
+      candles[candles.length - 6], // 5 candles back
+      candles[candles.length - 5], // 4 candles back
+      candles[candles.length - 4], // 3 candles back
+      candles[candles.length - 3], // 2 candles back
+      candles[candles.length - 2]  // 1 candle back (current)
+    ]
+    
+    console.log('📊 Candle data:', {
+      number_of_trades: candle?.number_of_trades,
+      open_price: candle?.open_price,
+      close_price: candle?.close_price,
+      price_change: candle?.close_price - candle?.open_price
+    })
+    
+    console.log('📊 Previous candle data:', {
+      close_price: previousCandle?.close_price,
+      time_diff: previousCandle ? (candle?.open_time - previousCandle?.close_time) / 1000 : 0
+    })
+    
+    console.log('📊 Moving Averages candles:', {
+      total_candles: movingAveragesCandles.length,
+      trades_sum: movingAveragesCandles.reduce((sum, c) => sum + (c?.number_of_trades || 0), 0)
+    })
+    
+    // Generate gauge data based on candle when candles update
+    setCurrentData(prevData => {
+      const newData = generateGaugeDataFromCandle(candle, previousCandle, movingAveragesCandles)
+      return newData
+    })
+  })
+
   const handleScenarioChange = (
     scenario: keyof typeof demoScenarios | "default"
   ) => {
@@ -436,77 +698,6 @@ export default function GaugeIndicators({
 
   return (
     <div className="w-full">
-      {/* Demo Controls */}
-      <div className="mb-6 p-4 bg-card border border-border rounded-lg">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">
-          Demo Market Scenarios
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => handleScenarioChange("default")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              currentScenario === "default"
-                ? "bg-orange-500 text-white"
-                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-            }`}
-          >
-            Default
-          </button>
-          <button
-            onClick={() => handleScenarioChange("bullish")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              currentScenario === "bullish"
-                ? "bg-green-500 text-white"
-                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-            }`}
-          >
-            🚀 Bullish Market
-          </button>
-          <button
-            onClick={() => handleScenarioChange("bearish")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              currentScenario === "bearish"
-                ? "bg-red-500 text-white"
-                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-            }`}
-          >
-            📉 Bearish Market
-          </button>
-          <button
-            onClick={() => handleScenarioChange("neutral")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              currentScenario === "neutral"
-                ? "bg-gray-500 text-white"
-                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-            }`}
-          >
-            ↔️ Neutral Market
-          </button>
-          <button
-            onClick={() => handleScenarioChange("mixed")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              currentScenario === "mixed"
-                ? "bg-purple-500 text-white"
-                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-            }`}
-          >
-            🔀 Mixed Signals
-          </button>
-        </div>
-
-        {/* Current Scenario Info */}
-        <div className="mt-4 p-3 bg-muted rounded-md">
-          <p className="text-sm text-muted-foreground">
-            <strong>Current Scenario:</strong>{" "}
-            {currentScenario.charAt(0).toUpperCase() + currentScenario.slice(1)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Click buttons above to see how gauges react to different market
-            conditions
-          </p>
-        </div>
-      </div>
-
       {/* Gauge indicators */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {currentData.map((gaugeData, index) => (

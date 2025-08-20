@@ -713,7 +713,7 @@ export default function Chart({
 
       // Thêm MA15 series
       ma15SeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? '#10b981' : '#059669', // Green
+        color: theme === 'dark' ? 'transparent' : 'transparent', // Green
         lineWidth: 2,
         title: '',
         priceLineVisible: false,
@@ -731,7 +731,7 @@ export default function Chart({
 
       // Thêm MA5 series
       ma5SeriesRef.current = chartRef.current.addLineSeries({
-        color: theme === 'dark' ? '#a84bff' : '#a84bff', // Purple
+        color: theme === 'dark' ? '#ff0084' : '#ff0084', // Purple
         lineWidth: 2,
         title: '',
         priceLineVisible: false,
@@ -791,7 +791,7 @@ export default function Chart({
       // Update MA series colors theo theme
       if (ma15SeriesRef.current) {
         ma15SeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#10b981' : '#059669', // Green
+          color: theme === 'dark' ? 'transparent' : 'transparent', // Green
         });
       }
 
@@ -803,7 +803,7 @@ export default function Chart({
 
       if (ma5SeriesRef.current) {
         ma5SeriesRef.current.applyOptions({
-          color: theme === 'dark' ? '#a84bff' : '#a84bff', // Purple
+          color: theme === 'dark' ? '#ff0084' : '#ff0084', // Purple
         });
       }
 

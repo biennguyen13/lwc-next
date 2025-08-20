@@ -58,19 +58,15 @@ export default function Home() {
 
               {/* Tab Content */}
               <div className="">
-                {activeMainTab === "gauges" && (
-                  <div className="flex justify-center max-w-[1000px] mx-auto">
-                    <GaugeIndicators />
-                  </div>
-                )}
+                <div className={`flex justify-center max-w-[1000px] mx-auto ${activeMainTab !== "gauges" ? "hidden" : ""}`}>
+                  <GaugeIndicators />
+                </div>
 
-                {activeMainTab === "candles" && (
-                  <div>
-                    <CandleTables
-                      symbol="BTCUSDT"
-                    />
-                  </div>
-                )}
+                <div className={`${activeMainTab !== "candles" ? "hidden" : ""}`}>
+                  <CandleTables
+                    symbol="BTCUSDT"
+                  />
+                </div>
               </div>
             </div>
           </div>
