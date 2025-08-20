@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useBinance30sStore } from "@/stores/binance-30s-store"
 import { CandleTable, Binance30sCandle } from "@/lib/api/binance-30s"
 import { useTheme } from "./ThemeProvider"
+import { TrendingUp, TrendingDown } from "lucide-react"
 
 interface CandleTablesProps {
   symbol?: string
@@ -277,6 +278,30 @@ export default function CandleTables({
   const { theme } = useTheme()
   const [currentSymbol, setCurrentSymbol] = useState(symbol)
 
+  // Calculate stats from candle tables
+  const calculateStats = () => {
+    if (!candleTables || candleTables.length === 0) return { green: 0, red: 0 }
+    
+    let greenCount = 0
+    let redCount = 0
+    
+    candleTables.forEach(table => {
+      if (table.candles) {
+        table.candles.forEach(candle => {
+          if (candle.close_price >= candle.open_price) {
+            greenCount++
+          } else {
+            redCount++
+          }
+        })
+      }
+    })
+    
+    return { green: greenCount, red: redCount }
+  }
+
+  const stats = calculateStats()
+
   // Fetch data khi component mount hoặc symbol thay đổi
   useEffect(() => {
     fetchCandleTables(currentSymbol)
@@ -304,6 +329,27 @@ export default function CandleTables({
   return (
     <div className="w-full mx-auto p-2 xl:p-6">
       <div className="">
+        {/* Stats Badges - Top Right */}
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center space-x-3">
+            {/* Green Badge */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 shadow-sm">
+              <TrendingUp className="w-4 h-4 text-green-500 dark:text-green-400" />
+              <span className="text-sm font-semibold text-green-700 dark:text-green-300">
+                {stats.green}
+              </span>
+            </div>
+            
+            {/* Red Badge */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 shadow-sm">
+              <TrendingDown className="w-4 h-4 text-red-500 dark:text-red-400" />
+              <span className="text-sm font-semibold text-red-700 dark:text-red-300">
+                {stats.red}
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Error Message */}
         {candleTablesError && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-md transition-colors">
