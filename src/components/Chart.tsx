@@ -485,7 +485,7 @@ export default function Chart({
 
     const initSocket = async () => {
       try {
-        socketRef.current = io(process.env.API_BASE_URL, {
+        socketRef.current = io(process.env.SOCKET_SERVER_URL, {
           transports: ['websocket', 'polling']
         });
 
