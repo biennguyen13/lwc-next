@@ -78,24 +78,6 @@ export function DepositDialog({ isOpen, onClose, currency }: DepositDialogProps)
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Amount Input */}
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <USDTIcon size={24} />
-              <Label htmlFor="amount" className="text-sm font-medium">
-                Số tiền
-              </Label>
-            </div>
-            <Input
-              id="amount"
-              type="number"
-              placeholder="0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="text-lg font-medium"
-            />
-          </div>
-
           {/* Network Selection */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Mạng Lưới</Label>

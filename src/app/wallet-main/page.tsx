@@ -27,7 +27,9 @@ export default function WalletMainPage() {
     fetchBalance, 
     fetchBalanceSummary,
     fetchDeposits,
-    fetchWithdrawals
+    fetchWithdrawals,
+    refreshDeposits,
+    refreshWithdrawals
   } = useWalletStore()
 
   // Fetch data on component mount
@@ -36,6 +38,18 @@ export default function WalletMainPage() {
     fetchDeposits()
     fetchWithdrawals()
   }, [fetchBalanceSummary, fetchDeposits, fetchWithdrawals])
+
+  // Auto-refresh data every 15 seconds (without loading states to prevent UI flicker)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchBalanceSummary()
+      refreshDeposits()
+      refreshWithdrawals()
+    }, 15000) // 15 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval)
+  }, [fetchBalanceSummary, refreshDeposits, refreshWithdrawals])
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">

@@ -44,6 +44,8 @@ interface WalletStoreState {
     page?: number
     limit?: number
   }) => Promise<void>
+  refreshDeposits: () => Promise<void>
+  refreshWithdrawals: () => Promise<void>
   fetchDepositAddresses: () => Promise<void>
   fetchMyDepositAddresses: () => Promise<void>
   fetchDepositStats: () => Promise<void>
@@ -54,6 +56,8 @@ interface WalletStoreState {
     tokenSymbol: 'BNB' | 'USDT' | 'USDC' | 'BUSD' | 'CAKE'
     amount: number
     toAddress: string
+    twoFactorToken?: string
+    memo?: string
   }) => Promise<void>
   
   // Utility actions
@@ -165,6 +169,32 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
     }
   },
 
+  // Refresh deposits without loading state (for auto-refresh)
+  refreshDeposits: async () => {
+    try {
+      const result = await walletAPI.getDeposits({})
+      set({ deposits: result.deposits })
+      // Emit event để thông báo cho các components khác
+      storeCommunication.emitWalletTransactionsUpdated(result.deposits)
+    } catch (error) {
+      // Silent error for auto-refresh - don't show loading or error states
+      console.warn('Auto-refresh deposits failed:', error)
+    }
+  },
+
+  // Refresh withdrawals without loading state (for auto-refresh)
+  refreshWithdrawals: async () => {
+    try {
+      const withdrawals = await walletAPI.getWithdrawals({})
+      set({ withdrawals })
+      // Emit event để thông báo cho các components khác
+      storeCommunication.emitWalletTransactionsUpdated(withdrawals)
+    } catch (error) {
+      // Silent error for auto-refresh - don't show loading or error states
+      console.warn('Auto-refresh withdrawals failed:', error)
+    }
+  },
+
   // Fetch deposit addresses
   fetchDepositAddresses: async () => {
     set({ depositAddressesLoading: true, depositAddressesError: null })
@@ -243,7 +273,7 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
       await get().fetchBalance()
       await get().fetchWithdrawals()
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định'
+      const errorMessage = error.response?.data?.error || 'Lỗi không xác định'
       storeCommunication.emitError(errorMessage, 'wallet-store')
       throw error // Re-throw to let component handle it
     }

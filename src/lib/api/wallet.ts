@@ -235,11 +235,15 @@ export const walletAPI = {
     tokenSymbol: 'BNB' | 'USDT' | 'USDC' | 'BUSD' | 'CAKE'
     amount: number
     toAddress: string
+    twoFactorToken?: string
+    memo?: string
   }): Promise<WithdrawalRequest> => {
     const response: AxiosResponse = await apiClient.post("/withdrawals", {
       tokenSymbol: params.tokenSymbol,
       amount: params.amount,
-      toAddress: params.toAddress
+      toAddress: params.toAddress,
+      ...(params.twoFactorToken && { twoFactorToken: params.twoFactorToken }),
+      ...(params.memo && { memo: params.memo })
     })
     if (!response.data.success)
       throw new Error(response.data.message || "Tạo yêu cầu rút tiền thất bại")
