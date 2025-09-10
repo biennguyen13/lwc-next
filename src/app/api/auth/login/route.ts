@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { success: false, message: data.message || "Đăng nhập thất bại" },
+        { ...data, success: false, message: data.message || "Đăng nhập thất bại" },
         { status: response.status }
       )
     }

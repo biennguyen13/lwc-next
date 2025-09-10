@@ -36,9 +36,39 @@ export const useBinance30sLatestEvents = (callback: (latestCandles: any) => void
   return useStoreEvents("BINANCE_30S_LATEST_UPDATED", callback)
 }
 
+// Hook để lắng nghe wallet events
+export const useWalletBalanceEvents = (callback: (balance: any) => void) => {
+  return useStoreEvents("WALLET_BALANCE_UPDATED", callback)
+}
+
+export const useWalletTransactionsEvents = (callback: (transactions: any) => void) => {
+  return useStoreEvents("WALLET_TRANSACTIONS_UPDATED", callback)
+}
+
+export const useWalletDepositEvents = (callback: (deposit: any) => void) => {
+  return useStoreEvents("WALLET_DEPOSIT_CREATED", callback)
+}
+
+export const useWalletWithdrawalEvents = (callback: (withdrawal: any) => void) => {
+  return useStoreEvents("WALLET_WITHDRAWAL_CREATED", callback)
+}
+
+export const useWalletTransferEvents = (callback: (transfer: any) => void) => {
+  return useStoreEvents("WALLET_TRANSFER_COMPLETED", callback)
+}
+
 // Hook để lắng nghe error events
 export const useErrorEvents = (callback: (error: any) => void) => {
   return useStoreEvents("ERROR_OCCURRED", callback)
+}
+
+// Hook để lắng nghe auth events
+export const useUserLoggedInEvents = (callback: (user: any) => void) => {
+  return useStoreEvents("USER_LOGGED_IN", callback)
+}
+
+export const useUserLoggedOutEvents = (callback: () => void) => {
+  return useStoreEvents("USER_LOGGED_OUT", callback)
 }
 
 // Hook để lắng nghe tất cả events
@@ -50,6 +80,11 @@ export const useAllStoreEvents = (callback: (event: any) => void) => {
       "BINANCE_30S_CANDLES_UPDATED",
       "BINANCE_30S_STATS_UPDATED",
       "BINANCE_30S_LATEST_UPDATED",
+      "WALLET_BALANCE_UPDATED",
+      "WALLET_TRANSACTIONS_UPDATED",
+      "WALLET_DEPOSIT_CREATED",
+      "WALLET_WITHDRAWAL_CREATED",
+      "WALLET_TRANSFER_COMPLETED",
       "USER_LOGGED_IN",
       "USER_LOGGED_OUT",
       "ERROR_OCCURRED",

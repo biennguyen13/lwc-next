@@ -7,6 +7,11 @@ export type StoreEventType =
   | 'BINANCE_30S_LATEST_UPDATED'
   | 'BINANCE_30S_TABLES_UPDATED'
   | 'BINANCE_30S_REALTIME_UPDATED'
+  | 'WALLET_BALANCE_UPDATED'
+  | 'WALLET_TRANSACTIONS_UPDATED'
+  | 'WALLET_DEPOSIT_CREATED'
+  | 'WALLET_WITHDRAWAL_CREATED'
+  | 'WALLET_TRANSFER_COMPLETED'
   | 'USER_LOGGED_IN'
   | 'USER_LOGGED_OUT'
   | 'ERROR_OCCURRED'
@@ -103,6 +108,71 @@ class StoreCommunication {
     })
   }
 
+  // Wallet events
+  emitWalletBalanceUpdated(balance: any) {
+    this.emit({
+      type: 'WALLET_BALANCE_UPDATED',
+      payload: balance,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitWalletTransactionsUpdated(transactions: any) {
+    this.emit({
+      type: 'WALLET_TRANSACTIONS_UPDATED',
+      payload: transactions,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitWalletDepositCreated(deposit: any) {
+    this.emit({
+      type: 'WALLET_DEPOSIT_CREATED',
+      payload: deposit,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitWalletWithdrawalCreated(withdrawal: any) {
+    this.emit({
+      type: 'WALLET_WITHDRAWAL_CREATED',
+      payload: withdrawal,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitWalletTransferCompleted(transfer: any) {
+    this.emit({
+      type: 'WALLET_TRANSFER_COMPLETED',
+      payload: transfer,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
+  // Auth events
+  emitUserLoggedIn(user: any) {
+    this.emit({
+      type: 'USER_LOGGED_IN',
+      payload: user,
+      source: 'auth-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitUserLoggedOut() {
+    this.emit({
+      type: 'USER_LOGGED_OUT',
+      payload: null,
+      source: 'auth-store',
+      timestamp: Date.now()
+    })
+  }
+
   emitError(error: string, source: string) {
     this.emit({
       type: 'ERROR_OCCURRED',
@@ -126,6 +196,13 @@ export const useStoreCommunication = () => {
     emitBinance30sLatestUpdated: storeCommunication.emitBinance30sLatestUpdated.bind(storeCommunication),
     emitBinance30sTablesUpdated: storeCommunication.emitBinance30sTablesUpdated.bind(storeCommunication),
     emitBinance30sRealtimeUpdated: storeCommunication.emitBinance30sRealtimeUpdated.bind(storeCommunication),
+    emitWalletBalanceUpdated: storeCommunication.emitWalletBalanceUpdated.bind(storeCommunication),
+    emitWalletTransactionsUpdated: storeCommunication.emitWalletTransactionsUpdated.bind(storeCommunication),
+    emitWalletDepositCreated: storeCommunication.emitWalletDepositCreated.bind(storeCommunication),
+    emitWalletWithdrawalCreated: storeCommunication.emitWalletWithdrawalCreated.bind(storeCommunication),
+    emitWalletTransferCompleted: storeCommunication.emitWalletTransferCompleted.bind(storeCommunication),
+    emitUserLoggedIn: storeCommunication.emitUserLoggedIn.bind(storeCommunication),
+    emitUserLoggedOut: storeCommunication.emitUserLoggedOut.bind(storeCommunication),
     emitError: storeCommunication.emitError.bind(storeCommunication),
   }
 } 

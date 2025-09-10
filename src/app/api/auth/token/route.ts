@@ -5,26 +5,17 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const accessToken = request.cookies.get("access_token")?.value
-    const refreshToken = request.cookies.get("refresh_token")?.value
-
+    // Check if access token exists in cookies
+    const accessToken = request.cookies.get('access_token')?.value
+    
     return NextResponse.json({
       success: true,
       data: {
-        accessToken: accessToken,
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
-        // Không trả về token thực tế vì lý do bảo mật
-        tokenInfo: accessToken
-          ? {
-              length: accessToken.length,
-              type: "JWT",
-            }
-          : null,
-      },
+        hasAccessToken: !!accessToken
+      }
     })
   } catch (error) {
-    console.error("Get token info error:", error)
+    console.error('Token check error:', error)
     return NextResponse.json(
       { success: false, message: "Lỗi server" },
       { status: 500 }
