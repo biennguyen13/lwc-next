@@ -22,20 +22,10 @@ export default function Home() {
           <Binance30sTest />
         </div> */}
 
-        {/* Navigation */}
-        <div className="mb-6 flex justify-center">
-          <Link href="/wallet-main">
-            <Button variant="outline" className="flex items-center space-x-2">
-              <span>💰</span>
-              <span>Ví của tôi</span>
-            </Button>
-          </Link>
-        </div>
-
         {/* Chart and Trading Panel Layout */}
         <div className="mb-6 md:mb-8 flex">
           {/* Chart Area */}
-          <div className="flex-1 w-[calc(100vw-210px-24px)]">
+          <div className="flex-1 w-[calc(100vw-210px-24px-105px)]">
             <Binance30sChart
               limit={200}
               symbol="BTCUSDT"

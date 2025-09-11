@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
 import { useStoreCommunication } from "@/stores/store-communication"
+import { useBinance30sCandlesEvents } from "@/stores"
 
 interface TradingPanelProps {
   currentPrice?: number
@@ -20,8 +21,53 @@ export default function TradingPanel({
     bearish: number
     bullish: number
   }>({
-    bearish: 49,
-    bullish: 51,
+    bearish: 50,
+    bullish: 50,
+  })
+
+  // Listen for candle updates and calculate sentiment
+  useBinance30sCandlesEvents(({payload: candles}) => {
+    
+    if (!candles || candles.length === 0) return
+
+    // Calculate sentiment based on all candles
+    let totalBuyTrades = 0
+    let totalSellTrades = 0
+    let totalTrades = 0
+
+    candles.slice(-20).forEach((candle: any) => {
+      if (candle && candle.open_price && candle.close_price && candle.number_of_trades) {
+        const isBuyCandle = candle.close_price > candle.open_price
+        const trades = candle.number_of_trades
+        
+        totalTrades += trades
+        
+        if (isBuyCandle) {
+          totalBuyTrades += trades
+        } else {
+          totalSellTrades += trades
+        }
+      }
+    })
+
+    // Calculate percentages and round to whole numbers
+    const buyPercentage = totalTrades > 0 ? Math.round((totalBuyTrades / totalTrades) * 100) : 50
+    const sellPercentage = totalTrades > 0 ? Math.round((totalSellTrades / totalTrades) * 100) : 50
+
+    // console.log('📊 Sentiment calculation:', {
+    //   totalCandles: candles.length,
+    //   totalTrades,
+    //   totalBuyTrades,
+    //   totalSellTrades,
+    //   buyPercentage,
+    //   sellPercentage
+    // })
+
+    // Update sentiment state
+    setSentiment({
+      bearish: sellPercentage,
+      bullish: buyPercentage,
+    })
   })
   
   // Real-time countdown state

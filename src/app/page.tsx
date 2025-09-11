@@ -17,15 +17,6 @@ export default function Home() {
   return (
     <main className="min-h-screen p-2 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
-        {/* Navigation */}
-        <div className="mb-6 flex justify-center">
-          <Link href="/wallet-main">
-            <Button variant="outline" className="flex items-center space-x-2">
-              <span>💰</span>
-              <span>Ví của tôi</span>
-            </Button>
-          </Link>
-        </div>
       </div>
     </main>
   )

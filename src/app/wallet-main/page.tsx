@@ -8,6 +8,9 @@ import { TransactionHistory } from "@/components/wallet/TransactionHistory"
 import { DepositDialog } from "@/components/wallet/DepositDialog"
 import { WithdrawDialog } from "@/components/wallet/WithdrawDialog"
 import { useWalletStore } from "@/stores"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { TrendingUp, TrendingDown, Activity, Shield, Zap } from "lucide-react"
 
 export default function WalletMainPage() {
   const [activeWalletTab, setActiveWalletTab] = useState<"main" | "trading">("main")
@@ -51,16 +54,25 @@ export default function WalletMainPage() {
     return () => clearInterval(interval)
   }, [fetchBalanceSummary, refreshDeposits, refreshWithdrawals])
 
+  // Calculate stats
+  const totalDeposits = deposits?.reduce((sum, deposit) => sum + parseFloat(deposit.amount || '0'), 0) || 0
+  const totalWithdrawals = withdrawals?.reduce((sum, withdrawal) => sum + parseFloat(withdrawal.amount || '0'), 0) || 0
+  const netFlow = totalDeposits - totalWithdrawals
+
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="max-w-6xl mx-auto p-4">
+    <div className="min-h-screen bg-gray-900 text-white">
+
+      <div className="mx-auto p-4 bg-orange-400 "> 
         {/* Wallet Header */}
-        <WalletHeader 
+        <WalletHeader
+          className="max-w-6xl mx-auto p-4"
           totalBalance={balanceSummary?.total_balance_usd || 0}
           isBalanceHidden={isBalanceHidden}
           onToggleBalance={() => setIsBalanceHidden(!isBalanceHidden)}
         />
+      </div>
 
+      <div className="max-w-6xl mx-auto p-4">
         {/* Wallet Tabs */}
         <div className="mt-6">
           <WalletTabs 
@@ -72,18 +84,19 @@ export default function WalletMainPage() {
         {/* Wallet Content */}
         <div className="mt-6">
           {activeWalletTab === "main" && (
-            <WalletCard 
-              currency="USDT"
-              currencyName="Tether"
-              balance={balanceSummary?.tokens?.USDT?.total_balance ? parseFloat(balanceSummary.tokens.USDT.total_balance) : 0}
-              usdValue={balanceSummary?.tokens?.USDT?.total_usd || 0}
-              onDeposit={() => setIsDepositDialogOpen(true)}
-              onWithdraw={() => setIsWithdrawDialogOpen(true)}
-            />
+              <WalletCard 
+                currency="USDT"
+                currencyName="Tether"
+                balance={balanceSummary?.tokens?.USDT?.total_balance ? parseFloat(balanceSummary.tokens.USDT.total_balance) : 0}
+                usdValue={balanceSummary?.tokens?.USDT?.total_usd || 0}
+                isBalanceHidden={isBalanceHidden}
+                onDeposit={() => setIsDepositDialogOpen(true)}
+                onWithdraw={() => setIsWithdrawDialogOpen(true)}
+              />
           )}
           
           {activeWalletTab === "trading" && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-400">
               Trading wallet content coming soon...
             </div>
           )}
@@ -111,6 +124,6 @@ export default function WalletMainPage() {
         currency="USDT"
         availableBalance={balanceSummary?.tokens?.USDT?.available_balance ? parseFloat(balanceSummary.tokens.USDT.available_balance) : 0}
       />
-    </main>
+    </div>
   )
 }

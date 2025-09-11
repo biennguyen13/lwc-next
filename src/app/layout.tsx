@@ -2,10 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import ThemeToggle from '@/components/ThemeToggle'
-import { StoreEventManager } from '@/stores/store-communication-usage'
-import { Toaster } from '@/components/ui'
-import { UserMenu } from '@/components/UserMenu'
+import { ConditionalLayout } from '@/components/ConditionalLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,13 +20,9 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <div className="fixed top-4 right-4 z-50 flex items-center space-x-2">
-            <UserMenu />
-            <ThemeToggle />
-          </div>
-          <StoreEventManager />
-          {children}
-          <Toaster />
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -75,6 +75,9 @@ export function DepositDialog({ isOpen, onClose, currency }: DepositDialogProps)
           <DialogTitle className="text-center text-xl font-semibold">
             Nạp tiền {currency}
           </DialogTitle>
+          <DialogDescription className="text-center text-gray-500">
+            Quét mã QR hoặc sao chép địa chỉ để nạp tiền vào ví
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">

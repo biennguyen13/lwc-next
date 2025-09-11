@@ -6,15 +6,17 @@ interface WalletHeaderProps {
   totalBalance: number
   isBalanceHidden: boolean
   onToggleBalance: () => void
+  className?: string
 }
 
 export function WalletHeader({ 
   totalBalance, 
   isBalanceHidden, 
-  onToggleBalance 
+  onToggleBalance,
+  ...props
 }: WalletHeaderProps) {
   return (
-    <div className="bg-orange-500 text-white p-6 rounded-lg">
+    <div className="text-white p-6" {...props}>
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-lg font-medium">Tổng tài sản (USDT)</h1>

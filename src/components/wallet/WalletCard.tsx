@@ -8,6 +8,7 @@ interface WalletCardProps {
   currencyName: string
   balance: number
   usdValue: number
+  isBalanceHidden?: boolean
   onDeposit: () => void
   onWithdraw: () => void
 }
@@ -17,6 +18,7 @@ export function WalletCard({
   currencyName, 
   balance, 
   usdValue, 
+  isBalanceHidden = false,
   onDeposit, 
   onWithdraw 
 }: WalletCardProps) {
@@ -40,10 +42,10 @@ export function WalletCard({
         {/* Balance Info */}
         <div className="text-right">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {balance.toLocaleString()} {currency}
+            {isBalanceHidden ? "****" : `${balance.toLocaleString()} ${currency}`}
           </div>
           <div className="text-gray-500 dark:text-gray-400">
-            ~${usdValue.toLocaleString()}
+            {isBalanceHidden ? "****" : `~$${usdValue.toLocaleString()}`}
           </div>
         </div>
       </div>
@@ -52,17 +54,23 @@ export function WalletCard({
       <div className="flex space-x-4 mt-6">
         <button
           onClick={onDeposit}
-          className="flex-1 flex items-center justify-center space-x-2 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors border border-gray-600"
         >
-          <ArrowUp className="w-5 h-5" />
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+            <ArrowDown className="w-5 h-5 text-green-400 relative -bottom-1.5 right-2" />
+          </div>
           <span>Nạp tiền</span>
         </button>
         
         <button
           onClick={onWithdraw}
-          className="flex-1 flex items-center justify-center space-x-2 bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg transition-colors"
+          className="flex-1 flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors border border-gray-600"
         >
-          <ArrowDown className="w-5 h-5" />
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+            <ArrowUp className="w-5 h-5 text-red-400 relative bottom-1.5 right-2" />
+          </div>
           <span>Rút tiền</span>
         </button>
       </div>

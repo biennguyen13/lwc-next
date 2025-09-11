@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -125,6 +125,9 @@ export function WithdrawDialog({ isOpen, onClose, currency, availableBalance }: 
           <DialogTitle className="text-center text-xl font-semibold">
             Rút tiền {currency}
           </DialogTitle>
+          <DialogDescription className="text-center text-gray-500">
+            Nhập thông tin để rút tiền từ ví của bạn
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">

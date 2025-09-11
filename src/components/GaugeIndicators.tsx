@@ -144,7 +144,6 @@ const random = (min: number, max: number) => {
 
 // Helper function to convert sentiment to speedometer value
 const getSentimentValue = (sentiment: string): number => {
-  console.log(sentiment)
   switch (sentiment) {
     case "STRONG SELL":
       return random(9, 12)
@@ -524,14 +523,14 @@ export default function GaugeIndicators({
       const angleRadians = Math.atan2(priceDiff, timeDiff)
       const angleDegrees = (angleRadians * 180) / Math.PI
       
-      console.log('📐 Moving Averages angle calculation:', {
-        previousPrice,
-        currentPrice,
-        priceDiff,
-        timeDiff,
-        angleDegrees,
-        totalTradesForMovingAverages
-      })
+      // console.log('📐 Moving Averages angle calculation:', {
+      //   previousPrice,
+      //   currentPrice,
+      //   priceDiff,
+      //   timeDiff,
+      //   angleDegrees,
+      //   totalTradesForMovingAverages
+      // })
       
       // Determine sentiment based on angle
       let movingAveragesSentiment: "STRONG SELL" | "SELL" | "NEUTRAL" | "BUY" | "STRONG BUY"
@@ -612,26 +611,26 @@ export default function GaugeIndicators({
         buy: movingAveragesBuy,
       }
       
-      console.log('📊 Moving Averages result:', {
-        angle: angleDegrees.toFixed(2) + '°',
-        sentiment: movingAveragesSentiment,
-        totalTrades: totalTradesForMovingAverages,
-        sell: movingAveragesSell,
-        neutral: movingAveragesNeutral,
-        buy: movingAveragesBuy,
-        totalAfterVariation: movingAveragesSell + movingAveragesNeutral + movingAveragesBuy
-      })
+      // console.log('📊 Moving Averages result:', {
+      //   angle: angleDegrees.toFixed(2) + '°',
+      //   sentiment: movingAveragesSentiment,
+      //   totalTrades: totalTradesForMovingAverages,
+      //   sell: movingAveragesSell,
+      //   neutral: movingAveragesNeutral,
+      //   buy: movingAveragesBuy,
+      //   totalAfterVariation: movingAveragesSell + movingAveragesNeutral + movingAveragesBuy
+      // })
       
       // Add Moving Averages values to Summary
       summarySell += movingAveragesSell
       summaryNeutral += movingAveragesNeutral
       summaryBuy += movingAveragesBuy
       
-      console.log('📊 Summary calculation:', {
-        oscillators: { sell: oscillatorsSell, neutral: oscillatorsNeutral, buy: oscillatorsBuy },
-        movingAverages: { sell: movingAveragesSell, neutral: movingAveragesNeutral, buy: movingAveragesBuy },
-        summary: { sell: summarySell, neutral: summaryNeutral, buy: summaryBuy }
-      })
+      // console.log('📊 Summary calculation:', {
+      //   oscillators: { sell: oscillatorsSell, neutral: oscillatorsNeutral, buy: oscillatorsBuy },
+      //   movingAverages: { sell: movingAveragesSell, neutral: movingAveragesNeutral, buy: movingAveragesBuy },
+      //   summary: { sell: summarySell, neutral: summaryNeutral, buy: summaryBuy }
+      // })
     }
     
     // Update second gauge (Summary)
@@ -661,22 +660,22 @@ export default function GaugeIndicators({
       candles[candles.length - 2]  // 1 candle back (current)
     ]
     
-    console.log('📊 Candle data:', {
-      number_of_trades: candle?.number_of_trades,
-      open_price: candle?.open_price,
-      close_price: candle?.close_price,
-      price_change: candle?.close_price - candle?.open_price
-    })
+    // console.log('📊 Candle data:', {
+    //   number_of_trades: candle?.number_of_trades,
+    //   open_price: candle?.open_price,
+    //   close_price: candle?.close_price,
+    //   price_change: candle?.close_price - candle?.open_price
+    // })
     
-    console.log('📊 Previous candle data:', {
-      close_price: previousCandle?.close_price,
-      time_diff: previousCandle ? (candle?.open_time - previousCandle?.close_time) / 1000 : 0
-    })
+    // console.log('📊 Previous candle data:', {
+    //   close_price: previousCandle?.close_price,
+    //   time_diff: previousCandle ? (candle?.open_time - previousCandle?.close_time) / 1000 : 0
+    // })
     
-    console.log('📊 Moving Averages candles:', {
-      total_candles: movingAveragesCandles.length,
-      trades_sum: movingAveragesCandles.reduce((sum, c) => sum + (c?.number_of_trades || 0), 0)
-    })
+    // console.log('📊 Moving Averages candles:', {
+    //   total_candles: movingAveragesCandles.length,
+    //   trades_sum: movingAveragesCandles.reduce((sum, c) => sum + (c?.number_of_trades || 0), 0)
+    // })
     
     // Generate gauge data based on candle when candles update
     setCurrentData(prevData => {
