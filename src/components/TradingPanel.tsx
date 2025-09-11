@@ -25,17 +25,33 @@ export default function TradingPanel({
     bullish: 50,
   })
 
-  // Listen for candle updates and calculate sentiment
+  // New state for sentiment data
+  const [sentimentData, setSentimentData] = useState<{
+    totalCandles: number
+    totalTrades: number
+    totalBuyTrades: number
+    totalSellTrades: number
+    buyPercentage: number
+    sellPercentage: number
+  }>({
+    totalCandles: 0,
+    totalTrades: 0,
+    totalBuyTrades: 0,
+    totalSellTrades: 0,
+    buyPercentage: 50,
+    sellPercentage: 50,
+  })
+
+  // Listen for candle updates and calculate base sentiment data
   useBinance30sCandlesEvents(({payload: candles}) => {
-    
     if (!candles || candles.length === 0) return
 
-    // Calculate sentiment based on all candles
+    // Calculate sentiment based on last 20 candles
     let totalBuyTrades = 0
     let totalSellTrades = 0
     let totalTrades = 0
 
-    candles.slice(-20).forEach((candle: any) => {
+    candles.slice(-25).forEach((candle: any) => {
       if (candle && candle.open_price && candle.close_price && candle.number_of_trades) {
         const isBuyCandle = candle.close_price > candle.open_price
         const trades = candle.number_of_trades
@@ -50,23 +66,27 @@ export default function TradingPanel({
       }
     })
 
-    // Calculate percentages and round to whole numbers
-    const buyPercentage = totalTrades > 0 ? Math.round((totalBuyTrades / totalTrades) * 100) : 50
-    const sellPercentage = totalTrades > 0 ? Math.round((totalSellTrades / totalTrades) * 100) : 50
+    // Calculate percentages with 2 decimal places
+    const buyPercentage = totalTrades > 0 ? parseFloat(((totalBuyTrades / totalTrades) * 100).toFixed(2)) : 50
+    const sellPercentage = totalTrades > 0 ? parseFloat(((totalSellTrades / totalTrades) * 100).toFixed(2)) : 50
 
-    // console.log('📊 Sentiment calculation:', {
-    //   totalCandles: candles.length,
-    //   totalTrades,
-    //   totalBuyTrades,
-    //   totalSellTrades,
-    //   buyPercentage,
-    //   sellPercentage
-    // })
+    console.log('📊 Base sentiment calculation:', {
+      totalCandles: candles.length,
+      totalTrades,
+      totalBuyTrades,
+      totalSellTrades,
+      buyPercentage,
+      sellPercentage
+    })
 
-    // Update sentiment state
-    setSentiment({
-      bearish: sellPercentage,
-      bullish: buyPercentage,
+    // Update sentiment data state
+    setSentimentData({
+      totalCandles: candles.length,
+      totalTrades,
+      totalBuyTrades,
+      totalSellTrades,
+      buyPercentage,
+      sellPercentage,
     })
   })
   
@@ -95,10 +115,58 @@ export default function TradingPanel({
           setCurrentCountdown(currentSecond)
         }
         
-        // Update current price if available
-        if (realtimeData.realtimeCandle) {
-          // You can update currentPrice here if needed
-          console.log('🔄 TradingPanel: Real-time price updated:', realtimeData.realtimeCandle.close_price)
+        // Update sentiment with real-time candle data
+        if (realtimeData.candle) {
+          const candle = realtimeData.candle
+          const volume = candle.trades || 0
+          const isBuyCandle = candle.close > candle.open
+          
+          // console.log('🔄 Real-time candle update:', {
+          //   open: candle.open,
+          //   close: candle.close,
+          //   volume,
+          //   isBuyCandle
+          // })
+          
+          // Update sentiment data with real-time volume
+          setSentimentData(prevData => {
+            let newTotalBuyTrades = prevData.totalBuyTrades
+            let newTotalSellTrades = prevData.totalSellTrades
+            let newTotalTrades = prevData.totalTrades + volume
+            
+            if (isBuyCandle) {
+              newTotalBuyTrades += volume
+            } else {
+              newTotalSellTrades += volume
+            }
+            
+            // Calculate new percentages
+            const newBuyPercentage = newTotalTrades > 0 ? parseFloat(((newTotalBuyTrades / newTotalTrades) * 100).toFixed(2)) : 50
+            const newSellPercentage = newTotalTrades > 0 ? parseFloat(((newTotalSellTrades / newTotalTrades) * 100).toFixed(2)) : 50
+            
+            // console.log('📊 Updated sentiment with real-time data:', JSON.stringify({
+            //   newTotalTrades,
+            //   newTotalBuyTrades,
+            //   newTotalSellTrades,
+            //   newBuyPercentage,
+            //   newSellPercentage
+            // }, null, 2))
+            
+            // Update sentiment display
+            setSentiment({
+              bearish: newSellPercentage,
+              bullish: newBuyPercentage,
+            })
+            
+            return {
+              ...prevData,
+              totalTrades: newTotalTrades,
+              totalBuyTrades: newTotalBuyTrades,
+              totalSellTrades: newTotalSellTrades,
+              buyPercentage: newBuyPercentage,
+              sellPercentage: newSellPercentage,
+            }
+          })
         }
       }
     })
