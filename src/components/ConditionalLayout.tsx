@@ -42,7 +42,7 @@ export function ConditionalLayout({ children }: ConditionalLayoutProps) {
         <UserMenu />
       </div> */}
       <StoreEventManager />
-      <main className="pt-[65px] pl-[105px]">
+      <main className="pt-[65px] pl-[95px]">
         {children}
       </main>
       <Toaster />

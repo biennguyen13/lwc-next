@@ -15,7 +15,7 @@ export default function Home() {
   ) // Main tab state
 
   return (
-    <main className="min-h-screen p-2 bg-gray-50 dark:bg-gray-900 transition-colors">
+    <main className="min-h-screen p-1 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
         {/* Binance 30s Test Component */}
         {/* <div className="mb-8">
@@ -25,7 +25,7 @@ export default function Home() {
         {/* Chart and Trading Panel Layout */}
         <div className="mb-6 md:mb-8 flex">
           {/* Chart Area */}
-          <div className="flex-1 w-[calc(100vw-210px-24px-105px)]">
+          <div className="flex-1 w-[calc(100vw-210px-24px-95px)]">
             <Binance30sChart
               limit={200}
               symbol="BTCUSDT"
