@@ -17,6 +17,7 @@ export type StoreEventType =
   | 'BETTING_KLINE_UPDATED'
   | 'BETTING_ORDER_PLACED'
   | 'BETTING_MODE_CHANGED'
+  | 'DEMO_BALANCE_RESET'
   | 'USER_LOGGED_IN'
   | 'USER_LOGGED_OUT'
   | 'ERROR_OCCURRED'
@@ -205,6 +206,15 @@ class StoreCommunication {
     })
   }
 
+  emitDemoBalanceReset(result: any) {
+    this.emit({
+      type: 'DEMO_BALANCE_RESET',
+      payload: result,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
   // Auth events
   emitUserLoggedIn(user: any) {
     this.emit({
@@ -257,6 +267,7 @@ export const useStoreCommunication = () => {
     emitBettingKlineUpdated: storeCommunication.emitBettingKlineUpdated.bind(storeCommunication),
     emitBettingOrderPlaced: storeCommunication.emitBettingOrderPlaced.bind(storeCommunication),
     emitBettingModeChanged: storeCommunication.emitBettingModeChanged.bind(storeCommunication),
+    emitDemoBalanceReset: storeCommunication.emitDemoBalanceReset.bind(storeCommunication),
     emitUserLoggedIn: storeCommunication.emitUserLoggedIn.bind(storeCommunication),
     emitUserLoggedOut: storeCommunication.emitUserLoggedOut.bind(storeCommunication),
     emitError: storeCommunication.emitError.bind(storeCommunication),

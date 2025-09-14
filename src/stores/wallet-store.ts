@@ -6,7 +6,9 @@ import {
   Deposit, 
   Withdrawal,
   DepositAddress,
-  DepositStats
+  DepositStats,
+  ResetDemoBalanceRequest,
+  ResetDemoBalanceResponse
 } from "@/lib/api/wallet"
 import { storeCommunication } from "./store-communication"
 
@@ -66,6 +68,9 @@ interface WalletStoreState {
   
   // Betting mode actions
   setBettingMode: (mode: 'real' | 'demo') => void
+  
+  // Demo balance actions
+  resetDemoBalance: (params: ResetDemoBalanceRequest) => Promise<ResetDemoBalanceResponse>
   
   // Utility actions
   clearBalanceError: () => void
@@ -307,6 +312,25 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
     
     // Emit event để thông báo betting mode đã thay đổi
     storeCommunication.emitBettingModeChanged(mode)
+  },
+
+  // Reset demo balance
+  resetDemoBalance: async (params: ResetDemoBalanceRequest) => {
+    try {
+      const result = await walletAPI.resetDemoBalance(params)
+      
+      // Emit event để thông báo demo balance đã được reset
+      storeCommunication.emitDemoBalanceReset(result)
+      
+      // Refresh balance summary after successful reset
+      await get().refreshBalanceSummary()
+      
+      return result
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định'
+      storeCommunication.emitError(errorMessage, 'wallet-store')
+      throw error // Re-throw to let component handle it
+    }
   },
 
   // Clear errors

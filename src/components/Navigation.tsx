@@ -15,15 +15,18 @@ import {
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useWalletStore } from "@/stores"
+import { useToast } from "@/hooks/use-toast"
 
 export function Navigation() {
   const [notificationCount] = useState(148) // Mock notification count
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode } = useWalletStore()
+  const [isResetting, setIsResetting] = useState(false)
+  const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode, resetDemoBalance } = useWalletStore()
+  const { toast } = useToast()
   
   // Get real and demo balances
-  const realBalance = balanceSummary?.real?.total_balance_usd || 0
-  const demoBalance = balanceSummary?.demo?.total_balance_usd || 0
+  const realBalance = balanceSummary?.real?.total_available_usd || 0
+  const demoBalance = balanceSummary?.demo?.total_available_usd || 0
   
   // Get current active balance
   const currentBalance = bettingMode === 'real' ? realBalance : demoBalance
@@ -32,6 +35,42 @@ export function Navigation() {
   const handleAccountChange = (account: 'real' | 'demo') => {
     setBettingMode(account)
     setIsDropdownOpen(false)
+  }
+
+  // Handle reset demo balance
+  const handleResetDemoBalance = async () => {
+    if (isResetting) return
+    
+    try {
+      setIsResetting(true)
+      
+      await resetDemoBalance({
+        token_symbol: 'USDT'
+      })
+      
+      toast({
+        title: "Reset thành công",
+        description: "Demo balance đã được reset về 1000 USDT",
+        variant: "default",
+      })
+    } catch (error: any) {
+      console.error("Reset demo balance failed:", error)
+      
+      let errorMessage = "Có lỗi xảy ra khi reset demo balance"
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      
+      toast({
+        title: "Reset thất bại",
+        description: errorMessage,
+        variant: "destructive",
+      })
+    } finally {
+      setIsResetting(false)
+    }
   }
 
   // Auto-refresh balance summary every 15 seconds
@@ -136,8 +175,11 @@ export function Navigation() {
                     size="sm"
                     variant="outline"
                     className="border-gray-600 text-white hover:bg-gray-700 p-2 rounded-full"
+                    onClick={handleResetDemoBalance}
+                    disabled={isResetting}
+                    title="Reset demo balance về 1000 USDT"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className={`w-4 h-4 ${isResetting ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
               </div>

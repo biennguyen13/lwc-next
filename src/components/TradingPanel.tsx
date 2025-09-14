@@ -102,7 +102,7 @@ export default function TradingPanel({
   const { placeOrder, placeOrderLoading } = useBettingStore()
   
   // Wallet store for betting mode
-  const { bettingMode, refreshBalanceSummary } = useWalletStore()
+  const { bettingMode, refreshBalanceSummary, balanceSummary } = useWalletStore()
 
   // Listen to realtime updates
   useEffect(() => {
@@ -199,7 +199,29 @@ export default function TradingPanel({
   }
 
   const handleAll = () => {
-    setValue(1000) // Set to a high value for "All"
+    // Get available balance based on current betting mode
+    let availableBalance = 0
+    
+    if (bettingMode === 'real') {
+      // Get real account USDT balance
+      const usdtBalance = balanceSummary?.real?.tokens?.USDT?.available_balance
+      availableBalance = usdtBalance ? parseFloat(usdtBalance) : 0
+    } else {
+      // Get demo account USDT balance
+      const usdtBalance = balanceSummary?.demo?.tokens?.USDT?.available_balance
+      availableBalance = usdtBalance ? parseFloat(usdtBalance) : 0
+    }
+    
+    // Set value to available balance, but ensure it's at least 1
+    const finalValue = Math.max(availableBalance, 1)
+    setValue(finalValue)
+    
+    // Show toast notification
+    toast({
+      title: "Đã chọn tất cả",
+      description: `Sử dụng ${finalValue.toFixed(2)} USDT từ tài khoản ${bettingMode === 'real' ? 'thực' : 'demo'}`,
+      variant: "default",
+    })
   }
 
   const handleIncrease = async () => {

@@ -124,6 +124,24 @@ export interface WithdrawalRequest {
   estimatedConfirmations: number
 }
 
+// Types cho Reset Demo Balance Request
+export interface ResetDemoBalanceRequest {
+  token_symbol: 'USDT' | 'BNB' | 'USDC' | 'BUSD' | 'CAKE'
+}
+
+// Types cho Reset Demo Balance Response
+export interface ResetDemoBalanceResponse {
+  id: number
+  account_id: number
+  token_symbol: string
+  available_balance: string
+  locked_balance: string
+  total_balance: string
+  demo_credits: string
+  reset_count: number
+  last_reset_at: string
+}
+
 // ==================== WALLET API ====================
 export const walletAPI = {
   // Lấy số dư hiện tại của user (dựa trên deposit.route.js)
@@ -278,6 +296,14 @@ export const walletAPI = {
     })
     if (!response.data.success)
       throw new Error(response.data.message || "Lấy lịch sử rút tiền thất bại")
+    return response.data.data
+  },
+
+  // Reset demo balance
+  resetDemoBalance: async (params: ResetDemoBalanceRequest): Promise<ResetDemoBalanceResponse> => {
+    const response: AxiosResponse = await apiClient.post("/deposits/balance/demo/reset", params)
+    if (!response.data.success)
+      throw new Error(response.data.message || "Reset demo balance thất bại")
     return response.data.data
   },
 }

@@ -24,6 +24,7 @@ export {
   useBettingHistoryEvents,
   useBettingKlineEvents,
   useBettingOrderPlacedEvents,
+  useDemoBalanceResetEvents,
   useUserLoggedInEvents,
   useUserLoggedOutEvents,
   useErrorEvents,

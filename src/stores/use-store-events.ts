@@ -74,6 +74,10 @@ export const useBettingOrderPlacedEvents = (callback: (order: any) => void) => {
   return useStoreEvents("BETTING_ORDER_PLACED", callback)
 }
 
+export const useDemoBalanceResetEvents = (callback: (result: any) => void) => {
+  return useStoreEvents("DEMO_BALANCE_RESET", callback)
+}
+
 // Hook để lắng nghe error events
 export const useErrorEvents = (callback: (error: any) => void) => {
   return useStoreEvents("ERROR_OCCURRED", callback)
@@ -106,6 +110,7 @@ export const useAllStoreEvents = (callback: (event: any) => void) => {
       "BETTING_HISTORY_UPDATED",
       "BETTING_KLINE_UPDATED",
       "BETTING_ORDER_PLACED",
+      "DEMO_BALANCE_RESET",
       "USER_LOGGED_IN",
       "USER_LOGGED_OUT",
       "ERROR_OCCURRED",
