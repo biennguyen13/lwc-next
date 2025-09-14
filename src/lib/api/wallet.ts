@@ -12,24 +12,39 @@ export interface WalletBalance {
   total_balance: string
 }
 
-export interface WalletBalanceSummary {
-  account_id: number
+// Token balance interface
+export interface TokenBalance {
+  available_balance: string
+  locked_balance: string
+  total_balance: string
+  total_deposited: string
+  total_withdrawn: string
+  available_usd: number
+  locked_usd: number
+  total_usd: number
+  demo_credits?: string // Only for demo tokens
+}
+
+// Real/Demo balance summary interface
+export interface BalanceSummary {
   total_available_usd: number
   total_locked_usd: number
   total_balance_usd: number
   token_count: number
   tokens: {
-    [tokenSymbol: string]: {
-      available_balance: string
-      locked_balance: string
-      total_balance: string
-      total_deposited: string
-      total_withdrawn: string
-      available_usd: number
-      locked_usd: number
-      total_usd: number
-    }
+    [tokenSymbol: string]: TokenBalance
   }
+}
+
+// Main balance summary interface
+export interface WalletBalanceSummary {
+  account_id: number
+  real: BalanceSummary
+  demo: BalanceSummary
+  total_available_usd: number
+  total_locked_usd: number
+  total_balance_usd: number
+  token_count: number
 }
 
 // Types cho Deposit (dựa trên deposit.route.js)

@@ -19,6 +19,9 @@ interface WalletStoreState {
   depositAddresses: DepositAddress[]
   depositStats: DepositStats | null
   
+  // Betting mode
+  bettingMode: 'real' | 'demo'
+  
   // Loading states
   balanceLoading: boolean
   depositsLoading: boolean
@@ -44,6 +47,7 @@ interface WalletStoreState {
     page?: number
     limit?: number
   }) => Promise<void>
+  refreshBalanceSummary: () => Promise<void>
   refreshDeposits: () => Promise<void>
   refreshWithdrawals: () => Promise<void>
   fetchDepositAddresses: () => Promise<void>
@@ -59,6 +63,9 @@ interface WalletStoreState {
     twoFactorToken?: string
     memo?: string
   }) => Promise<void>
+  
+  // Betting mode actions
+  setBettingMode: (mode: 'real' | 'demo') => void
   
   // Utility actions
   clearBalanceError: () => void
@@ -76,6 +83,7 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
   withdrawals: [],
   depositAddresses: [],
   depositStats: null,
+  bettingMode: 'demo', // Default to demo mode
   balanceLoading: false,
   depositsLoading: false,
   withdrawalsLoading: false,
@@ -166,6 +174,20 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
       
       // Emit error event
       storeCommunication.emitError(errorMessage, 'wallet-store')
+    }
+  },
+
+  // Refresh balance summary without loading state (for auto-refresh)
+  refreshBalanceSummary: async () => {
+    try {
+      const balanceSummary = await walletAPI.getBalanceSummary()
+      set({ balanceSummary })
+      
+      // Emit event để thông báo cho các components khác
+      storeCommunication.emitWalletBalanceUpdated(balanceSummary)
+    } catch (error) {
+      // Silent error for auto-refresh - don't show loading or error states
+      console.warn('Auto-refresh balance summary failed:', error)
     }
   },
 
@@ -279,6 +301,14 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
     }
   },
 
+  // Set betting mode
+  setBettingMode: (mode: 'real' | 'demo') => {
+    set({ bettingMode: mode })
+    
+    // Emit event để thông báo betting mode đã thay đổi
+    storeCommunication.emitBettingModeChanged(mode)
+  },
+
   // Clear errors
   clearBalanceError: () => set({ balanceError: null }),
   clearDepositsError: () => set({ depositsError: null }),
@@ -293,6 +323,7 @@ export const useWalletStore = create<WalletStoreState>((set, get) => ({
     withdrawals: [],
     depositAddresses: [],
     depositStats: null,
+    bettingMode: 'demo', // Reset to demo mode
     balanceLoading: false,
     depositsLoading: false,
     withdrawalsLoading: false,

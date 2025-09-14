@@ -12,6 +12,11 @@ export type StoreEventType =
   | 'WALLET_DEPOSIT_CREATED'
   | 'WALLET_WITHDRAWAL_CREATED'
   | 'WALLET_TRANSFER_COMPLETED'
+  | 'BETTING_ACTIVE_ORDERS_UPDATED'
+  | 'BETTING_HISTORY_UPDATED'
+  | 'BETTING_KLINE_UPDATED'
+  | 'BETTING_ORDER_PLACED'
+  | 'BETTING_MODE_CHANGED'
   | 'USER_LOGGED_IN'
   | 'USER_LOGGED_OUT'
   | 'ERROR_OCCURRED'
@@ -154,6 +159,52 @@ class StoreCommunication {
     })
   }
 
+  // Betting events
+  emitBettingActiveOrdersUpdated(orders: any[]) {
+    this.emit({
+      type: 'BETTING_ACTIVE_ORDERS_UPDATED',
+      payload: orders,
+      source: 'betting-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitBettingHistoryUpdated(orders: any[]) {
+    this.emit({
+      type: 'BETTING_HISTORY_UPDATED',
+      payload: orders,
+      source: 'betting-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitBettingKlineUpdated(kline: any) {
+    this.emit({
+      type: 'BETTING_KLINE_UPDATED',
+      payload: kline,
+      source: 'betting-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitBettingOrderPlaced(order: any) {
+    this.emit({
+      type: 'BETTING_ORDER_PLACED',
+      payload: order,
+      source: 'betting-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitBettingModeChanged(mode: 'real' | 'demo') {
+    this.emit({
+      type: 'BETTING_MODE_CHANGED',
+      payload: mode,
+      source: 'wallet-store',
+      timestamp: Date.now()
+    })
+  }
+
   // Auth events
   emitUserLoggedIn(user: any) {
     this.emit({
@@ -201,6 +252,11 @@ export const useStoreCommunication = () => {
     emitWalletDepositCreated: storeCommunication.emitWalletDepositCreated.bind(storeCommunication),
     emitWalletWithdrawalCreated: storeCommunication.emitWalletWithdrawalCreated.bind(storeCommunication),
     emitWalletTransferCompleted: storeCommunication.emitWalletTransferCompleted.bind(storeCommunication),
+    emitBettingActiveOrdersUpdated: storeCommunication.emitBettingActiveOrdersUpdated.bind(storeCommunication),
+    emitBettingHistoryUpdated: storeCommunication.emitBettingHistoryUpdated.bind(storeCommunication),
+    emitBettingKlineUpdated: storeCommunication.emitBettingKlineUpdated.bind(storeCommunication),
+    emitBettingOrderPlaced: storeCommunication.emitBettingOrderPlaced.bind(storeCommunication),
+    emitBettingModeChanged: storeCommunication.emitBettingModeChanged.bind(storeCommunication),
     emitUserLoggedIn: storeCommunication.emitUserLoggedIn.bind(storeCommunication),
     emitUserLoggedOut: storeCommunication.emitUserLoggedOut.bind(storeCommunication),
     emitError: storeCommunication.emitError.bind(storeCommunication),

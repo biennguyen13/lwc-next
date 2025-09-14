@@ -45,14 +45,13 @@ export default function WalletMainPage() {
   // Auto-refresh data every 15 seconds (without loading states to prevent UI flicker)
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchBalanceSummary()
       refreshDeposits()
       refreshWithdrawals()
     }, 15000) // 15 seconds
 
     // Cleanup interval on component unmount
     return () => clearInterval(interval)
-  }, [fetchBalanceSummary, refreshDeposits, refreshWithdrawals])
+  }, [])
 
   // Calculate stats
   const totalDeposits = deposits?.reduce((sum, deposit) => sum + parseFloat(deposit.amount || '0'), 0) || 0
@@ -66,7 +65,9 @@ export default function WalletMainPage() {
         {/* Wallet Header */}
         <WalletHeader
           className="max-w-6xl mx-auto p-4"
-          totalBalance={balanceSummary?.total_balance_usd || 0}
+          totalBalance={balanceSummary?.real?.tokens?.USDT?.total_balance 
+            ? parseFloat(balanceSummary.real.tokens.USDT.total_balance) 
+            : 0}
           isBalanceHidden={isBalanceHidden}
           onToggleBalance={() => setIsBalanceHidden(!isBalanceHidden)}
         />
@@ -87,8 +88,12 @@ export default function WalletMainPage() {
               <WalletCard 
                 currency="USDT"
                 currencyName="Tether"
-                balance={balanceSummary?.tokens?.USDT?.total_balance ? parseFloat(balanceSummary.tokens.USDT.total_balance) : 0}
-                usdValue={balanceSummary?.tokens?.USDT?.total_usd || 0}
+                balance={
+                  balanceSummary?.real?.tokens?.USDT?.total_balance 
+                    ? parseFloat(balanceSummary.real.tokens.USDT.total_balance) 
+                    : 0
+                }
+                usdValue={balanceSummary?.real?.tokens?.USDT?.total_usd || 0}
                 isBalanceHidden={isBalanceHidden}
                 onDeposit={() => setIsDepositDialogOpen(true)}
                 onWithdraw={() => setIsWithdrawDialogOpen(true)}
@@ -122,7 +127,11 @@ export default function WalletMainPage() {
         isOpen={isWithdrawDialogOpen}
         onClose={() => setIsWithdrawDialogOpen(false)}
         currency="USDT"
-        availableBalance={balanceSummary?.tokens?.USDT?.available_balance ? parseFloat(balanceSummary.tokens.USDT.available_balance) : 0}
+        availableBalance={
+          balanceSummary?.real?.tokens?.USDT?.available_balance 
+            ? parseFloat(balanceSummary.real.tokens.USDT.available_balance) 
+            : 0
+        }
       />
     </div>
   )

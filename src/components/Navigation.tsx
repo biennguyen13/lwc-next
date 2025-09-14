@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -9,12 +9,41 @@ import {
   User, 
   Bell, 
   Download,
-  Gift
+  Gift,
+  ArrowLeftRight,
+  RotateCcw
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useWalletStore } from "@/stores"
 
 export function Navigation() {
   const [notificationCount] = useState(148) // Mock notification count
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode } = useWalletStore()
+  
+  // Get real and demo balances
+  const realBalance = balanceSummary?.real?.total_balance_usd || 0
+  const demoBalance = balanceSummary?.demo?.total_balance_usd || 0
+  
+  // Get current active balance
+  const currentBalance = bettingMode === 'real' ? realBalance : demoBalance
+  
+  // Handle account change and close dropdown
+  const handleAccountChange = (account: 'real' | 'demo') => {
+    setBettingMode(account)
+    setIsDropdownOpen(false)
+  }
+
+  // Auto-refresh balance summary every 15 seconds
+  useEffect(() => {
+    refreshBalanceSummary()
+    const interval = setInterval(() => {
+      refreshBalanceSummary()
+    }, 15000) // 15 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gray-800 border-b border-gray-700 px-6 h-[65px] flex items-center justify-between">
@@ -41,8 +70,8 @@ export function Navigation() {
             </div>
           </Badge>
 
-          {/* Demo Account Balance */}
-          <DropdownMenu>
+          {/* Account Balance Dropdown */}
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline" 
@@ -50,20 +79,68 @@ export function Navigation() {
               >
                 <div className="flex items-center space-x-2">
                   <div className="text-center">
-                    <div className="text-xs text-gray-300">Tài khoản Demo</div>
-                    <div className="text-sm font-semibold">$3,197.97</div>
+                    <div className="text-xs text-gray-300">
+                      {bettingMode === 'real' ? 'Tài khoản Thật' : 'Tài khoản Demo'}
+                    </div>
+                    <div className="text-sm font-semibold">
+                      ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700">
-              <DropdownMenuItem className="text-white hover:bg-gray-700">
-                Chuyển sang tài khoản thật
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-white hover:bg-gray-700">
-                Cài đặt tài khoản
-              </DropdownMenuItem>
+            <DropdownMenuContent className="w-72 bg-gray-800 border-gray-700">
+              {/* Real Account Section */}
+              <div className="px-4 py-3 border-b border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleAccountChange('real')}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                      bettingMode === 'real' ? 'bg-orange-500' : 'bg-gray-500'
+                    }`}>
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-300 font-medium">Tài khoản thực</div>
+                      <div className="text-sm  text-gray-300">
+                        ${realBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg"
+                  >
+                    <ArrowLeftRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Demo Account Section */}
+              <div className="px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3 cursor-pointer"  onClick={() => handleAccountChange('demo')}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                      bettingMode === 'demo' ? 'bg-orange-500' : 'bg-gray-500'
+                    }`}>
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-300 font-medium">Tài khoản Demo</div>
+                      <div className="text-sm  text-gray-300">
+                        ${demoBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-gray-600 text-white hover:bg-gray-700 p-2 rounded-full"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
 

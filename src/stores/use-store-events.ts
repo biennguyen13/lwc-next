@@ -57,6 +57,23 @@ export const useWalletTransferEvents = (callback: (transfer: any) => void) => {
   return useStoreEvents("WALLET_TRANSFER_COMPLETED", callback)
 }
 
+// Hook để lắng nghe betting events
+export const useBettingActiveOrdersEvents = (callback: (orders: any) => void) => {
+  return useStoreEvents("BETTING_ACTIVE_ORDERS_UPDATED", callback)
+}
+
+export const useBettingHistoryEvents = (callback: (orders: any) => void) => {
+  return useStoreEvents("BETTING_HISTORY_UPDATED", callback)
+}
+
+export const useBettingKlineEvents = (callback: (kline: any) => void) => {
+  return useStoreEvents("BETTING_KLINE_UPDATED", callback)
+}
+
+export const useBettingOrderPlacedEvents = (callback: (order: any) => void) => {
+  return useStoreEvents("BETTING_ORDER_PLACED", callback)
+}
+
 // Hook để lắng nghe error events
 export const useErrorEvents = (callback: (error: any) => void) => {
   return useStoreEvents("ERROR_OCCURRED", callback)
@@ -85,6 +102,10 @@ export const useAllStoreEvents = (callback: (event: any) => void) => {
       "WALLET_DEPOSIT_CREATED",
       "WALLET_WITHDRAWAL_CREATED",
       "WALLET_TRANSFER_COMPLETED",
+      "BETTING_ACTIVE_ORDERS_UPDATED",
+      "BETTING_HISTORY_UPDATED",
+      "BETTING_KLINE_UPDATED",
+      "BETTING_ORDER_PLACED",
       "USER_LOGGED_IN",
       "USER_LOGGED_OUT",
       "ERROR_OCCURRED",

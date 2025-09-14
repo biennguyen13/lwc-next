@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
 import { useStoreCommunication } from "@/stores/store-communication"
-import { useBinance30sCandlesEvents } from "@/stores"
+import { useBinance30sCandlesEvents, useBettingStore, useWalletStore } from "@/stores"
+import { toast } from "@/hooks/use-toast"
 
 interface TradingPanelProps {
   currentPrice?: number
@@ -96,6 +97,12 @@ export default function TradingPanel({
   
   // Store communication
   const { subscribe } = useStoreCommunication()
+  
+  // Betting store
+  const { placeOrder, placeOrderLoading } = useBettingStore()
+  
+  // Wallet store for betting mode
+  const { bettingMode, refreshBalanceSummary } = useWalletStore()
 
   // Listen to realtime updates
   useEffect(() => {
@@ -195,22 +202,84 @@ export default function TradingPanel({
     setValue(1000) // Set to a high value for "All"
   }
 
-  const handleIncrease = () => {
+  const handleIncrease = async () => {
     if (!isBettingTime) {
       console.log("❌ Cannot place order - betting time is over")
+      toast({
+        title: "Không thể đặt lệnh",
+        description: "Thời gian đặt lệnh đã kết thúc",
+        variant: "destructive",
+      })
       return
     }
-    console.log("✅ TĂNG - Buy order placed with value:", value)
-    // Add your buy logic here
+
+    try {
+      console.log("✅ TĂNG - Buy order placed with value:", value)
+      
+      const result = await placeOrder({
+        symbol: "BTCUSDT",
+        order_type: "BUY",
+        amount: value,
+        mode: bettingMode
+      })
+
+      toast({
+        title: "Đặt lệnh thành công",
+        description: `Lệnh BUY ${value} USDT đã được đặt thành công`,
+      })
+
+      // Refresh wallet balance summary after successful order
+      await refreshBalanceSummary()
+
+      console.log("Order placed successfully:", result)
+    } catch (error) {
+      console.error("Failed to place BUY order:", error)
+      toast({
+        title: "Đặt lệnh thất bại",
+        description: error instanceof Error ? error.message : "Có lỗi xảy ra khi đặt lệnh",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleDecrease = () => {
+  const handleDecrease = async () => {
     if (!isBettingTime) {
       console.log("❌ Cannot place order - betting time is over")
+      toast({
+        title: "Không thể đặt lệnh",
+        description: "Thời gian đặt lệnh đã kết thúc",
+        variant: "destructive",
+      })
       return
     }
-    console.log("✅ GIẢM - Sell order placed with value:", value)
-    // Add your sell logic here
+
+    try {
+      console.log("✅ GIẢM - Sell order placed with value:", value)
+      
+      const result = await placeOrder({
+        symbol: "BTCUSDT",
+        order_type: "SELL",
+        amount: value,
+        mode: bettingMode
+      })
+
+      toast({
+        title: "Đặt lệnh thành công",
+        description: `Lệnh SELL ${value} USDT đã được đặt thành công`,
+      })
+
+      // Refresh wallet balance summary after successful order
+      await refreshBalanceSummary()
+
+      console.log("Order placed successfully:", result)
+    } catch (error) {
+      console.error("Failed to place SELL order:", error)
+      toast({
+        title: "Đặt lệnh thất bại",
+        description: error instanceof Error ? error.message : "Có lỗi xảy ra khi đặt lệnh",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -305,14 +374,23 @@ export default function TradingPanel({
         {/* TĂNG Button */}
         <button
           onClick={handleIncrease}
-          disabled={!isBettingTime}
+          disabled={!isBettingTime || placeOrderLoading}
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
-            isBettingTime 
+            isBettingTime && !placeOrderLoading
               ? 'bg-green-600 hover:bg-green-500 text-white' 
               : 'bg-gray-400 text-gray-200 cursor-not-allowed'
           }`}
         >
-          TĂNG <TrendingUp className="w-5 h-5" />
+          {placeOrderLoading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Đang đặt lệnh...
+            </>
+          ) : (
+            <>
+              TĂNG <TrendingUp className="w-5 h-5" />
+            </>
+          )}
         </button>
 
         {/* Place Order Button */}
@@ -326,14 +404,23 @@ export default function TradingPanel({
         {/* GIẢM Button */}
         <button
           onClick={handleDecrease}
-          disabled={!isBettingTime}
+          disabled={!isBettingTime || placeOrderLoading}
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
-            isBettingTime 
+            isBettingTime && !placeOrderLoading
               ? 'bg-red-500 hover:bg-red-600 text-white' 
               : 'bg-gray-400 text-gray-200 cursor-not-allowed'
           }`}
         >
-          GIẢM <TrendingDown className="w-5 h-5" />
+          {placeOrderLoading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Đang đặt lệnh...
+            </>
+          ) : (
+            <>
+              GIẢM <TrendingDown className="w-5 h-5" />
+            </>
+          )}
         </button>
       </div>
     </div>
