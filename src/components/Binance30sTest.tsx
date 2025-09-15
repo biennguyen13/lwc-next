@@ -4,7 +4,7 @@ import React from "react"
 import { useBinance30sStore, useBinance30sCandlesEvents, useBinance30sStatsEvents, useBinance30sLatestEvents } from "@/stores"
 
 export const Binance30sTest: React.FC = () => {
-  const { fetchCandles, fetchStats, fetchLatestCandles } = useBinance30sStore()
+  const { fetchCandles, fetchStats,  } = useBinance30sStore()
 
   // Listen to events
   useBinance30sCandlesEvents((candles) => {
@@ -29,11 +29,6 @@ export const Binance30sTest: React.FC = () => {
     fetchStats("BTCUSDT")
   }
 
-  const handleTestLatest = () => {
-    console.log("🔄 Fetching latest candles...")
-    fetchLatestCandles({ symbol: "BTCUSDT", count: 3 })
-  }
-
   return (
     <div className="p-6 space-y-4">
       <h2 className="text-xl font-bold">Binance 30s Event Test</h2>
@@ -52,13 +47,6 @@ export const Binance30sTest: React.FC = () => {
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
           Test Fetch Stats
-        </button>
-        
-        <button
-          onClick={handleTestLatest}
-          className="bg-purple-500 text-white px-4 py-2 rounded"
-        >
-          Test Fetch Latest
         </button>
       </div>
       

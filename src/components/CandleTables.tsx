@@ -39,7 +39,7 @@ const CandleCell = ({
     <div className="relative group">
       <div
         className={`
-          w-4 h-4 xl:w-6 xl:h-6 rounded-full border-2 transition-all duration-200
+          w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 rounded-full border-2 transition-all duration-200
           ${
             isActive
               ? color === "green"

@@ -152,7 +152,7 @@ export const ErrorListener: React.FC = () => {
 
 // Component tổng hợp để sử dụng trong app
 export const StoreEventManager: React.FC = () => {
-  const { fetchCandles, fetchStats, fetchLatestCandles } = useBinance30sStore()
+  const { fetchCandles, fetchStats,  } = useBinance30sStore()
 
   return (
     <>
@@ -176,12 +176,6 @@ export const StoreEventManager: React.FC = () => {
             className="bg-green-500 text-white px-3 py-1 rounded text-sm"
           >
             Fetch Stats
-          </button>
-          <button 
-            onClick={() => fetchLatestCandles({ symbol: "BTCUSDT", count: 5 })}
-            className="bg-purple-500 text-white px-3 py-1 rounded text-sm"
-          >
-            Fetch Latest
           </button>
         </div>
       </div> */}

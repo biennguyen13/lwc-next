@@ -15,7 +15,7 @@ export default function Home() {
   ) // Main tab state
 
   return (
-    <main className="min-h-screen p-1 bg-gray-50 dark:bg-gray-900 transition-colors">
+    <main className="p-1 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
         {/* Binance 30s Test Component */}
         {/* <div className="mb-8">

@@ -34,7 +34,6 @@ interface Binance30sStoreState {
     limit?: number
   }) => Promise<void>
   fetchStats: (symbol?: string) => Promise<void>
-  fetchLatestCandles: (params?: { symbol?: string; count?: number }) => Promise<void>
   fetchCandleTables: (symbol?: string) => Promise<void>
   
   // Socket actions
@@ -96,23 +95,6 @@ export const useBinance30sStore = create<Binance30sStoreState>((set) => ({
       set({
         statsLoading: false,
         statsError: error?.message || "Lấy thống kê nến 30s thất bại",
-      })
-    }
-  },
-
-  // Fetch latest candles
-  fetchLatestCandles: async (params = {}) => {
-    set({ latestCandlesLoading: true, latestCandlesError: null })
-    try {
-      const data = await binance30sAPI.getLatestCandles(params)
-      set({ latestCandles: data, latestCandlesLoading: false })
-      
-      // Emit event khi fetch latest candles thành công
-      storeCommunication.emitBinance30sLatestUpdated(data)
-    } catch (error: any) {
-      set({
-        latestCandlesLoading: false,
-        latestCandlesError: error?.message || "Lấy nến 30s gần nhất thất bại",
       })
     }
   },
