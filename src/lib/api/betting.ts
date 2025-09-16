@@ -7,10 +7,11 @@ export interface BettingOrder {
   symbol: string
   order_type: 'BUY' | 'SELL'
   amount: number
+  mode: 'real' | 'demo'
   kline_open_time: number
   kline_close_time: number
   open_price: number
-  status: 'PENDING' | 'WIN' | 'LOSE' | 'CANCELLED'
+  status: 'PENDING' | 'WIN' | 'LOSE' | 'CANCELLED' | 'ACTIVE' | 'COMPLETED'
   created_at: string
   completed_at?: string
   result?: number

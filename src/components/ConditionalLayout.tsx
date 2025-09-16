@@ -7,45 +7,52 @@ import { Sidebar } from "@/components/Sidebar"
 import { UserMenu } from "@/components/UserMenu"
 import { StoreEventManager } from "@/stores/store-communication-usage"
 import { Toaster } from "@/components/ui"
+import { ActiveOrdersProvider, useActiveOrders } from "@/contexts/ActiveOrdersContext"
 
 interface ConditionalLayoutProps {
   children: React.ReactNode
 }
 
-export function ConditionalLayout({ children }: ConditionalLayoutProps) {
+function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
   const { isAuthenticated, isLoading } = useAuthStore()
   const [mounted, setMounted] = useState(false)
+  const { isActiveOrdersOpen, toggleActiveOrders } = useActiveOrders()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // If user is not authenticated, show children without navigation/sidebar
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-900">
-        <StoreEventManager />
-        <main>
-          {children}
-        </main>
-        <Toaster />
-      </div>
-    )
-  }
-
   // If user is authenticated, show full layout with navigation and sidebar
   return (
-    <div className="min-h-screen bg-gray-900">
-      <Navigation />
-      <Sidebar />
-      {/* <div className="fixed top-4 right-4 z-50 flex items-center space-x-2">
-        <UserMenu />
-      </div> */}
+    <div className="min-h-screen bg-gray-900  pt-[65px]">
+      {
+        isAuthenticated && 
+        <Navigation 
+          onToggleActiveOrders={toggleActiveOrders}
+          isActiveOrdersOpen={isActiveOrdersOpen}
+        />
+      }
       <StoreEventManager />
-      <main className="pt-[65px] pl-[95px]">
-        {children}
+      <main className="flex">
+        {
+          isAuthenticated && 
+          <Sidebar />
+        }
+        <div className="flex-1">
+          {children}
+        </div>
       </main>
       <Toaster />
     </div>
+  )
+}
+
+export function ConditionalLayout({ children }: ConditionalLayoutProps) {
+  return (
+    <ActiveOrdersProvider>
+      <ConditionalLayoutContent>
+        {children}
+      </ConditionalLayoutContent>
+    </ActiveOrdersProvider>
   )
 }

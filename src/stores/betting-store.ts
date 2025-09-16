@@ -157,7 +157,7 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
       storeCommunication.emitBettingOrderPlaced(result.order)
       
       // Refresh active orders after successful order placement
-      // await get().fetchActiveOrders({ mode: params.mode })
+      await get().fetchActiveOrders({})
       
       set({ placeOrderLoading: false })
       return result

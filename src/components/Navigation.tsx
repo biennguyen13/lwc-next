@@ -11,13 +11,19 @@ import {
   Download,
   Gift,
   ArrowLeftRight,
-  RotateCcw
+  RotateCcw,
+  MoreVertical
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useWalletStore } from "@/stores"
 import { useToast } from "@/hooks/use-toast"
 
-export function Navigation() {
+interface NavigationProps {
+  onToggleActiveOrders?: () => void
+  isActiveOrdersOpen?: boolean
+}
+
+export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: NavigationProps) {
   const [notificationCount] = useState(148) // Mock notification count
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
@@ -238,6 +244,21 @@ export function Navigation() {
               )}
             </div>
             <span className="text-xs text-gray-300">Thông báo</span>
+          </div>
+
+          {/* Three Dots Menu */}
+          <div className="flex flex-col items-center space-y-1">
+            <div className="relative">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={onToggleActiveOrders}
+                className={`text-white hover:bg-gray-700 p-2 ${isActiveOrdersOpen ? 'bg-gray-700' : ''}`}
+              >
+                <MoreVertical className="w-5 h-5" />
+              </Button>
+            </div>
+            <span className="text-xs text-gray-300">Menu</span>
           </div>
         </div>
       </div>

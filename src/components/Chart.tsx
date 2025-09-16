@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { createChart, IChartApi, CandlestickData, HistogramData, LineStyle } from 'lightweight-charts';
 import { useTheme } from './ThemeProvider';
 import { HLCAreaSeries, HLCAreaData } from './HLCAreaSeries';
 import { useBinance30sStore } from '@/stores';
 import { SocketKlineMessage, BinanceCandle } from '@/lib/api/binance-30s';
 import { io } from 'socket.io-client';
+import { useActiveOrders } from '@/contexts/ActiveOrdersContext';
 
 // Types for socket data (legacy - keeping for backward compatibility)
 interface KlineData {
@@ -35,7 +36,6 @@ interface ChartProps {
   candlestickData: CandlestickData[];
   hlcData: HLCAreaData[];
   volumeData: HistogramData[];
-  title?: string;
   preserveZoom?: boolean; // Thêm prop để control việc giữ zoom
   enableRealTime?: boolean; // Thêm prop để enable/disable real-time updates
   symbol?: string; // Thêm prop để filter symbol
@@ -61,7 +61,7 @@ const expansionFactor = 0; // Mở rộng thêm 30%
 const getChartHeight = (): number => {
   const viewportHeight = window.innerHeight;
   const calculatedHeight = viewportHeight * 0.66; // 75% of viewport height
-  const maxHeight = 800;
+  const maxHeight = calculatedHeight;
   const minHeight = 350;
   
   return Math.min(Math.max(calculatedHeight, minHeight), maxHeight);
@@ -153,7 +153,6 @@ export default function Chart({
   candlestickData, 
   hlcData, 
   volumeData, 
-  title = 'Biểu đồ giá', 
   preserveZoom = false,
   enableRealTime = true,
   symbol = 'BTCUSDT',
@@ -178,6 +177,9 @@ export default function Chart({
   const hlcSeriesRef = useRef<any>(null);
   const volumeSeriesRef = useRef<any>(null);
   const ma5SeriesRef = useRef<any>(null);
+  
+  // Get active orders context
+  const { isActiveOrdersOpen } = useActiveOrders();
   const ma15SeriesRef = useRef<any>(null);
   const ma10SeriesRef = useRef<any>(null);
   const fakeSeriesRef = useRef<any>(null); // Thêm ref cho fake series
@@ -901,27 +903,34 @@ export default function Chart({
   },[])
 
   // Handle resize with dynamic offset calculation
-  useEffect(() => {
-    const handleResize = () => {
-      if (chartContainerRef.current) {
-        const newContainerWidth = chartContainerRef.current.clientWidth;
-        // Always update container width to trigger re-render
-        setContainerWidth(newContainerWidth);
-        
-        // Resize chart
-        if (chartRef.current) {
-          chartRef.current.resize(newContainerWidth, getChartHeight());
-        }
+  const handleResize = useCallback(() => {
+    if (chartContainerRef.current) {
+      const newContainerWidth = chartContainerRef.current.clientWidth;
+      // Always update container width to trigger re-render
+      setContainerWidth(newContainerWidth);
+      
+      // Resize chart
+      if (chartRef.current) {
+        chartRef.current.resize(newContainerWidth, getChartHeight());
       }
-    };
+    }
+  }, [currentOffset, containerWidth]);
 
+  useEffect(() => {
     // Initial calculation
     handleResize();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [currentOffset, containerWidth]);
+  }, [handleResize]);
 
+  // Handle active orders panel toggle
+  useEffect(() => {
+    setTimeout(() => {
+      handleResize();
+    }, 25);
+    handleResize();
+  }, [isActiveOrdersOpen, handleResize]);
 
   return (
     <div className="w-full">

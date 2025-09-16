@@ -698,7 +698,7 @@ export default function GaugeIndicators({
   return (
     <div className="w-full">
       {/* Gauge indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid gap-6 gauge-indicators-grid">
         {currentData.map((gaugeData, index) => (
           <GaugeIndicator key={index} data={gaugeData} />
         ))}

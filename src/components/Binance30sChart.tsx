@@ -150,7 +150,6 @@ export default function Binance30sChart({
       candlestickData={chartData.candlestickData}
       hlcData={[]}
       volumeData={chartData.volumeData}
-      title={`${symbol} 30s Candles - ${candles.length} data points`}
       preserveZoom={true} // Giữ nguyên zoom khi refresh
       enableRealTime={true}
       candleWidth={15}

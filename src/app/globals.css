@@ -115,4 +115,72 @@ body {
   * {
     @apply border-border;
   }
+}
+
+/* Custom Scrollbar Styles - Thin and Minimal */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+*::-webkit-scrollbar-corner {
+  background: #1f2937;
+}
+
+/* Light mode scrollbar */
+.light * {
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.light *::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+.light *::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+.light *::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.light *::-webkit-scrollbar-corner {
+  background: #f9fafb;
+}
+
+/* Responsive Grid for CandleTables */
+.candle-tables-grid {
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+@media (min-width: 768px) {
+  .candle-tables-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Responsive Grid for GaugeIndicators */
+.gauge-indicators-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 } 

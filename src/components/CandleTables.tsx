@@ -5,6 +5,7 @@ import { useBinance30sStore } from "@/stores/binance-30s-store"
 import { CandleTable, Binance30sCandle } from "@/lib/api/binance-30s"
 import { useTheme } from "./ThemeProvider"
 import { TrendingUp, TrendingDown } from "lucide-react"
+import { useActiveOrders } from "@/contexts/ActiveOrdersContext"
 
 interface CandleTablesProps {
   symbol?: string
@@ -28,10 +29,12 @@ const CandleCell = ({
   candle,
   isActive = true,
   index = 0,
+  isActiveOrdersOpen = false,
 }: {
   candle: Binance30sCandle
   isActive?: boolean
   index?: number
+  isActiveOrdersOpen?: boolean
 }) => {
   const color = getCandleColor(candle)
 
@@ -61,6 +64,7 @@ const CandleCell = ({
 
       {/* Tooltip */}
       {
+        process.env.NODE_ENV === "development" && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-20 min-w-[200px] border border-gray-200 dark:border-gray-600 backdrop-blur-sm">
           <div className="font-mono space-y-1">
             <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-600">
@@ -146,6 +150,7 @@ const CandleCell = ({
           {/* Arrow */}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-t-6 border-transparent border-t-white dark:border-t-gray-800"></div>
         </div>
+      )
       }
     </div>
   )
@@ -155,9 +160,11 @@ const CandleCell = ({
 const CandleTableComponent = ({
   table,
   tableIndex,
+  isActiveOrdersOpen = false,
 }: {
   table: CandleTable
   tableIndex: number
+  isActiveOrdersOpen?: boolean
 }) => {
   const [candles, setCandles] = useState<Binance30sCandle[]>([])
 
@@ -182,7 +189,7 @@ const CandleTableComponent = ({
         row.push(
           <div key={`${i}-${j}`} className="flex justify-center items-center">
             {candle ? (
-              <CandleCell candle={candle} isActive={true} index={index} />
+              <CandleCell candle={candle} isActive={true} index={index} isActiveOrdersOpen={isActiveOrdersOpen} />
             ) : (
               <CandleCell
                 candle={{
@@ -203,6 +210,7 @@ const CandleTableComponent = ({
                 }}
                 isActive={false}
                 index={index}
+                isActiveOrdersOpen={isActiveOrdersOpen}
               />
             )}
           </div>
@@ -276,6 +284,7 @@ export default function CandleTables({
   } = useBinance30sStore()
 
   const { theme } = useTheme()
+  const { isActiveOrdersOpen } = useActiveOrders()
   const [currentSymbol, setCurrentSymbol] = useState(symbol)
 
   // Calculate stats from candle tables
@@ -301,6 +310,12 @@ export default function CandleTables({
   }
 
   const stats = calculateStats()
+
+  // Handle active orders panel toggle
+  useEffect(() => {
+    console.log('CandleTables - Active orders panel toggled:', isActiveOrdersOpen)
+    // TODO: Implement any logic needed when active orders panel opens/closes
+  }, [isActiveOrdersOpen])
 
   // Fetch data khi component mount hoặc symbol thay đổi
   useEffect(() => {
@@ -368,12 +383,13 @@ export default function CandleTables({
 
         {/* Tables Grid */}
         {candleTables && candleTables.length > 0 && (
-          <div className="grid grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-4">
+          <div className="grid gap-4 lg:gap-6 candle-tables-grid">
             {candleTables.map((table, index) => (
               <CandleTableComponent
                 key={table.table_key}
                 table={table}
                 tableIndex={index}
+                isActiveOrdersOpen={isActiveOrdersOpen}
               />
             ))}
           </div>

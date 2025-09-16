@@ -6,6 +6,8 @@ import Binance30sChart from "@/components/Binance30sChart"
 import CandleTables from "@/components/CandleTables"
 import GaugeIndicators from "@/components/GaugeIndicators"
 import TradingPanel from "@/components/TradingPanel"
+import { ActiveOrdersPanel } from "@/components/ActiveOrdersPanel"
+import { useActiveOrders } from "@/contexts/ActiveOrdersContext"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -13,19 +15,30 @@ export default function Home() {
   const [activeMainTab, setActiveMainTab] = useState<"gauges" | "candles">(
     "gauges"
   ) // Main tab state
+  const { isActiveOrdersOpen, closeActiveOrders } = useActiveOrders()
+  const offsetWidth = '200px'
 
   return (
-    <main className="p-1 bg-gray-50 dark:bg-gray-900 transition-colors">
+    <main className="p-1 pr-0 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
         {/* Binance 30s Test Component */}
         {/* <div className="mb-8">
           <Binance30sTest />
         </div> */}
 
-        {/* Chart and Trading Panel Layout */}
-        <div className="mb-6 md:mb-8 flex">
+        {/* Chart, Trading Panel, and Active Orders Layout */}
+        <div 
+          className="mb-6 md:mb-8 min-h-[calc(100vh-120px)] transition-all duration-500"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isActiveOrdersOpen 
+              ? `1fr ${offsetWidth} ${offsetWidth}` 
+              : `1fr ${offsetWidth} 0px`,
+            gap: '0'
+          }}
+        >
           {/* Chart Area */}
-          <div className="flex-1 w-[calc(100vw-210px-24px-95px)]">
+          <div className="min-w-0">
             <Binance30sChart
               limit={200}
               symbol="BTCUSDT"
@@ -33,7 +46,7 @@ export default function Home() {
             />
 
             {/* Tabs Container */}
-            <div className="my-2 md:my-8 px-6">
+            <div className="my-2 md:my-8 px-1 lg:px-6">
               {/* Tab Navigation */}
               <div className="flex items-center gap-6 mb-6">
                 <button
@@ -74,9 +87,15 @@ export default function Home() {
           </div>
 
           {/* Trading Panel */}
-          <div className="flex-shrink-0 w-[210px]">
+          <div className="flex-shrink-0">
             <TradingPanel/>
           </div>
+
+          {/* Active Orders Panel */}
+          <ActiveOrdersPanel 
+            isOpen={isActiveOrdersOpen}
+            onClose={closeActiveOrders}
+          />
         </div>
       </div>
     </main>
