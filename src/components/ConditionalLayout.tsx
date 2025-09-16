@@ -24,7 +24,7 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
 
   // If user is authenticated, show full layout with navigation and sidebar
   return (
-    <div className="min-h-screen bg-gray-900  pt-[65px]">
+    <div className="min-h-screen bg-gray-900 pt-[65px]">
       {
         isAuthenticated && 
         <Navigation 

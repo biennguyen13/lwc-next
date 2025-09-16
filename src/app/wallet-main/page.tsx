@@ -15,7 +15,6 @@ import { TrendingUp, TrendingDown, Activity, Shield, Zap } from "lucide-react"
 export default function WalletMainPage() {
   const [activeWalletTab, setActiveWalletTab] = useState<"main" | "trading">("main")
   const [activeHistoryTab, setActiveHistoryTab] = useState<"usdt" | "commission">("usdt")
-  const [isBalanceHidden, setIsBalanceHidden] = useState(false)
   const [isDepositDialogOpen, setIsDepositDialogOpen] = useState(false)
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false)
 
@@ -68,8 +67,6 @@ export default function WalletMainPage() {
           totalBalance={balanceSummary?.real?.tokens?.USDT?.total_balance 
             ? parseFloat(balanceSummary.real.tokens.USDT.total_balance) 
             : 0}
-          isBalanceHidden={isBalanceHidden}
-          onToggleBalance={() => setIsBalanceHidden(!isBalanceHidden)}
         />
       </div>
 
@@ -94,7 +91,6 @@ export default function WalletMainPage() {
                     : 0
                 }
                 usdValue={balanceSummary?.real?.tokens?.USDT?.total_usd || 0}
-                isBalanceHidden={isBalanceHidden}
                 onDeposit={() => setIsDepositDialogOpen(true)}
                 onWithdraw={() => setIsWithdrawDialogOpen(true)}
               />

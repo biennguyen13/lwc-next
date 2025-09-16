@@ -314,7 +314,7 @@ export default function TradingPanel({
         <div className="flex items-center gap-1">
           <button
             onClick={() => handleValueChange(Math.max(0, value - 5))}
-            className="w-10 h-10 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded flex items-center justify-center transition-colors"
+            className="w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
           >
             -
           </button>
@@ -329,7 +329,7 @@ export default function TradingPanel({
           </div>
           <button
             onClick={() => handleValueChange(value + 5)}
-            className="w-10 h-10 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded flex items-center justify-center transition-colors"
+            className="w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
           >
             +
           </button>
@@ -341,14 +341,14 @@ export default function TradingPanel({
             <button
               key={quickValue}
               onClick={() => handleQuickValue(quickValue)}
-              className="px-3 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
+              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
             >
               +{quickValue}
             </button>
           ))}
           <button
             onClick={handleAll}
-            className="px-3 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
+            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
           >
             All
           </button>
@@ -400,7 +400,7 @@ export default function TradingPanel({
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
             isBettingTime && !placeOrderLoading
               ? 'bg-green-600 hover:bg-green-500 text-white' 
-              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : 'bg-gray-600 text-gray-200 cursor-not-allowed'
           }`}
         >
           {placeOrderLoading ? (
@@ -416,7 +416,7 @@ export default function TradingPanel({
         </button>
 
         {/* Place Order Button */}
-        <div className="w-full py-2 bg-gray-600 text-white rounded-lg">
+        <div className="w-full py-2 bg-gray-700 text-gray-200 rounded-lg">
           <div className="text-center text-sm">
             {isBettingTime ? "Hãy đặt lệnh" : "Đang chờ kết quả"}
           </div>
@@ -430,7 +430,7 @@ export default function TradingPanel({
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
             isBettingTime && !placeOrderLoading
               ? 'bg-red-500 hover:bg-red-600 text-white' 
-              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : 'bg-gray-600 text-gray-200 cursor-not-allowed'
           }`}
         >
           {placeOrderLoading ? (

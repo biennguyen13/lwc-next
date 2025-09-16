@@ -1,20 +1,22 @@
 "use client"
 
 import { Eye, EyeOff } from "lucide-react"
+import { useWalletStore } from "@/stores"
 
 interface WalletHeaderProps {
   totalBalance: number
-  isBalanceHidden: boolean
-  onToggleBalance: () => void
   className?: string
 }
 
 export function WalletHeader({ 
   totalBalance, 
-  isBalanceHidden, 
-  onToggleBalance,
   ...props
 }: WalletHeaderProps) {
+  const { isBalanceHidden, setBalanceHidden } = useWalletStore()
+
+  const handleToggleBalance = () => {
+    setBalanceHidden(!isBalanceHidden)
+  }
   return (
     <div className="text-white p-6" {...props}>
       <div className="flex justify-between items-center">
@@ -26,7 +28,7 @@ export function WalletHeader({
         </div>
         
         <button
-          onClick={onToggleBalance}
+          onClick={handleToggleBalance}
           className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
         >
           {isBalanceHidden ? (

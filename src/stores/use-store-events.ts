@@ -36,6 +36,11 @@ export const useBinance30sLatestEvents = (callback: (latestCandles: any) => void
   return useStoreEvents("BINANCE_30S_LATEST_UPDATED", callback)
 }
 
+// Hook để lắng nghe Binance 30s realtime updates events
+export const useBinance30sRealtimeEvents = (callback: (realtimeData: any) => void) => {
+  return useStoreEvents("BINANCE_30S_REALTIME_UPDATED", callback)
+}
+
 // Hook để lắng nghe wallet events
 export const useWalletBalanceEvents = (callback: (balance: any) => void) => {
   return useStoreEvents("WALLET_BALANCE_UPDATED", callback)
@@ -101,6 +106,7 @@ export const useAllStoreEvents = (callback: (event: any) => void) => {
       "BINANCE_30S_CANDLES_UPDATED",
       "BINANCE_30S_STATS_UPDATED",
       "BINANCE_30S_LATEST_UPDATED",
+      "BINANCE_30S_REALTIME_UPDATED",
       "WALLET_BALANCE_UPDATED",
       "WALLET_TRANSACTIONS_UPDATED",
       "WALLET_DEPOSIT_CREATED",

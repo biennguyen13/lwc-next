@@ -12,14 +12,20 @@ module.exports = {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
   		},
-  		fontSize: {
-  			xxs: [
-  				'0.65rem',
-  				{
-  					lineHeight: '0.75rem'
-  				}
-  			]
-  		},
+		fontSize: {
+			'2xs': [
+				'0.65rem',
+				{
+					lineHeight: '0.75rem'
+				}
+			],
+			xxs: [
+				'0.65rem',
+				{
+					lineHeight: '0.75rem'
+				}
+			]
+		},
   		colors: {
   			chart: {
   				'1': 'hsl(var(--chart-1))',

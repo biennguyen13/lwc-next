@@ -19,7 +19,7 @@ export default function Home() {
   const offsetWidth = '200px'
 
   return (
-    <main className="p-1 pr-0 bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="p-1 pr-0 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
         {/* Binance 30s Test Component */}
         {/* <div className="mb-8">
@@ -28,7 +28,7 @@ export default function Home() {
 
         {/* Chart, Trading Panel, and Active Orders Layout */}
         <div 
-          className="mb-6 md:mb-8 min-h-[calc(100vh-120px)] transition-all duration-500"
+          className="transition-all duration-500"
           style={{
             display: 'grid',
             gridTemplateColumns: isActiveOrdersOpen 
@@ -98,6 +98,6 @@ export default function Home() {
           />
         </div>
       </div>
-    </main>
+    </div>
   )
 }

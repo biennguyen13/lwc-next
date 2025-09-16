@@ -2,13 +2,13 @@
 
 import { ArrowUp, ArrowDown } from "lucide-react"
 import { USDTIcon } from "@/components/ui/usdt-icon"
+import { useWalletStore } from "@/stores"
 
 interface WalletCardProps {
   currency: string
   currencyName: string
   balance: number
   usdValue: number
-  isBalanceHidden?: boolean
   onDeposit: () => void
   onWithdraw: () => void
 }
@@ -18,10 +18,10 @@ export function WalletCard({
   currencyName, 
   balance, 
   usdValue, 
-  isBalanceHidden = false,
   onDeposit, 
   onWithdraw 
 }: WalletCardProps) {
+  const { isBalanceHidden } = useWalletStore()
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between">

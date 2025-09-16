@@ -15,6 +15,7 @@ export {
   useBinance30sCandlesEvents,
   useBinance30sStatsEvents,
   useBinance30sLatestEvents,
+  useBinance30sRealtimeEvents,
   useWalletBalanceEvents,
   useWalletTransactionsEvents,
   useWalletDepositEvents,

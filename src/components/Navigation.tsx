@@ -15,7 +15,7 @@ import {
   MoreVertical
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useWalletStore } from "@/stores"
+import { useWalletStore, useBinance30sRealtimeEvents } from "@/stores"
 import { useToast } from "@/hooks/use-toast"
 
 interface NavigationProps {
@@ -29,6 +29,13 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
   const [isResetting, setIsResetting] = useState(false)
   const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode, resetDemoBalance } = useWalletStore()
   const { toast } = useToast()
+  
+  // Listen for realtime updates and refresh balance when second = 2
+  useBinance30sRealtimeEvents((realtimeData) => {
+    if (realtimeData?.payload?.second === 2) {
+      refreshBalanceSummary()
+    }
+  })
   
   // Get real and demo balances
   const realBalance = balanceSummary?.real?.total_available_usd || 0
@@ -128,7 +135,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                       {bettingMode === 'real' ? 'Tài khoản Thật' : 'Tài khoản Demo'}
                     </div>
                     <div className="text-sm font-semibold">
-                      ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                     </div>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
@@ -139,7 +146,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
               {/* Real Account Section */}
               <div className="px-4 py-3 border-b border-gray-700">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleAccountChange('real')}>
+                  <div className="flex items-center space-x-3 cursor-pointer flex-1" onClick={() => handleAccountChange('real')}>
                     <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                       bettingMode === 'real' ? 'bg-orange-500' : 'bg-gray-500'
                     }`}>
@@ -148,7 +155,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                     <div>
                       <div className="text-sm text-gray-300 font-medium">Tài khoản thực</div>
                       <div className="text-sm  text-gray-300">
-                        ${realBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${realBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                       </div>
                     </div>
                   </div>
@@ -164,7 +171,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
               {/* Demo Account Section */}
               <div className="px-4 py-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3 cursor-pointer"  onClick={() => handleAccountChange('demo')}>
+                  <div className="flex items-center space-x-3 cursor-pointer flex-1"  onClick={() => handleAccountChange('demo')}>
                     <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                       bettingMode === 'demo' ? 'bg-orange-500' : 'bg-gray-500'
                     }`}>
@@ -173,7 +180,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                     <div>
                       <div className="text-sm text-gray-300 font-medium">Tài khoản Demo</div>
                       <div className="text-sm  text-gray-300">
-                        ${demoBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${demoBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                       </div>
                     </div>
                   </div>
@@ -258,7 +265,6 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                 <MoreVertical className="w-5 h-5" />
               </Button>
             </div>
-            <span className="text-xs text-gray-300">Menu</span>
           </div>
         </div>
       </div>
