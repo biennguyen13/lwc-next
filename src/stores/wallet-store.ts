@@ -28,6 +28,10 @@ interface WalletStoreState {
   // Balance visibility
   isBalanceHidden: boolean
 
+  // Active Orders Panel state
+  isActiveOrdersOpen: boolean
+  activeOrdersTab: "open" | "closed"
+
   // Loading states
   balanceLoading: boolean
   depositsLoading: boolean
@@ -78,6 +82,10 @@ interface WalletStoreState {
   // Balance visibility actions
   setBalanceHidden: (hidden: boolean) => void
 
+  // Active Orders Panel actions
+  setActiveOrdersOpen: (isOpen: boolean) => void
+  setActiveOrdersTab: (tab: "open" | "closed") => void
+
   // Demo balance actions
   resetDemoBalance: (
     params: ResetDemoBalanceRequest
@@ -103,6 +111,8 @@ export const useWalletStore = create<WalletStoreState>()(
       depositStats: null,
       bettingMode: "demo", // Default to demo mode
       isBalanceHidden: false, // Default to show balance
+      isActiveOrdersOpen: false, // Default to closed
+      activeOrdersTab: "open", // Default to open tab
       balanceLoading: false,
       depositsLoading: false,
       withdrawalsLoading: false,
@@ -347,6 +357,16 @@ export const useWalletStore = create<WalletStoreState>()(
         set({ isBalanceHidden: hidden })
       },
 
+      // Set active orders panel open state
+      setActiveOrdersOpen: (isOpen: boolean) => {
+        set({ isActiveOrdersOpen: isOpen })
+      },
+
+      // Set active orders panel tab
+      setActiveOrdersTab: (tab: "open" | "closed") => {
+        set({ activeOrdersTab: tab })
+      },
+
       // Reset demo balance
       resetDemoBalance: async (params: ResetDemoBalanceRequest) => {
         try {
@@ -384,6 +404,8 @@ export const useWalletStore = create<WalletStoreState>()(
           depositStats: null,
           bettingMode: "demo", // Reset to demo mode
           isBalanceHidden: false, // Reset to show balance
+          isActiveOrdersOpen: false, // Reset to closed
+          activeOrdersTab: "open", // Reset to open tab
           balanceLoading: false,
           depositsLoading: false,
           withdrawalsLoading: false,
@@ -398,7 +420,9 @@ export const useWalletStore = create<WalletStoreState>()(
       name: "wallet-storage",
       partialize: (state) => ({ 
         bettingMode: state.bettingMode,
-        isBalanceHidden: state.isBalanceHidden
+        isBalanceHidden: state.isBalanceHidden,
+        isActiveOrdersOpen: state.isActiveOrdersOpen,
+        activeOrdersTab: state.activeOrdersTab
       }),
     }
   )

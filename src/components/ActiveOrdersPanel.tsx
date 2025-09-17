@@ -1,19 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, Clock, X } from "lucide-react"
 import { useBettingStore, useWalletStore } from "@/stores"
+import { useActiveOrders } from "@/contexts/ActiveOrdersContext"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 
 interface ActiveOrdersPanelProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen?: boolean
+  onClose?: () => void
 }
 
-export function ActiveOrdersPanel({ isOpen, onClose }: ActiveOrdersPanelProps) {
+export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: ActiveOrdersPanelProps) {
   const {
     activeOrders,
     bettingHistory,
@@ -23,7 +24,17 @@ export function ActiveOrdersPanel({ isOpen, onClose }: ActiveOrdersPanelProps) {
     bettingHistoryLoading,
   } = useBettingStore()
   const { bettingMode } = useWalletStore()
-  const [activeTab, setActiveTab] = useState<"open" | "closed">("open")
+  const { 
+    isActiveOrdersOpen, 
+    activeOrdersTab, 
+    closeActiveOrders, 
+    setActiveOrdersTab 
+  } = useActiveOrders()
+  
+  // Use props if provided, otherwise use context
+  const isOpen = propIsOpen !== undefined ? propIsOpen : isActiveOrdersOpen
+  const onClose = propOnClose || closeActiveOrders
+  const activeTab = activeOrdersTab
 
   // Fetch data when panel opens or tab changes
   useEffect(() => {
@@ -65,13 +76,6 @@ export function ActiveOrdersPanel({ isOpen, onClose }: ActiveOrdersPanelProps) {
       ? activeOrders.filter((order) => order.status === "PENDING")
       : bettingHistory // Use betting history for closed tab
 
-  // Debug log to check data
-  // useEffect(() => {
-  //   console.log('ActiveOrdersPanel - activeOrders:', activeOrders)
-  //   console.log('ActiveOrdersPanel - filteredOrders:', filteredOrders)
-  //   console.log('ActiveOrdersPanel - activeTab:', activeTab)
-  // }, [activeOrders, filteredOrders, activeTab])
-
   return (
     <div
       className={`bg-gray-900 border-l border-gray-700 h-full flex flex-col ${
@@ -81,7 +85,7 @@ export function ActiveOrdersPanel({ isOpen, onClose }: ActiveOrdersPanelProps) {
       {/* Tabs */}
       <div className="flex border-b border-gray-700">
         <button
-          onClick={() => setActiveTab("open")}
+          onClick={() => setActiveOrdersTab("open")}
           className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
             activeTab === "open"
               ? "text-gray-200 border-b-2 border-orange-500"
@@ -96,7 +100,7 @@ export function ActiveOrdersPanel({ isOpen, onClose }: ActiveOrdersPanelProps) {
           )}
         </button>
         <button
-          onClick={() => setActiveTab("closed")}
+          onClick={() => setActiveOrdersTab("closed")}
           className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
             activeTab === "closed"
               ? "text-gray-200 border-b-2 border-orange-500"

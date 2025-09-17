@@ -49,7 +49,7 @@ export const Binance30sRealtimeListener: React.FC = () => {
 
   useBinance30sRealtimeEvents((realtimeData) => {
     if (realtimeData?.payload?.second === 28 && realtimeData?.payload?.isBet) {
-      console.log("Binance 30s realtime update - refreshing APIs:", realtimeData)
+      console.log("Binance 30s realtime update - refreshing APIs:", bettingMode, realtimeData)
       
       // Refresh balance summary
       refreshBalanceSummary()

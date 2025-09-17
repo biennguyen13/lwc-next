@@ -9,7 +9,6 @@ import {
   User, 
   Bell, 
   Download,
-  Gift,
   ArrowLeftRight,
   RotateCcw,
   MoreVertical
@@ -105,12 +104,16 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
         {/* Center Items */}
         <div className="flex items-center space-x-4">
           {/* Prize Pool */}
-          <Badge className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg border-0">
+          <Badge className="relative bg-[linear-gradient(133deg,#020024,#290c7e,#592ae6)] text-gray-200 pl-6 pr-4 py-1 rounded-lg border-0">
             <div className="flex items-center space-x-2">
-              <Gift className="w-4 h-4 text-yellow-400" />
+              <img 
+                src="/images/treasure.png" 
+                alt="Treasure" 
+                className="w-auto h-12 absolute -left-5 top-1/2 transform -translate-y-1/2"
+              />
               <div className="text-center">
-                <div className="text-xs">Prize Pool</div>
-                <div className="text-sm font-semibold">$26.83K</div>
+                <div className="text-2xs text-gray-200">Prize Pool</div>
+                <div className="text-sm text-orange-400 font-semibold">$26.83K</div>
               </div>
             </div>
           </Badge>
@@ -120,7 +123,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline" 
-                className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-white px-4 py-2 rounded-lg"
+                className="bg-gray-700 hover:bg-gray-600 border-gray-600 text-gray-200 px-4 py-2 rounded-lg h-13"
               >
                 <div className="flex items-center space-x-2">
                   <div className="text-center">
@@ -154,7 +157,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                   </div>
                   <Button
                     size="sm"
-                    className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg"
+                    className="bg-orange-500 hover:bg-orange-600 text-gray-200 p-2 rounded-lg"
                   >
                     <ArrowLeftRight className="w-4 h-4" />
                   </Button>
@@ -180,7 +183,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                   <Button
                     size="sm"
                     variant="outline"
-                    className="border-gray-600 text-white hover:bg-gray-700 p-2 rounded-full"
+                    className="border-gray-600 text-gray-200 hover:bg-gray-700 p-2 rounded-full"
                     onClick={handleResetDemoBalance}
                     disabled={isResetting}
                     title="Reset demo balance về 1000 USDT"
@@ -193,7 +196,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
           </DropdownMenu>
 
           {/* Quick Deposit Button */}
-          <Button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg">
+          <Button className="bg-teal-500 hover:bg-teal-600 text-gray-200 px-4 py-2 rounded-lg">
             <div className="flex items-center space-x-2">
               <Download className="w-4 h-4" />
               <span>Nạp nhanh</span>
@@ -208,7 +211,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
             <Button 
               variant="ghost" 
               size="sm"
-              className="text-white hover:bg-gray-700 p-2"
+              className="text-gray-200 hover:bg-gray-700 p-2"
             >
               <Settings className="w-5 h-5" />
             </Button>
@@ -220,7 +223,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
             <Button 
               variant="ghost" 
               size="sm"
-              className="text-white hover:bg-gray-700 p-2"
+              className="text-gray-200 hover:bg-gray-700 p-2"
             >
               <User className="w-5 h-5" />
             </Button>
@@ -233,12 +236,12 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-white hover:bg-gray-700 p-2"
+                className="text-gray-200 hover:bg-gray-700 p-2"
               >
                 <Bell className="w-5 h-5" />
               </Button>
               {notificationCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 bg-red-500 text-gray-200 text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </div>
               )}
@@ -253,7 +256,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                 variant="ghost" 
                 size="sm"
                 onClick={onToggleActiveOrders}
-                className={`text-white hover:bg-gray-700 p-2 ${isActiveOrdersOpen ? 'bg-gray-700' : ''}`}
+                className={`text-gray-200 hover:bg-gray-700 p-2 ${isActiveOrdersOpen ? 'bg-gray-600' : 'bg-gray-700'}`}
               >
                 <MoreVertical className="w-5 h-5" />
               </Button>

@@ -1,11 +1,14 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, ReactNode } from "react"
+import { useWalletStore } from "@/stores"
 
 interface ActiveOrdersContextType {
   isActiveOrdersOpen: boolean
+  activeOrdersTab: "open" | "closed"
   toggleActiveOrders: () => void
   closeActiveOrders: () => void
+  setActiveOrdersTab: (tab: "open" | "closed") => void
 }
 
 const ActiveOrdersContext = createContext<ActiveOrdersContextType | undefined>(undefined)
@@ -15,21 +18,28 @@ interface ActiveOrdersProviderProps {
 }
 
 export function ActiveOrdersProvider({ children }: ActiveOrdersProviderProps) {
-  const [isActiveOrdersOpen, setIsActiveOrdersOpen] = useState(false)
+  const { 
+    isActiveOrdersOpen, 
+    activeOrdersTab, 
+    setActiveOrdersOpen, 
+    setActiveOrdersTab 
+  } = useWalletStore()
 
   const toggleActiveOrders = () => {
-    setIsActiveOrdersOpen(prev => !prev)
+    setActiveOrdersOpen(!isActiveOrdersOpen)
   }
 
   const closeActiveOrders = () => {
-    setIsActiveOrdersOpen(false)
+    setActiveOrdersOpen(false)
   }
 
   return (
     <ActiveOrdersContext.Provider value={{
       isActiveOrdersOpen,
+      activeOrdersTab,
       toggleActiveOrders,
-      closeActiveOrders
+      closeActiveOrders,
+      setActiveOrdersTab
     }}>
       {children}
     </ActiveOrdersContext.Provider>
