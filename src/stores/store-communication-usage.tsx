@@ -7,8 +7,10 @@ import {
   useBinance30sCandlesEvents,
   useBinance30sStatsEvents,
   useBinance30sLatestEvents,
+  useBinance30sRealtimeEvents,
 } from "./index"
 import { useBinance30sStore } from "./binance-30s-store"
+import { useWalletStore, useBettingStore } from "./index"
 
 // Component lắng nghe Binance 30s candles events
 export const Binance30sCandlesListener: React.FC = () => {
@@ -35,6 +37,29 @@ export const Binance30sLatestListener: React.FC = () => {
   useBinance30sLatestEvents((latestCandles) => {
     console.log("Binance 30s latest candles updated:", latestCandles)
     // Có thể update real-time chart
+  })
+
+  return null
+}
+
+// Component lắng nghe Binance 30s realtime events và refresh các API
+export const Binance30sRealtimeListener: React.FC = () => {
+  const { refreshBalanceSummary, bettingMode } = useWalletStore()
+  const { fetchActiveOrders, fetchBettingHistory } = useBettingStore()
+
+  useBinance30sRealtimeEvents((realtimeData) => {
+    if (realtimeData?.payload?.second === 28 && realtimeData?.payload?.isBet) {
+      console.log("Binance 30s realtime update - refreshing APIs:", realtimeData)
+      
+      // Refresh balance summary
+      refreshBalanceSummary()
+      
+      // Refresh active orders
+      fetchActiveOrders({ mode: bettingMode })
+      
+      // Refresh betting history
+      fetchBettingHistory({ page: 1, limit: 50, mode: bettingMode })
+    }
   })
 
   return null
@@ -160,6 +185,7 @@ export const StoreEventManager: React.FC = () => {
       <Binance30sCandlesListener />
       <Binance30sStatsListener />
       <Binance30sLatestListener />
+      <Binance30sRealtimeListener />
       
       {/* Auto-refresh example */}
       {/* <div className="p-4">

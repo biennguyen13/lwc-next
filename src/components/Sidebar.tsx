@@ -4,12 +4,11 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  BarChart3, 
-  Users, 
-  Wallet, 
-  LayoutDashboard,
-  TrendingUp
-} from "lucide-react"
+  TradingIcon, 
+  VipMemberIcon, 
+  WalletIcon, 
+  DashboardIcon 
+} from "./ui/icons"
 
 interface SidebarProps {
   activeItem?: string
@@ -23,28 +22,28 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
     {
       id: "trading",
       label: "Giao Dịch",
-      icon: TrendingUp,
+      icon: TradingIcon,
       href: "/trading",
       isActive: pathname === "/trading" || activeItem === "trading"
     },
     {
       id: "vip",
       label: "Thành Viên Vip", 
-      icon: Users,
+      icon: VipMemberIcon,
       href: "/vip",
       isActive: pathname === "/vip" || activeItem === "vip"
     },
     {
       id: "wallet",
       label: "Ví",
-      icon: Wallet,
+      icon: WalletIcon,
       href: "/wallet-main",
       isActive: pathname === "/wallet-main" || activeItem === "wallet"
     },
     {
       id: "dashboard",
       label: "Bảng Điều Khiển",
-      icon: LayoutDashboard,
+      icon: DashboardIcon,
       href: "/dashboard",
       isActive: pathname === "/dashboard" || activeItem === "dashboard"
     }
@@ -68,9 +67,8 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
                 }`}
               >
                 <Icon 
-                  className={`w-6 h-6 ${
-                    item.isActive ? "text-orange-400" : "text-gray-400"
-                  }`} 
+                  isActive={item.isActive}
+                  className="w-6 h-6" 
                 />
                 <span className={`text-xs font-medium text-center ${
                   item.isActive ? "text-orange-400" : "text-gray-400"

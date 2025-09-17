@@ -15,7 +15,7 @@ import {
   MoreVertical
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useWalletStore, useBinance30sRealtimeEvents } from "@/stores"
+import { useWalletStore } from "@/stores"
 import { useToast } from "@/hooks/use-toast"
 
 interface NavigationProps {
@@ -29,13 +29,6 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
   const [isResetting, setIsResetting] = useState(false)
   const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode, resetDemoBalance } = useWalletStore()
   const { toast } = useToast()
-  
-  // Listen for realtime updates and refresh balance when second = 2
-  useBinance30sRealtimeEvents((realtimeData) => {
-    if (realtimeData?.payload?.second === 2) {
-      refreshBalanceSummary()
-    }
-  })
   
   // Get real and demo balances
   const realBalance = balanceSummary?.real?.total_available_usd || 0

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, Clock, X } from "lucide-react"
-import { useBettingStore, useWalletStore, useBinance30sRealtimeEvents } from "@/stores"
+import { useBettingStore, useWalletStore } from "@/stores"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 
@@ -24,17 +24,6 @@ export function ActiveOrdersPanel({ isOpen, onClose }: ActiveOrdersPanelProps) {
   } = useBettingStore()
   const { bettingMode } = useWalletStore()
   const [activeTab, setActiveTab] = useState<"open" | "closed">("open")
-
-  // Listen for realtime updates and refresh orders when second = 2
-  useBinance30sRealtimeEvents((realtimeData) => {
-    if (realtimeData?.payload?.second === 2) {
-      if (activeTab === "open") {
-        fetchActiveOrders({ mode: bettingMode })
-      } else {
-        fetchBettingHistory({ page: 1, limit: 50, mode: bettingMode })
-      }
-    }
-  })
 
   // Fetch data when panel opens or tab changes
   useEffect(() => {
