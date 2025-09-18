@@ -943,7 +943,7 @@ export default function Chart({
               <div className="flex items-center space-x-2">
                 <div 
                   className={`w-3 h-3 rounded-full ${
-                    isSocketConnected ? 'bg-green-500' : 'bg-red-500'
+                    isSocketConnected ? 'bg-[#31baa0]' : 'bg-[#fc605f]'
                   }`}
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">

@@ -154,7 +154,7 @@ export const ErrorListener: React.FC = () => {
 //         </button>
 //         <button 
 //           onClick={handleEmitBinance30sStats}
-//           className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+//           className="bg-[#31baa0] text-white px-3 py-1 rounded text-sm"
 //         >
 //           Emit Stats
 //         </button>
@@ -166,7 +166,7 @@ export const ErrorListener: React.FC = () => {
 //         </button>
 //         <button 
 //           onClick={handleTriggerError}
-//           className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+//           className="bg-[#fc605f] text-white px-3 py-1 rounded text-sm"
 //         >
 //           Trigger Error
 //         </button>
@@ -199,7 +199,7 @@ export const StoreEventManager: React.FC = () => {
           </button>
           <button 
             onClick={() => fetchStats("BTCUSDT")}
-            className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+            className="bg-[#31baa0] text-white px-3 py-1 rounded text-sm"
           >
             Fetch Stats
           </button>

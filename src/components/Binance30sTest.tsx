@@ -44,7 +44,7 @@ export const Binance30sTest: React.FC = () => {
         
         <button
           onClick={handleTestStats}
-          className="bg-green-500 text-white px-4 py-2 rounded"
+          className="bg-[#31baa0] text-white px-4 py-2 rounded"
         >
           Test Fetch Stats
         </button>

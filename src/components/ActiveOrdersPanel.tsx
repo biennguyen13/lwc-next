@@ -124,7 +124,7 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
             {filteredOrders.map((order) => (
               <div
                 key={order.id}
-                className="bg-gray-800 rounded-lg p-2 border border-gray-700"
+                className="bg-gray-800 rounded-lg p-1.5 border border-gray-700"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-2">
@@ -154,7 +154,7 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
                   <div className="flex gap-2 items-center">
                     <div
                       className={`w-6 h-6 rounded flex items-center justify-center ${
-                        order.order_type === "BUY" ? "bg-green-500" : "bg-red-500"
+                        order.order_type === "BUY" ? "bg-[#31baa0]" : "bg-[#fc605f]"
                       }`}
                     >
                       {order.order_type === "BUY" ? (
@@ -163,25 +163,25 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
                         <TrendingDown className="w-4 h-4 text-gray-200" />
                       )}
                     </div>
-                    <span className="text-gray-200 font-medium text-sm">
+                    <span className={`text-gray-200 font-medium text-sm ${order.order_type === "BUY" ? "" : "text-[#fc605f]"}`}>
                       {order.order_type === "BUY" ? "MUA" : "BÁN"}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1 text-sm">
-                    <span className="text-gray-200">{order.amount?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}$</span>
+                  <div className={`flex items-center space-x-1 text-sm`}>
+                    <span className={`text-gray-200 ${order.order_type === "BUY" ? "" : "text-[#fc605f]"}`}>{order.amount?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}$</span>
                   </div>
                 </div>
 
                 {/* Time */}
                 <div className="flex items-center justify-between">
-                  <div className="text-gray-400 text-sm">
+                  <div className="text-gray-400 text-xs">
                     {formatTime(order.created_at)}
                   </div>
                   <div className={`text-sm font-semibold ${
                     order.payout_amount > 0 
-                      ? 'text-green-600' 
+                      ? 'text-[#31baa0]' 
                       : order.payout_amount === 0 
-                        ? 'text-red-500' 
+                        ? 'text-[#fc605f]' 
                         : 'text-gray-200'
                   }`}>
                     {order.payout_amount > 0 ? '+' : ''}{order.payout_amount?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}$

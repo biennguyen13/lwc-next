@@ -412,7 +412,7 @@ export default function CandleTables({
         {autoRefresh && (
           <div className="mt-6 text-center">
             <div className="inline-flex items-center space-x-2 text-gray-500 dark:text-gray-400 text-sm transition-colors">
-              <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-[#31baa0] dark:bg-green-400 rounded-full animate-pulse"></div>
               <span>Auto-refreshing every {refreshInterval / 1000}s</span>
             </div>
           </div>

@@ -38,7 +38,7 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
           isAuthenticated && 
           <Sidebar />
         }
-        <div className="flex-1">
+        <div className="flex-1 pl-[95px]">
           {children}
         </div>
       </main>

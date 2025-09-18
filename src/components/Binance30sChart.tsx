@@ -120,7 +120,7 @@ export default function Binance30sChart({
         <p className="text-sm">{candlesError}</p>
         <button 
           onClick={() => fetchCandles({ symbol, limit })}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          className="mt-2 px-4 py-2 bg-[#fc605f] text-white rounded hover:bg-red-600"
         >
           Thử lại
         </button>

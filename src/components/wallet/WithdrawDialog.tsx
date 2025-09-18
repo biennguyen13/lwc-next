@@ -367,7 +367,7 @@ export function WithdrawDialog({ isOpen, onClose, currency, availableBalance }: 
           <div className="pt-4">
             <Button 
               onClick={handleWithdraw} 
-              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 text-lg font-medium disabled:opacity-50"
+              className="w-full bg-[#fc605f] hover:bg-red-600 text-white py-3 text-lg font-medium disabled:opacity-50"
               disabled={!amount || !receiverAddress || !twoFactorCode || parseFloat(amount) < 5 || parseFloat(amount) > availableBalance || isSubmitting}
             >
               {isSubmitting ? (

@@ -376,7 +376,7 @@ export default function TradingPanel({
         <div className="space-y-2">
           <div className="flex h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="bg-red-500 h-full transition-all duration-300"
+              className="bg-[#fc605f] h-full transition-all duration-300"
               style={{ width: `${sentiment.bearish}%` }}
             ></div>
             <div
@@ -399,20 +399,11 @@ export default function TradingPanel({
           disabled={!isBettingTime || placeOrderLoading}
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
             isBettingTime && !placeOrderLoading
-              ? 'bg-green-600 hover:bg-green-500 text-white' 
+              ? 'bg-[#31baa0] hover:bg-[#31baa0] text-white' 
               : 'bg-gray-600 text-gray-200 cursor-not-allowed'
           }`}
         >
-          {placeOrderLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Đang đặt lệnh...
-            </>
-          ) : (
-            <>
-              TĂNG <TrendingUp className="w-5 h-5" />
-            </>
-          )}
+          TĂNG <TrendingUp className="w-5 h-5" />
         </button>
 
         {/* Place Order Button */}
@@ -429,20 +420,11 @@ export default function TradingPanel({
           disabled={!isBettingTime || placeOrderLoading}
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
             isBettingTime && !placeOrderLoading
-              ? 'bg-red-500 hover:bg-red-600 text-white' 
+              ? 'bg-[#fc605f] hover:bg-red-600 text-white' 
               : 'bg-gray-600 text-gray-200 cursor-not-allowed'
           }`}
         >
-          {placeOrderLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Đang đặt lệnh...
-            </>
-          ) : (
-            <>
-              GIẢM <TrendingDown className="w-5 h-5" />
-            </>
-          )}
+          GIẢM <TrendingDown className="w-5 h-5" />
         </button>
       </div>
     </div>
