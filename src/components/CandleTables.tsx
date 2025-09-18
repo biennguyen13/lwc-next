@@ -286,6 +286,19 @@ export default function CandleTables({
   const { theme } = useTheme()
   const { isActiveOrdersOpen } = useActiveOrders()
   const [currentSymbol, setCurrentSymbol] = useState(symbol)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 767.99)
+    }
+    
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
 
   // Calculate stats from candle tables
   const calculateStats = () => {
@@ -345,7 +358,7 @@ export default function CandleTables({
     <div className="w-full mx-auto p-2">
       <div className="">
         {/* Stats Badges - Top Right */}
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-4 -mt-16 md:mt-0">
           <div className="flex items-center space-x-3">
             {/* Green Badge */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 shadow-sm">
@@ -383,8 +396,8 @@ export default function CandleTables({
 
         {/* Tables Grid */}
         {candleTables && candleTables.length > 0 && (
-          <div className="grid gap-4 lg:gap-6 candle-tables-grid">
-            {candleTables.map((table, index) => (
+          <div className="grid gap-8 lg:gap-6 candle-tables-grid">
+            {(isMobile ? candleTables.slice(-3) : candleTables).map((table, index) => (
               <CandleTableComponent
                 key={table.table_key}
                 table={table}

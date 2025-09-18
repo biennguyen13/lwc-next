@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown } from 'lucide-reac
 import { useBettingStore } from '@/stores/betting-store'
 import BettingStatsPanel from '@/components/BettingStatsPanel'
 import { useGlobalLoading } from '@/contexts/GlobalLoadingContext'
+import { OrderCard } from '@/components/OrderCard'
 
 interface BettingHistoryTableProps {
   orders: BettingOrder[]
@@ -20,6 +21,17 @@ interface BettingHistoryTableProps {
 }
 
 const BettingHistoryTable = ({ orders, pagination, onPageChange }: BettingHistoryTableProps) => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleString('vi-VN', {
@@ -99,93 +111,154 @@ const BettingHistoryTable = ({ orders, pagination, onPageChange }: BettingHistor
 
   return (
     <div className="w-full">
-      {/* Table */}
-      <div className="bg-gray-900 rounded-lg rounded-b-none border-b-0 overflow-hidden border border-gray-700">
-        <div className="overflow-x-auto" style={{ maxWidth: 'calc(100vw - 105px - 16px * 2)' }}>
-          <table className="w-full border-collapse">
-            <thead className="bg-gray-800">
-              <tr>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">OrderID</th>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Thời gian bắt đầu</th>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Lựa chọn</th>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá mở</th>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá đóng</th>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá trị</th>
-                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-gray-700">Thanh toán</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-800/30 border-b border-gray-700/50">
-                  <td className="px-4 py-3 text-sm text-center text-white font-mono border-r border-gray-700/50">
-                    {order.id}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
-                    {formatDateTime(order.created_at)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center border-r border-gray-700/50">
-                    {getOrderTypeIcon(order.order_type)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
-                    {formatPrice(parseFloat(order.open_price.toString()))}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
-                    {order.close_price ? formatPrice(parseFloat(order.close_price.toString())) : '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
-                    {formatAmount(parseFloat(order.amount.toString()))}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center font-medium">
-                    {getPaymentDisplay(order)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {isMobile ? (
+        // Mobile View - Order Cards
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {orders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              formatDateTime={formatDateTime}
+              formatPrice={formatPrice}
+              formatAmount={formatAmount}
+              getPaymentDisplay={getPaymentDisplay}
+            />
+          ))}
+          
+          {/* Mobile Pagination */}
+          <div className="flex items-center justify-center gap-4 py-4">
+            <div className="flex gap-4">
+              {/* Left Arrow */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
+                  pagination.page <= 1 
+                    ? "text-gray-500 cursor-not-allowed" 
+                    : "text-white hover:bg-gray-800"
+                }`}
+              >
+                <ChevronLeft className="!w-8 !h-8" />
+              </Button>
+
+              {/* Current Page Number */}
+              <div className="flex items-center justify-center w-8 h-8">
+                <span className="text-orange-400 text-lg font-semibold">
+                  {pagination.page}
+                </span>
+              </div>
+
+              {/* Right Arrow */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.total_pages}
+                className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
+                  pagination.page >= pagination.total_pages 
+                    ? "text-gray-500 cursor-not-allowed" 
+                    : "text-white hover:bg-gray-800"
+                }`}
+              >
+                <ChevronRight className="!w-8 !h-8" />
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Pagination */}
-      <div className="rounded-b-lg flex items-center justify-end gap-4 py-3 border border-gray-700">
-        <div className="flex gap-4">
-          {/* Left Arrow */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(pagination.page - 1)}
-            disabled={pagination.page <= 1}
-            className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
-              pagination.page <= 1 
-                ? "text-gray-500 cursor-not-allowed" 
-                : "text-white hover:bg-gray-800"
-            }`}
-          >
-            <ChevronLeft className="!w-8 !h-8" />
-          </Button>
-
-          {/* Current Page Number */}
-          <div className="flex items-center justify-center w-8 h-8">
-            <span className="text-orange-400 text-lg font-semibold">
-              {pagination.page}
-            </span>
+      ) : (
+        // Desktop View - Table
+        <>
+          {/* Table */}
+          <div className="bg-gray-900 rounded-lg rounded-b-none border-b-0 overflow-hidden border border-gray-700">
+            <div className="overflow-x-auto" style={{ maxWidth: 'calc(100vw)' }}>
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-800">
+                  <tr>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">OrderID</th>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Thời gian bắt đầu</th>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Lựa chọn</th>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá mở</th>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá đóng</th>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá trị</th>
+                    <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-gray-700">Thanh toán</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id} className="hover:bg-gray-800/30 border-b border-gray-700/50">
+                      <td className="px-4 py-3 text-sm text-center text-white font-mono border-r border-gray-700/50">
+                        {order.id}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
+                        {formatDateTime(order.created_at)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center border-r border-gray-700/50">
+                        {getOrderTypeIcon(order.order_type)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
+                        {formatPrice(parseFloat(order.open_price.toString()))}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
+                        {order.close_price ? formatPrice(parseFloat(order.close_price.toString())) : '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
+                        {formatAmount(parseFloat(order.amount.toString()))}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center font-medium">
+                        {getPaymentDisplay(order)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Right Arrow */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(pagination.page + 1)}
-            disabled={pagination.page >= pagination.total_pages}
-            className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
-              pagination.page >= pagination.total_pages 
-                ? "text-gray-500 cursor-not-allowed" 
-                : "text-white hover:bg-gray-800"
-            }`}
-          >
-            <ChevronRight className="!w-8 !h-8" />
-          </Button>
-        </div>
-      </div>
+          {/* Desktop Pagination */}
+          <div className="rounded-b-lg flex items-center justify-end gap-4 py-3 border border-gray-700">
+            <div className="flex gap-4">
+              {/* Left Arrow */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
+                  pagination.page <= 1 
+                    ? "text-gray-500 cursor-not-allowed" 
+                    : "text-white hover:bg-gray-800"
+                }`}
+              >
+                <ChevronLeft className="!w-8 !h-8" />
+              </Button>
+
+              {/* Current Page Number */}
+              <div className="flex items-center justify-center w-8 h-8">
+                <span className="text-orange-400 text-lg font-semibold">
+                  {pagination.page}
+                </span>
+              </div>
+
+              {/* Right Arrow */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.total_pages}
+                className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
+                  pagination.page >= pagination.total_pages 
+                    ? "text-gray-500 cursor-not-allowed" 
+                    : "text-white hover:bg-gray-800"
+                }`}
+              >
+                <ChevronRight className="!w-8 !h-8" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -231,7 +304,7 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
+    <div className="min-h-screen bg-gray-900 text-white p-2 lg:p-4">
       <div className="space-y-8">
         {/* Betting Statistics Panel */}
         <BettingStatsPanel />

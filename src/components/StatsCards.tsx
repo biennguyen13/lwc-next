@@ -15,11 +15,11 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
   showValues = false
 }) => {
   return (
-    <div className="flex gap-8 mb-6">
+    <div className="flex flex-col md:flex-row gap-2 xl:gap-8 mb-6">
       {/* Net Profit Card */}
-      <div className="flex-1 bg-[#ea9000] rounded-lg px-8 flex items-center gap-4 h-[112px]">
+      <div className="flex-1 bg-[#ea9000] rounded-lg px-4 xl:px-8 flex items-center gap-4 h-[112px] py-4">
         {/* Icon */}
-        <div className="flex-shrink-0">
+        <div className="block lg:hidden xl:block flex-shrink-0">
           <BarGraphIcon className="w-12 h-12 text-orange-200" />
         </div>
         
@@ -35,9 +35,9 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
       </div>
 
       {/* Total Revenue Card */}
-      <div className="flex-1 bg-teal-500 rounded-lg px-8 flex items-center gap-4 h-[112px]">
+      <div className="flex-1 bg-teal-500 rounded-lg px-4 xl:px-8 flex items-center gap-4 h-[112px] py-4">
         {/* Icon */}
-        <div className="flex-shrink-0">
+        <div className="block lg:hidden xl:block flex-shrink-0">
           <SavingsIcon className="w-12 h-12 text-teal-200" />
         </div>
         

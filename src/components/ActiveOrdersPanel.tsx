@@ -78,7 +78,7 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
 
   return (
     <div
-      className={`bg-gray-900 border-gray-700 h-[66vh] flex flex-col ${
+      className={`hidden bg-gray-900 border-gray-700 h-[66vh] md:flex flex-col ${
         isOpen ? "opacity-100" : "opacity-0 overflow-hidden"
       }`}
     >

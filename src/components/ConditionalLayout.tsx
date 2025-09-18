@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useAuthStore } from "@/stores"
 import { Navigation } from "@/components/Navigation"
 import { Sidebar } from "@/components/Sidebar"
+import { MobileSidebar } from "@/components/MobileSidebar"
 import { UserMenu } from "@/components/UserMenu"
 import { StoreEventManager } from "@/stores/store-communication-usage"
 import { Toaster } from "@/components/ui"
@@ -16,11 +17,16 @@ interface ConditionalLayoutProps {
 function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
   const { isAuthenticated, isLoading } = useAuthStore()
   const [mounted, setMounted] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isActiveOrdersOpen, toggleActiveOrders } = useActiveOrders()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
 
   // If user is authenticated, show full layout with navigation and sidebar
   return (
@@ -30,6 +36,8 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
         <Navigation 
           onToggleActiveOrders={toggleActiveOrders}
           isActiveOrdersOpen={isActiveOrdersOpen}
+          onToggleMobileMenu={toggleMobileMenu}
+          isMobileMenuOpen={isMobileMenuOpen}
         />
       }
       <StoreEventManager />
@@ -38,7 +46,14 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
           isAuthenticated && 
           <Sidebar />
         }
-        <div className="flex-1 ml-[75px] xl:ml-[95px] z-0">
+        {
+          isAuthenticated && 
+          <MobileSidebar 
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          />
+        }
+        <div className="flex-1 pl-1 lg:pl-[95px] z-0">
           {children}
         </div>
       </main>

@@ -15,13 +15,17 @@ export default function Home() {
   const [activeMainTab, setActiveMainTab] = useState<"gauges" | "candles">(
     "gauges"
   ) // Main tab state
-  const [isMobile, setIsMobile] = useState(false)
   const { isActiveOrdersOpen, closeActiveOrders } = useActiveOrders()
+  const [offsetWidth, setOffsetWidth] = useState('200px')
+  const [isShowTradingPanel, setIsShowTradingPanel] = useState(true)
+  const [isShowActiveOrdersPanel, setIsShowActiveOrdersPanel] = useState(true)
   
   // Check screen size
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024)
+      setOffsetWidth(window.innerWidth < 767.99 ? '0' : window.innerWidth < 1024 ? '155px' : '200px')
+      setIsShowTradingPanel(window.innerWidth < 767.99 ? false : true)
+      setIsShowActiveOrdersPanel(window.innerWidth < 767.99 ? false : true)
     }
     
     checkScreenSize()
@@ -30,8 +34,6 @@ export default function Home() {
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
   
-  const offsetWidth = isMobile ? '155px' : '200px'
-
   return (
     <div className="p-1 pr-0 bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="max-w-[100vw] mx-auto">
@@ -61,15 +63,19 @@ export default function Home() {
           </div>
 
           {/* Trading Panel */}
-          <div className="flex-shrink-0">
+          {
+            isShowTradingPanel && <div className="flex-shrink-0">
             <TradingPanel/>
           </div>
+          }
 
           {/* Active Orders Panel */}
-          <ActiveOrdersPanel 
+          {
+            isShowActiveOrdersPanel && <ActiveOrdersPanel 
             isOpen={isActiveOrdersOpen}
             onClose={closeActiveOrders}
           />
+          }
         </div>
 
         {/* Tabs Container */}

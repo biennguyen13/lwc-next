@@ -60,7 +60,9 @@ const expansionFactor = 0; // Mở rộng thêm 30%
 // Function to calculate dynamic chart height based on browser viewport
 const getChartHeight = (): number => {
   const viewportHeight = window.innerHeight;
-  const calculatedHeight = viewportHeight * 0.66; // 75% of viewport height
+  const isMobile = window.innerWidth < 767.99;
+  const heightRatio = isMobile ? 0.5 : 0.66; // 50% for mobile, 66% for desktop
+  const calculatedHeight = viewportHeight * heightRatio;
   const maxHeight = calculatedHeight;
   const minHeight = 350;
   
