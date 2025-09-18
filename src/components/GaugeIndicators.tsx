@@ -180,9 +180,11 @@ const getSentimentColor = (sentiment: string): string => {
 const GaugeIndicator = ({
   data,
   isMiddle = false,
+  isMobile = false,
 }: {
   data: GaugeData
   isMiddle?: boolean
+  isMobile?: boolean
 }) => {
   const speedometerValue = getSentimentValue(data.sentiment)
   const sentimentColor = getSentimentColor(data.sentiment)
@@ -190,8 +192,9 @@ const GaugeIndicator = ({
   // Speedometer dimensions - middle gauge is 10% larger
   const baseWidth = 180
   const baseHeight = 112
-  const speedometerWidth = isMiddle ? baseWidth * 1.2 : baseWidth
-  const speedometerHeight = isMiddle ? baseHeight * 1.2 : baseHeight
+  const mobileScale = isMobile ? 0.65 : 1
+  const speedometerWidth = (isMiddle ? baseWidth * 1.2 : baseWidth) * mobileScale
+  const speedometerHeight = (isMiddle ? baseHeight * 1.2 : baseHeight) * mobileScale
   const centerX = speedometerWidth / 2
   const centerY = speedometerHeight * 0.8 // Adjust based on arc position
 
@@ -213,8 +216,8 @@ const GaugeIndicator = ({
   return (
     <div className="flex flex-col items-center justify-end p-2">
       {/* Title */}
-      <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-semibold text-foreground">{data.title}</h3>
+      <div className="flex items-center gap-2 md:mb-4">
+        <h3 className="text-xs md:text-lg font-semibold text-foreground">{data.title}</h3>
         {/* <button className="text-muted-foreground hover:text-foreground transition-colors">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -227,7 +230,7 @@ const GaugeIndicator = ({
       </div>
 
       {/* Speedometer */}
-      <div className="mb-4 relative">
+      <div className="md:mb-4 relative">
         {/* Semi-circular gradient background */}
         <div
           className="absolute inset-0 rounded-t-full"
@@ -264,7 +267,7 @@ const GaugeIndicator = ({
           height={speedometerHeight + 10}
           ringWidth={4}
           textColor="#6b7280"
-          valueTextFontSize="14px"
+          valueTextFontSize={`${isMobile ? '12px' : '14px'}`}
           labelFontSize="12px"
           currentValueText={`${data.sentiment}`}
           customSegmentLabels={[
@@ -301,7 +304,7 @@ const GaugeIndicator = ({
             return (
               <div
                 key={index}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                className="hidden md:block absolute transform -translate-x-1/2 -translate-y-1/2"
                 style={{
                   left: `${x}px`,
                   top: `${y}px`,
@@ -404,7 +407,7 @@ const GaugeIndicator = ({
       </div> */}
 
       {/* Numerical breakdown */}
-      <div className="flex gap-8 text-sm">
+       <div className="hidden md:flex gap-8 text-sm">
         <div className="flex flex-col items-center">
           <span className="text-red-500 font-semibold">{data.sell}</span>
           <span className="text-muted-foreground text-xs">Sell</span>
@@ -429,6 +432,16 @@ export default function GaugeIndicators({
 }: GaugeIndicatorsProps) {
   const [currentData, setCurrentData] = useState<GaugeData[]>(data)
   const [currentScenario, setCurrentScenario] = useState<string>("default")
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
 
   // Function to generate gauge data based on candle data
   const generateGaugeDataFromCandle = (candle: any, previousCandle?: any, movingAveragesCandles?: any[]): GaugeData[] => {
@@ -697,12 +710,33 @@ export default function GaugeIndicators({
 
   return (
     <div className="w-full">
-      {/* Gauge indicators */}
-      <div className="grid gap-6 gauge-indicators-grid">
-        {currentData.map((gaugeData, index) => (
-          <GaugeIndicator key={index} data={gaugeData} />
-        ))}
-      </div>
+      {/* Mobile Gauge indicators (< 1024px) */}
+      {isMobile && (
+        <div className="grid gap-2 md:gap-6 gauge-indicators-grid">
+          {currentData.map((gaugeData, index) => (
+            <GaugeIndicator 
+              key={index} 
+              data={gaugeData} 
+              isMiddle={index === 1} 
+              isMobile={true}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Desktop Gauge indicators (>= 1024px) */}
+      {!isMobile && (
+        <div className="grid gap-2 md:gap-6 gauge-indicators-grid">
+          {currentData.map((gaugeData, index) => (
+            <GaugeIndicator 
+              key={index} 
+              data={gaugeData} 
+              isMiddle={index === 1} 
+              isMobile={false}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

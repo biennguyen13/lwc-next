@@ -185,5 +185,12 @@ body {
 
 /* Responsive Grid for GaugeIndicators */
 .gauge-indicators-grid {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-} 
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+@media (min-width: 1024px) {
+  /* Responsive Grid for GaugeIndicators */
+  .gauge-indicators-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}

@@ -355,10 +355,10 @@ export default function CandleTables({
   }
 
   return (
-    <div className="w-full mx-auto p-2">
+    <div className="w-full mx-auto p-2 mb-4">
       <div className="">
         {/* Stats Badges - Top Right */}
-        <div className="flex justify-end mb-4 -mt-16 md:mt-0">
+        <div className="flex justify-end mb-4 -mt-12 lg:-mt-10">
           <div className="flex items-center space-x-3">
             {/* Green Badge */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 shadow-sm">
@@ -396,8 +396,8 @@ export default function CandleTables({
 
         {/* Tables Grid */}
         {candleTables && candleTables.length > 0 && (
-          <div className="grid gap-8 lg:gap-6 candle-tables-grid">
-            {(isMobile ? candleTables.slice(-3) : candleTables).map((table, index) => (
+          <div className="grid gap-2 md:gap-8 lg:gap-6 candle-tables-grid">
+            {(isMobile ? candleTables.slice(-2) : candleTables).map((table, index) => (
               <CandleTableComponent
                 key={table.table_key}
                 table={table}
