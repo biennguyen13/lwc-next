@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBettingStore } from '@/stores/betting-store'
 import { useGlobalLoading } from '@/contexts/GlobalLoadingContext'
+import { StatsCards } from '@/components/StatsCards'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -108,12 +109,10 @@ const BettingStatsPanel: React.FC<BettingStatsPanelProps> = ({
   }
 
   const formatCurrency = (num: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'USD',
+    return `$${new Intl.NumberFormat('vi-VN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(num)
+    }).format(num)}`
   }
 
   const getProfitColor = (profit: number) => {
@@ -132,7 +131,7 @@ const BettingStatsPanel: React.FC<BettingStatsPanelProps> = ({
     <div className={className}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Số Liệu B.O</h1>
+        <h1 className="text-3xl font-bold text-white">Số Liệu B.O</h1>
         <div className="flex items-center gap-4">
           <Button 
             variant="ghost" 
@@ -150,16 +149,16 @@ const BettingStatsPanel: React.FC<BettingStatsPanelProps> = ({
         {/* Left Column - Trade Stats */}
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
-            <CardTitle className="text-white">Trade Stats</CardTitle>
+            <CardTitle className="text-white text-2xl">Trade Stats</CardTitle>
           </CardHeader>
           <CardContent>
-            {stats ? (
+            {stats && (
               <div className="space-y-6">
                 {/* Donut Chart Area */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 justify-around">
                   {/* Donut Chart */}
-                  <div className="relative w-32 h-32">
-                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
+                  <div className="relative w-44 h-44">
+                    <svg className="w-44 h-44 transform -rotate-90" viewBox="0 0 100 100">
                       {/* Background circle */}
                       <circle
                         cx="50"
@@ -169,24 +168,24 @@ const BettingStatsPanel: React.FC<BettingStatsPanelProps> = ({
                         stroke="#374151"
                         strokeWidth="8"
                       />
-                      {/* Win percentage */}
+                      {/* Win percentage - Blue */}
                       <circle
                         cx="50"
                         cy="50"
                         r="40"
                         fill="none"
-                        stroke="#3B82F6"
+                        stroke="#2d55fd"
                         strokeWidth="8"
                         strokeDasharray={`${(stats.win_rate / 100) * 251.2} 251.2`}
                         strokeLinecap="round"
                       />
-                      {/* Loss percentage */}
+                      {/* Loss percentage - Red/Pink */}
                       <circle
                         cx="50"
                         cy="50"
                         r="40"
                         fill="none"
-                        stroke="#EF4444"
+                        stroke="#ff2a55"
                         strokeWidth="8"
                         strokeDasharray={`${((100 - stats.win_rate) / 100) * 251.2} 251.2`}
                         strokeDashoffset={`-${(stats.win_rate / 100) * 251.2}`}
@@ -194,129 +193,87 @@ const BettingStatsPanel: React.FC<BettingStatsPanelProps> = ({
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xs text-gray-400">Lượt giao dịch</span>
-                      <span className="text-2xl font-bold text-white">{stats.total_orders}</span>
+                      <span className="text-base text-gray-200">Lượt giao dịch</span>
+                      <span className="text-2xl  text-white">{stats.total_orders}</span>
                     </div>
                   </div>
 
                   {/* Legend */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                      <span className="text-sm text-gray-300">Tổng vòng thắng</span>
+                      <div className="w-5 h-5 rounded-full border-2 border-orange-500 bg-transparent"></div>
+                      <span className="text-base text-white">Tổng vòng thắng</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                      <span className="text-sm text-gray-300">Tổng vòng hòa</span>
+                      <div className="w-5 h-5 rounded-full border-2 border-gray-400 bg-transparent"></div>
+                      <span className="text-base text-white">Tổng vòng hòa</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-                      <span className="text-sm text-gray-300">Tổng vòng thua</span>
+                      <div className="w-5 h-5 rounded-full border-2 border-pink-500 bg-transparent"></div>
+                      <span className="text-base text-white">Tổng vòng thua</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Stats below chart */}
-                <div className="flex justify-between">
-                  <div className="text-center">
+                <div className="flex justify-between items-center">
+                  <div className="text-center flex-1">
                     <p className="text-sm text-gray-400">Tỷ lệ thắng</p>
                     <p className="text-xl font-bold text-white">{formatNumber(stats.win_rate)}%</p>
                   </div>
-                  <div className="text-center">
+                  
+                  {/* Vertical divider */}
+                  <div className="w-px h-12 bg-gray-400 mx-4"></div>
+                  
+                  <div className="text-center flex-1">
                     <p className="text-sm text-gray-400">Tổng giao dịch</p>
                     <p className="text-xl font-bold text-white">
                       {hideBalance ? '*****' : formatCurrency(stats.total_volume)}
                     </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : error ? (
-            <div className="text-center py-8 text-red-500">
-              {error}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-400">
-              Không có dữ liệu
-            </div>
           )}
           </CardContent>
         </Card>
 
         {/* Right Column */}
-        <div className="space-y-6">
+        {stats && <div className="space-y-6">
           {/* Top Cards */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Net Profit Card */}
-            <Card className="bg-orange-500 border-orange-500">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-orange-100">Lợi nhuận ròng</p>
-                    <p className="text-xl font-bold text-white">
-                      {hideBalance ? '*****' : formatCurrency(stats?.profit || 0)}
-                    </p>
-                  </div>
-                  <TrendingUp className="h-8 w-8 text-orange-200" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Total Revenue Card */}
-            <Card className="bg-teal-500 border-teal-500">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-teal-100">Tổng doanh thu</p>
-                    <p className="text-xl font-bold text-white">
-                      {hideBalance ? '*****' : formatCurrency(stats?.total_income || 0)}
-                    </p>
-                  </div>
-                  <Circle className="h-8 w-8 text-teal-200" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <StatsCards 
+            netProfit={formatCurrency(stats?.profit || 0)}
+            totalRevenue={formatCurrency(stats?.total_income || 0)}
+            showValues={!hideBalance}
+          />
 
           {/* Trading Summary */}
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white">Tóm tắt giao dịch</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {stats ? (
-                <div className="space-y-4">
-                  {/* Progress Bar */}
-                  <div className="relative">
-                    <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-pink-500 transition-all duration-300"
-                        style={{ width: `${stats.sell_percentage}%` }}
-                      ></div>
-                      <div 
-                        className="h-full bg-teal-500 transition-all duration-300"
-                        style={{ width: `${stats.buy_percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
+          <div className="space-y-4">
+            <p className='text-center text-lg text-gray-400'>Tóm tắt giao dịch</p>
+            {/* Progress Bar */}
+            <div className="relative">
+              <div className="w-full flex h-2.5 bg-gray-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#ff2a55] transition-all duration-300"
+                  style={{ width: `${stats.sell_percentage}%` }}
+                ></div>
+                <div 
+                  className="h-full bg-[#31baa0] transition-all duration-300"
+                  style={{ width: `${stats.buy_percentage}%` }}
+                ></div>
+              </div>
+            </div>
 
-                  {/* Labels */}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-pink-400">
-                      BÁN {formatNumber(stats.sell_percentage)}%
-                    </span>
-                    <span className="text-teal-400">
-                      {formatNumber(stats.buy_percentage)}% MUA
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-400">
-                  Không có dữ liệu
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            {/* Labels */}
+            <div className="flex justify-between">
+              <span className="text-[#ff2a55]">
+                BÁN {formatNumber(stats.sell_percentage)}%
+              </span>
+              <span className="text-[#31baa0]">
+                {formatNumber(stats.buy_percentage)}% MUA
+              </span>
+            </div>
+          </div>
+        </div>}
       </div>
     </div>
   )

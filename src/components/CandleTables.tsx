@@ -342,7 +342,7 @@ export default function CandleTables({
   }
 
   return (
-    <div className="w-full mx-auto p-2 -mt-8">
+    <div className="w-full mx-auto p-2">
       <div className="">
         {/* Stats Badges - Top Right */}
         <div className="flex justify-end mb-4">

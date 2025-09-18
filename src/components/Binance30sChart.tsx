@@ -103,10 +103,10 @@ export default function Binance30sChart({
   // Loading state - chỉ hiển thị khi lần đầu load
   if (isInitialLoading && candlesLoading) {
     return (
-      <div className="flex items-center justify-center h-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+      <div className="h-[66vh] flex items-center justify-center bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Đang tải dữ liệu Binance 30s...</p>
+          {/* <p className="text-gray-600 dark:text-gray-300">Đang tải dữ liệu Binance 30s...</p> */}
         </div>
       </div>
     );

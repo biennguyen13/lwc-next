@@ -8,8 +8,8 @@ import { GlobalLoadingProvider } from '@/contexts/GlobalLoadingContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Finantex',
-  description: 'Finantex',
+  title: 'FINANTEX',
+  description: 'FINANTEX',
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },

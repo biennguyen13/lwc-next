@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -26,6 +27,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
   const [notificationCount] = useState(148) // Mock notification count
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+  const pathname = usePathname()
   const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode, resetDemoBalance } = useWalletStore()
   const { toast } = useToast()
   
@@ -35,6 +37,9 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
   
   // Get current active balance
   const currentBalance = bettingMode === 'real' ? realBalance : demoBalance
+  
+  // Check if we're on trading page
+  const isTradingPage = pathname === '/trading'
   
   // Handle account change and close dropdown
   const handleAccountChange = (account: 'real' | 'demo') => {
@@ -141,10 +146,10 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-72 bg-gray-800 border-gray-700">
+            <DropdownMenuContent className="w-fit bg-gray-800 border-gray-700">
               {/* Real Account Section */}
               <div className="px-4 py-3 border-b border-gray-700">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center space-x-3 cursor-pointer flex-1" onClick={() => handleAccountChange('real')}>
                     <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                       bettingMode === 'real' ? 'bg-orange-500' : 'bg-gray-500'
@@ -169,7 +174,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
               
               {/* Demo Account Section */}
               <div className="px-4 py-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center space-x-3 cursor-pointer flex-1"  onClick={() => handleAccountChange('demo')}>
                     <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                       bettingMode === 'demo' ? 'bg-orange-500' : 'bg-gray-500'
@@ -253,18 +258,20 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
           </div>
 
           {/* Three Dots Menu */}
-          <div className="flex flex-col items-center space-y-1">
-            <div className="relative">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={onToggleActiveOrders}
-                className={`text-gray-200 hover:bg-gray-700 p-2 ${isActiveOrdersOpen ? 'bg-gray-600' : 'bg-gray-700'}`}
-              >
-                <MoreVertical className="w-5 h-5" />
-              </Button>
+          {isTradingPage && (
+            <div className="flex flex-col items-center space-y-1">
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={onToggleActiveOrders}
+                  className={`text-gray-200 hover:bg-gray-700 p-2 ${isActiveOrdersOpen ? 'bg-gray-600' : 'bg-gray-700'}`}
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </header>

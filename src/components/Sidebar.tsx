@@ -50,7 +50,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   ]
 
   return (
-    <aside className="w-[95px] pt-[65px] h-screen fixed left-0 top-0 bg-gray-900 border-r border-gray-700 flex-shrink-0">
+    <aside className="w-[75px] xl:w-[95px] pt-[65px] h-screen z-10 fixed left-0 top-0 bg-gray-900 border-r border-gray-700 flex-shrink-0">
       <div className="">
         <nav className="space-y-2">
           {menuItems.map((item) => {

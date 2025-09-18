@@ -47,7 +47,7 @@ export const GlobalLoadingProvider: React.FC<GlobalLoadingProviderProps> = ({ ch
       
       {/* Global Loading Overlay */}
       {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Simple spinning circle */}
           <div className="w-12 h-12 border-4 rounded-full animate-spin" style={{ borderTopColor: 'white', borderWidth: '4px' }}></div>
         </div>

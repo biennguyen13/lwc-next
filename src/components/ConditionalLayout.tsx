@@ -33,12 +33,12 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
         />
       }
       <StoreEventManager />
-      <main className="flex">
+      <main className="flex overflow-x-hidden">
         {
           isAuthenticated && 
           <Sidebar />
         }
-        <div className="flex-1 pl-[95px]">
+        <div className="flex-1 ml-[75px] xl:ml-[95px] z-0">
           {children}
         </div>
       </main>

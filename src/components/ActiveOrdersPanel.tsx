@@ -78,7 +78,7 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
 
   return (
     <div
-      className={`bg-gray-900 border-l border-gray-700 h-full flex flex-col ${
+      className={`bg-gray-900 border-gray-700 h-[66vh] flex flex-col ${
         isOpen ? "opacity-100" : "opacity-0 overflow-hidden"
       }`}
     >
@@ -112,7 +112,7 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
       </div>
 
       {/* Orders List */}
-      <div className="flex-1 overflow-y-auto max-h-[calc(100vh-120px)]">
+      <div className="flex-1 overflow-y-auto">
         {(
           activeTab === "open" ? activeOrdersLoading : bettingHistoryLoading
         ) ? (
@@ -120,7 +120,7 @@ export function ActiveOrdersPanel({ isOpen: propIsOpen, onClose: propOnClose }: 
             <div className="text-gray-400">Đang tải...</div>
           </div>
         ) : filteredOrders.length === 0 ? null : (
-          <div className="p-2 space-y-2">
+          <div className="p-1 md:p-2 space-y-2">
             {filteredOrders.map((order) => (
               <div
                 key={order.id}

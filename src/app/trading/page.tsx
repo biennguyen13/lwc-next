@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Binance30sTest } from "@/components/Binance30sTest"
 import Binance30sChart from "@/components/Binance30sChart"
 import CandleTables from "@/components/CandleTables"
@@ -15,8 +15,22 @@ export default function Home() {
   const [activeMainTab, setActiveMainTab] = useState<"gauges" | "candles">(
     "gauges"
   ) // Main tab state
+  const [isMobile, setIsMobile] = useState(false)
   const { isActiveOrdersOpen, closeActiveOrders } = useActiveOrders()
-  const offsetWidth = '200px'
+  
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+  
+  const offsetWidth = isMobile ? '155px' : '200px'
 
   return (
     <div className="p-1 pr-0 bg-gray-50 dark:bg-gray-900 transition-colors">
@@ -44,46 +58,6 @@ export default function Home() {
               symbol="BTCUSDT"
               title="Binance 30s Real-time Chart"
             />
-
-            {/* Tabs Container */}
-            <div className="my-2 md:my-8 px-1 lg:px-6">
-              {/* Tab Navigation */}
-              <div className="flex items-center gap-6 mb-6">
-                <button
-                  onClick={() => setActiveMainTab("gauges")}
-                  className={`text-lg font-medium transition-colors ${
-                    activeMainTab === "gauges"
-                      ? "text-foreground border-b-2 border-orange-500 pb-1"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Indicators
-                </button>
-                <button
-                  onClick={() => setActiveMainTab("candles")}
-                  className={`text-lg font-medium transition-colors ${
-                    activeMainTab === "candles"
-                      ? "text-foreground border-b-2 border-orange-500 pb-1"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Last Results
-                </button>
-              </div>
-
-              {/* Tab Content */}
-              <div className="">
-                <div className={`flex justify-center max-w-[1000px] mx-auto ${activeMainTab !== "gauges" ? "hidden" : ""}`}>
-                  <GaugeIndicators />
-                </div>
-
-                <div className={`${activeMainTab !== "candles" ? "hidden" : ""}`}>
-                  <CandleTables
-                    symbol="BTCUSDT"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Trading Panel */}
@@ -96,6 +70,46 @@ export default function Home() {
             isOpen={isActiveOrdersOpen}
             onClose={closeActiveOrders}
           />
+        </div>
+
+        {/* Tabs Container */}
+        <div className="my-2 md:my-8 px-1 lg:px-6">
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-6 mb-6">
+            <button
+              onClick={() => setActiveMainTab("gauges")}
+              className={`text-lg font-medium transition-colors ${
+                activeMainTab === "gauges"
+                  ? "text-foreground border-b-2 border-orange-500 pb-1"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Indicators
+            </button>
+            <button
+              onClick={() => setActiveMainTab("candles")}
+              className={`text-lg font-medium transition-colors ${
+                activeMainTab === "candles"
+                  ? "text-foreground border-b-2 border-orange-500 pb-1"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Last Results
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="">
+            <div className={`flex justify-center max-w-[1000px] mx-auto ${activeMainTab !== "gauges" ? "hidden" : ""}`}>
+              <GaugeIndicators />
+            </div>
+
+            <div className={`${activeMainTab !== "candles" ? "hidden" : ""}`}>
+              <CandleTables
+                symbol="BTCUSDT"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

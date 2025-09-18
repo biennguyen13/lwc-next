@@ -305,7 +305,7 @@ export default function TradingPanel({
   }
 
   return (
-    <div className="rounded-lg p-2 space-y-6">
+    <div className="rounded-lg p-1 lg:p-2 space-y-6">
       {/* Giá trị (Value) Section */}
       <div className="space-y-3">
         <h3 className="text-foreground text-base">Giá trị</h3>
@@ -314,7 +314,7 @@ export default function TradingPanel({
         <div className="flex items-center gap-1">
           <button
             onClick={() => handleValueChange(Math.max(0, value - 5))}
-            className="w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
+            className="w-6 lg:w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
           >
             -
           </button>
@@ -329,7 +329,7 @@ export default function TradingPanel({
           </div>
           <button
             onClick={() => handleValueChange(value + 5)}
-            className="w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
+            className="w-6 lg:w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
           >
             +
           </button>
@@ -341,14 +341,14 @@ export default function TradingPanel({
             <button
               key={quickValue}
               onClick={() => handleQuickValue(quickValue)}
-              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
+              className="p-x1 lg:px-3 py-1 lg:py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
             >
               +{quickValue}
             </button>
           ))}
           <button
             onClick={handleAll}
-            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
+            className="p-x1 lg:px-3 py-1 lg:py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
           >
             All
           </button>

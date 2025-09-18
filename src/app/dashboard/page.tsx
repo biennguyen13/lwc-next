@@ -31,46 +31,6 @@ const BettingHistoryTable = ({ orders, pagination, onPageChange }: BettingHistor
     })
   }
 
-  // Generate pagination items with ellipsis logic
-  const generatePaginationItems = () => {
-    const { page, total_pages } = pagination
-    const items = []
-    
-    if (total_pages <= 7) {
-      // Show all pages if total is 7 or less
-      for (let i = 1; i <= total_pages; i++) {
-        items.push(i)
-      }
-    } else {
-      // Always show first page
-      items.push(1)
-      
-      if (page <= 4) {
-        // Show first 5 pages + ellipsis + last page
-        for (let i = 2; i <= 5; i++) {
-          items.push(i)
-        }
-        items.push('...')
-        items.push(total_pages)
-      } else if (page >= total_pages - 3) {
-        // Show first page + ellipsis + last 5 pages
-        items.push('...')
-        for (let i = total_pages - 4; i <= total_pages; i++) {
-          items.push(i)
-        }
-      } else {
-        // Show first page + ellipsis + current page range + ellipsis + last page
-        items.push('...')
-        for (let i = page - 1; i <= page + 1; i++) {
-          items.push(i)
-        }
-        items.push('...')
-        items.push(total_pages)
-      }
-    }
-    
-    return items
-  }
 
   const formatPrice = (price: number) => {
     return price.toFixed(2)
@@ -87,14 +47,14 @@ const BettingHistoryTable = ({ orders, pagination, onPageChange }: BettingHistor
   const getOrderTypeIcon = (orderType: string) => {
     if (orderType === 'BUY') {
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <TrendingUp className="w-4 h-4 text-green-500" />
           <span className="text-green-500">Mua</span>
         </div>
       )
     } else {
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <TrendingDown className="w-4 h-4 text-red-500" />
           <span className="text-red-500">Bán</span>
         </div>
@@ -119,45 +79,63 @@ const BettingHistoryTable = ({ orders, pagination, onPageChange }: BettingHistor
     return <span className="text-white">0</span>
   }
 
+  const getSelectedDisplay = (order: BettingOrder) => {
+    if (order.order_type === 'BUY') {
+      return (
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-green-500" />
+          <span className="text-green-500">Mua</span>
+        </div>
+      )
+    } else {
+      return (
+        <div className="flex items-center gap-2">
+          <TrendingDown className="w-4 h-4 text-red-500" />
+          <span className="text-red-500">Bán</span>
+        </div>
+      )
+    }
+  }
+
   return (
     <div className="w-full">
       {/* Table */}
-      <div className="bg-gray-900 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+      <div className="bg-gray-900 rounded-lg rounded-b-none border-b-0 overflow-hidden border border-gray-700">
+        <div className="overflow-x-auto" style={{ maxWidth: 'calc(100vw - 105px - 16px * 2)' }}>
+          <table className="w-full border-collapse">
             <thead className="bg-gray-800">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">OrderID</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Thời gian bắt đầu</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Lựa chọn</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Giá mở</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Giá đóng</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Giá trị</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Thanh toán</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">OrderID</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Thời gian bắt đầu</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Lựa chọn</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá mở</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá đóng</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-r border-gray-700">Giá trị</th>
+                <th className="px-4 py-3  text-sm text-center font-medium text-gray-300 border-b border-gray-700">Thanh toán</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody>
               {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-800/50">
-                  <td className="px-4 py-3 text-sm text-white font-mono">
+                <tr key={order.id} className="hover:bg-gray-800/30 border-b border-gray-700/50">
+                  <td className="px-4 py-3 text-sm text-center text-white font-mono border-r border-gray-700/50">
                     {order.id}
                   </td>
-                  <td className="px-4 py-3 text-sm text-white">
+                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
                     {formatDateTime(order.created_at)}
                   </td>
-                  <td className="px-4 py-3 text-sm">
+                  <td className="px-4 py-3 text-sm text-center border-r border-gray-700/50">
                     {getOrderTypeIcon(order.order_type)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-white">
+                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
                     {formatPrice(parseFloat(order.open_price.toString()))}
                   </td>
-                  <td className="px-4 py-3 text-sm text-white">
+                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
                     {order.close_price ? formatPrice(parseFloat(order.close_price.toString())) : '-'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-white">
+                  <td className="px-4 py-3 text-sm text-center text-white border-r border-gray-700/50">
                     {formatAmount(parseFloat(order.amount.toString()))}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium">
+                  <td className="px-4 py-3 text-sm text-center font-medium">
                     {getPaymentDisplay(order)}
                   </td>
                 </tr>
@@ -168,58 +146,45 @@ const BettingHistoryTable = ({ orders, pagination, onPageChange }: BettingHistor
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center gap-2 mt-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(pagination.page - 1)}
-          disabled={pagination.page <= 1}
-          className="bg-transparent border-gray-600 text-white hover:bg-gray-800"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        
-        <div className="flex items-center gap-1">
-          {generatePaginationItems().map((item, index) => {
-            if (item === '...') {
-              return (
-                <span
-                  key={`ellipsis-${index}`}
-                  className="px-3 py-2 text-gray-400 text-sm"
-                >
-                  ...
-                </span>
-              )
-            }
-            
-            const pageNum = item as number
-            return (
-              <Button
-                key={pageNum}
-                variant={pagination.page === pageNum ? "default" : "outline"}
-                size="sm"
-                onClick={() => onPageChange(pageNum)}
-                className={
-                  pagination.page === pageNum
-                    ? "bg-orange-500 hover:bg-orange-600 text-white"
-                    : "bg-transparent border-gray-600 text-white hover:bg-gray-800"
-                }
-              >
-                {pageNum}
-              </Button>
-            )
-          })}
-        </div>
+      <div className="rounded-b-lg flex items-center justify-end gap-4 py-3 border border-gray-700">
+        <div className="flex gap-4">
+          {/* Left Arrow */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(pagination.page - 1)}
+            disabled={pagination.page <= 1}
+            className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
+              pagination.page <= 1 
+                ? "text-gray-500 cursor-not-allowed" 
+                : "text-white hover:bg-gray-800"
+            }`}
+          >
+            <ChevronLeft className="!w-8 !h-8" />
+          </Button>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(pagination.page + 1)}
-          disabled={pagination.page >= pagination.total_pages}
-          className="bg-transparent border-gray-600 text-white hover:bg-gray-800"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+          {/* Current Page Number */}
+          <div className="flex items-center justify-center w-8 h-8">
+            <span className="text-orange-400 text-lg font-semibold">
+              {pagination.page}
+            </span>
+          </div>
+
+          {/* Right Arrow */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(pagination.page + 1)}
+            disabled={pagination.page >= pagination.total_pages}
+            className={`w-8 h-8 p-0 rounded-md border-0 bg-transparent ${
+              pagination.page >= pagination.total_pages 
+                ? "text-gray-500 cursor-not-allowed" 
+                : "text-white hover:bg-gray-800"
+            }`}
+          >
+            <ChevronRight className="!w-8 !h-8" />
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -266,14 +231,14 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-900 text-white p-4">
       <div className="space-y-8">
         {/* Betting Statistics Panel */}
         <BettingStatsPanel />
 
         {/* Betting History Section */}
         <div>
-          <h2 className="text-xl font-semibold text-white mb-4">Lịch Sử Giao Dịch</h2>
+          <h2 className="text-3xl font-semibold text-white mb-4">Lịch Sử Giao Dịch</h2>
           
           {bettingHistoryError ? (
             <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-6 text-center">
