@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { ConditionalLayout } from '@/components/ConditionalLayout'
+import { GlobalLoadingProvider } from '@/contexts/GlobalLoadingContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,9 +21,11 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
+          <GlobalLoadingProvider>
+            <ConditionalLayout>
+              {children}
+            </ConditionalLayout>
+          </GlobalLoadingProvider>
         </ThemeProvider>
       </body>
     </html>

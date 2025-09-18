@@ -80,6 +80,28 @@ export interface GetCurrentKlineParams {
   symbol?: string
 }
 
+// Types cho Betting Statistics
+export interface BettingStats {
+  date: string
+  symbol: string
+  total_orders: number
+  total_volume: number
+  total_income: number
+  profit: number
+  buy_count: number
+  sell_count: number
+  buy_percentage: number
+  sell_percentage: number
+  win_count: number
+  loss_count: number
+  win_rate: number
+}
+
+// Types cho Get Betting Stats Params
+export interface GetBettingStatsParams {
+  symbol?: string
+}
+
 // ==================== BETTING API ====================
 export const bettingAPI = {
   // Đặt lệnh betting
@@ -117,6 +139,16 @@ export const bettingAPI = {
     })
     if (!response.data.success)
       throw new Error(response.data.message || "Lấy thông tin nến hiện tại thất bại")
+    return response.data.data
+  },
+
+  // Lấy thống kê betting real
+  getBettingStats: async (params: GetBettingStatsParams = {}): Promise<BettingStats> => {
+    const response: AxiosResponse = await apiClient.get("/betting/stats", {
+      params
+    })
+    if (!response.data.success)
+      throw new Error(response.data.message || "Lấy thống kê betting thất bại")
     return response.data.data
   }
 }

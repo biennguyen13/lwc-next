@@ -15,6 +15,7 @@ export type StoreEventType =
   | 'BETTING_ACTIVE_ORDERS_UPDATED'
   | 'BETTING_HISTORY_UPDATED'
   | 'BETTING_KLINE_UPDATED'
+  | 'BETTING_STATS_UPDATED'
   | 'BETTING_ORDER_PLACED'
   | 'BETTING_MODE_CHANGED'
   | 'DEMO_BALANCE_RESET'
@@ -192,6 +193,15 @@ class StoreCommunication {
     this.emit({
       type: 'BETTING_ORDER_PLACED',
       payload: order,
+      source: 'betting-store',
+      timestamp: Date.now()
+    })
+  }
+
+  emitBettingStatsUpdated(stats: any) {
+    this.emit({
+      type: 'BETTING_STATS_UPDATED',
+      payload: stats,
       source: 'betting-store',
       timestamp: Date.now()
     })

@@ -926,10 +926,11 @@ export default function Chart({
 
   // Handle active orders panel toggle
   useEffect(() => {
-    setTimeout(() => {
+    const _ = setTimeout(() => {
       handleResize();
-    }, 25);
+    }, 50);
     handleResize();
+    return () => clearTimeout(_);
   }, [isActiveOrdersOpen, handleResize]);
 
   return (

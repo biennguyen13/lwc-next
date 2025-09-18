@@ -83,7 +83,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
     refreshBalanceSummary()
     const interval = setInterval(() => {
       refreshBalanceSummary()
-    }, 15000) // 15 seconds
+    }, 30000) // 30 seconds
 
     // Cleanup interval on component unmount
     return () => clearInterval(interval)
@@ -119,7 +119,10 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen }: Navigat
           </Badge>
 
           {/* Account Balance Dropdown */}
-          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+          <DropdownMenu open={isDropdownOpen} onOpenChange={(open) => {
+            setIsDropdownOpen(open);
+            open && refreshBalanceSummary();
+          }}>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline" 
