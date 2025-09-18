@@ -61,8 +61,8 @@ const expansionFactor = 0; // Mở rộng thêm 30%
 const getChartHeight = (): number => {
   const viewportHeight = window.innerHeight;
   const isMobile = window.innerWidth < 767.99;
-  const heightRatio = isMobile ? 0.5 : 0.66; // 50% for mobile, 66% for desktop
-  const calculatedHeight = viewportHeight * heightRatio;
+  const heightRatio = isMobile ? 1 : 0.66; // 50% for mobile, 66% for desktop
+  const calculatedHeight = (viewportHeight * heightRatio) - (isMobile ? 277 + 65 + 30 : 0);
   const maxHeight = calculatedHeight;
   const minHeight = 350;
   
