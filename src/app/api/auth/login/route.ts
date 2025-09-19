@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 
-const API_BASE_URL = process.env.API_BASE_URL + "/api/v1"
+const API_SERVER_URL = process.env.API_SERVER_URL + "/api/v1"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
     // Gọi Fastify API
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_SERVER_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -4,6 +4,8 @@ const nextConfig = {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
+      net: false,
+      tls: false,
     }
     return config
   },
@@ -15,10 +17,10 @@ const nextConfig = {
   },
   reactStrictMode: false,
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+    const backendUrl = process.env.API_SERVER_URL
 
     if (!backendUrl) {
-      throw new Error("Missing NEXT_PUBLIC_API_BASE_URL env variable")
+      throw new Error("Missing API_SERVER_URL env variable")
     }
     console.log('backendUrl', backendUrl)
     return [
@@ -30,8 +32,9 @@ const nextConfig = {
     ]
   },
   env: {
-    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-    SOCKET_SERVER_URL: process.env.NEXT_PUBLIC_SOCKET_SERVER_BASE_URL,
+    API_SERVER_URL: process.env.API_SERVER_URL,
+    SOCKET_SERVER_URL: process.env.SERVER_SOCKET_URL,
+    NEXT_SERVER_URL: process.env.NEXT_SERVER_URL,
   },
 }
 

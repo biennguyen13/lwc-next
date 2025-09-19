@@ -489,9 +489,21 @@ export default function Chart({
 
     const initSocket = async () => {
       try {
-        socketRef.current = io(process.env.SOCKET_SERVER_URL, {
-          transports: ['websocket', 'polling']
-        });
+        const serverUrl = typeof window !== 'undefined' 
+          ? window.location.origin 
+          : 'http://localhost:4000'
+
+        socketRef.current = io(serverUrl, {
+          path: '/api/socketio',
+          transports: ['websocket', 'polling'],
+          timeout: 20000,
+          forceNew: true,
+          reconnection: true,
+          reconnectionAttempts: Infinity,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          autoConnect: true,
+        })
 
         socketRef.current.on('connect', () => {
           console.log('🔌 Chart: Connected to Socket.IO server');

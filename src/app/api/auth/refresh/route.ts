@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
 
-const API_BASE_URL = process.env.API_BASE_URL
+const API_SERVER_URL = process.env.API_SERVER_URL
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Gọi Fastify API
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+    const response = await fetch(`${API_SERVER_URL}/api/v1/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
