@@ -269,18 +269,18 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen, onToggleM
                 >
                   <Bell className="w-5 h-5" />
                 </Button>
-                {notificationCount > 0 && (
+                {/* {notificationCount > 0 && (
                   <div className="absolute -top-1 -right-1 bg-[#fc605f] text-gray-200 text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {notificationCount > 99 ? '99+' : notificationCount}
                   </div>
-                )}
+                )} */}
               </div>
               <span className="hidden lg:block text-xs text-gray-300">Thông báo</span>
             </div>
 
             {/* Three Dots Menu */}
             {isTradingPage && (
-              <div className="hidden lg:flex flex-col items-center space-y-1">
+              <div className="hidden md:flex flex-col items-center space-y-1">
                 <div className="relative">
                   <Button 
                     variant="ghost" 

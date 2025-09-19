@@ -102,6 +102,32 @@ export interface GetBettingStatsParams {
   symbol?: string
 }
 
+// Types cho Recent Order (từ recent-orders-total-payout API)
+export interface RecentOrder {
+  id: number
+  symbol: string
+  order_type: 'BUY' | 'SELL'
+  amount: number
+  payout_amount: number
+  result: number
+  open_time: number
+  close_time: number
+  created_at: string
+  completed_at: string
+}
+
+// Types cho Recent Orders Total Payout Response
+export interface RecentOrdersTotalPayoutResponse {
+  total_payout: number
+  order_count: number
+  orders: RecentOrder[]
+}
+
+// Types cho Get Recent Orders Total Payout Params
+export interface GetRecentOrdersTotalPayoutParams {
+  mode?: 'real' | 'demo'
+}
+
 // ==================== BETTING API ====================
 export const bettingAPI = {
   // Đặt lệnh betting
@@ -149,6 +175,16 @@ export const bettingAPI = {
     })
     if (!response.data.success)
       throw new Error(response.data.message || "Lấy thống kê betting thất bại")
+    return response.data.data
+  },
+
+  // Lấy tổng payout của các lệnh gần nhất
+  getRecentOrdersTotalPayout: async (params: GetRecentOrdersTotalPayoutParams = {}): Promise<RecentOrdersTotalPayoutResponse> => {
+    const response: AxiosResponse = await apiClient.get("/betting/recent-orders-total-payout", {
+      params
+    })
+    if (!response.data.success)
+      throw new Error(response.data.message || "Lấy tổng payout gần nhất thất bại")
     return response.data.data
   }
 }

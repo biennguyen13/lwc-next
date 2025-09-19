@@ -79,6 +79,10 @@ export const useBettingOrderPlacedEvents = (callback: (order: any) => void) => {
   return useStoreEvents("BETTING_ORDER_PLACED", callback)
 }
 
+export const useBettingRecentOrdersTotalPayoutEvents = (callback: (recentOrdersTotalPayout: any) => void) => {
+  return useStoreEvents("BETTING_RECENT_ORDERS_TOTAL_PAYOUT_UPDATED", callback)
+}
+
 export const useDemoBalanceResetEvents = (callback: (result: any) => void) => {
   return useStoreEvents("DEMO_BALANCE_RESET", callback)
 }
@@ -115,6 +119,7 @@ export const useAllStoreEvents = (callback: (event: any) => void) => {
       "BETTING_ACTIVE_ORDERS_UPDATED",
       "BETTING_HISTORY_UPDATED",
       "BETTING_KLINE_UPDATED",
+      "BETTING_RECENT_ORDERS_TOTAL_PAYOUT_UPDATED",
       "BETTING_ORDER_PLACED",
       "DEMO_BALANCE_RESET",
       "USER_LOGGED_IN",

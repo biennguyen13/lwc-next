@@ -16,6 +16,7 @@ export type StoreEventType =
   | 'BETTING_HISTORY_UPDATED'
   | 'BETTING_KLINE_UPDATED'
   | 'BETTING_STATS_UPDATED'
+  | 'BETTING_RECENT_ORDERS_TOTAL_PAYOUT_UPDATED'
   | 'BETTING_ORDER_PLACED'
   | 'BETTING_MODE_CHANGED'
   | 'DEMO_BALANCE_RESET'
@@ -207,6 +208,15 @@ class StoreCommunication {
     })
   }
 
+  emitBettingRecentOrdersTotalPayoutUpdated(recentOrdersTotalPayout: any) {
+    this.emit({
+      type: 'BETTING_RECENT_ORDERS_TOTAL_PAYOUT_UPDATED',
+      payload: recentOrdersTotalPayout,
+      source: 'betting-store',
+      timestamp: Date.now()
+    })
+  }
+
   emitBettingModeChanged(mode: 'real' | 'demo') {
     this.emit({
       type: 'BETTING_MODE_CHANGED',
@@ -275,6 +285,8 @@ export const useStoreCommunication = () => {
     emitBettingActiveOrdersUpdated: storeCommunication.emitBettingActiveOrdersUpdated.bind(storeCommunication),
     emitBettingHistoryUpdated: storeCommunication.emitBettingHistoryUpdated.bind(storeCommunication),
     emitBettingKlineUpdated: storeCommunication.emitBettingKlineUpdated.bind(storeCommunication),
+    emitBettingStatsUpdated: storeCommunication.emitBettingStatsUpdated.bind(storeCommunication),
+    emitBettingRecentOrdersTotalPayoutUpdated: storeCommunication.emitBettingRecentOrdersTotalPayoutUpdated.bind(storeCommunication),
     emitBettingOrderPlaced: storeCommunication.emitBettingOrderPlaced.bind(storeCommunication),
     emitBettingModeChanged: storeCommunication.emitBettingModeChanged.bind(storeCommunication),
     emitDemoBalanceReset: storeCommunication.emitDemoBalanceReset.bind(storeCommunication),

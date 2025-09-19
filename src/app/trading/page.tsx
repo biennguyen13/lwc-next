@@ -8,7 +8,10 @@ import GaugeIndicators from "@/components/GaugeIndicators"
 import TradingPanel from "@/components/TradingPanel"
 import MobileTradingPanel from "@/components/MobileTradingPanel"
 import { ActiveOrdersPanel } from "@/components/ActiveOrdersPanel"
+import { WinPopup } from "@/components/WinPopup"
 import { useActiveOrders } from "@/contexts/ActiveOrdersContext"
+import { useBinance30sRealtimeEvents } from "@/stores/use-store-events"
+import { useBettingStore, useWalletStore } from "@/stores"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -22,10 +25,18 @@ export default function Home() {
   const [isShowActiveOrdersPanel, setIsShowActiveOrdersPanel] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   
+  // Win popup state
+  const [isWinPopupOpen, setIsWinPopupOpen] = useState(false)
+  const [winAmount, setWinAmount] = useState(0)
+  
+  // Store hooks
+  const { fetchRecentOrdersTotalPayout } = useBettingStore()
+  const { bettingMode } = useWalletStore()
+  
   // Check screen size
   useEffect(() => {
     const checkScreenSize = () => {
-      setOffsetWidth(window.innerWidth < 767.99 ? '0' : window.innerWidth < 1024 ? '155px' : '200px')
+      setOffsetWidth(window.innerWidth < 767.99 ? '0' : window.innerWidth < 1024 ? '185px' : '200px')
       setIsShowTradingPanel(window.innerWidth < 767.99 ? false : true)
       setIsShowActiveOrdersPanel(window.innerWidth < 767.99 ? false : true)
     }
@@ -47,6 +58,28 @@ export default function Home() {
     
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
+
+  // Listen for realtime updates and check for win results
+  useBinance30sRealtimeEvents((realtimeData) => {
+    if (realtimeData?.payload?.second === 28 && realtimeData?.payload?.isBet) {
+      console.log('🎯 Checking for win results at second 28...')
+      
+      // Fetch recent orders total payout
+      fetchRecentOrdersTotalPayout({ mode: 'real' })
+        .then((data) => {
+          console.log('💰 Recent orders total payout:', data)
+          
+          if (data && data.total_payout > 0) {
+            console.log('🎉 WIN! Total payout:', data.total_payout)
+            setWinAmount(data.total_payout)
+            setIsWinPopupOpen(true)
+          }
+        })
+        .catch((error) => {
+          console.error('❌ Error fetching recent orders total payout:', error)
+        })
+    }
+  })
   
   return (
     <div className="p-1 pr-0 bg-gray-50 dark:bg-gray-900 transition-colors">
@@ -72,7 +105,6 @@ export default function Home() {
             <Binance30sChart
               limit={200}
               symbol="BTCUSDT"
-              title="Binance 30s Real-time Chart"
             />
           </div>
 
@@ -135,6 +167,14 @@ export default function Home() {
 
       {/* Mobile Trading Panel - Fixed at bottom */}
       {isMobile && <MobileTradingPanel />}
+      
+      {/* Win Popup */}
+      <WinPopup
+        isOpen={isWinPopupOpen}
+        onClose={() => setIsWinPopupOpen(false)}
+        amount={winAmount}
+        duration={3500}
+      />
     </div>
   )
 }

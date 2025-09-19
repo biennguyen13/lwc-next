@@ -8,10 +8,12 @@ import {
   BettingHistoryResponse,
   CurrentKlineInfo,
   BettingStats,
+  RecentOrdersTotalPayoutResponse,
   GetActiveOrdersParams,
   GetBettingHistoryParams,
   GetCurrentKlineParams,
-  GetBettingStatsParams
+  GetBettingStatsParams,
+  GetRecentOrdersTotalPayoutParams
 } from "@/lib/api/betting"
 import { storeCommunication } from "./store-communication"
 
@@ -21,6 +23,7 @@ interface BettingStoreState {
   bettingHistory: BettingOrder[]
   currentKline: CurrentKlineInfo | null
   bettingStats: BettingStats | null
+  recentOrdersTotalPayout: RecentOrdersTotalPayoutResponse | null
   pagination: {
     page: number
     limit: number
@@ -34,6 +37,7 @@ interface BettingStoreState {
   currentKlineLoading: boolean
   placeOrderLoading: boolean
   bettingStatsLoading: boolean
+  recentOrdersTotalPayoutLoading: boolean
   
   // Error states
   activeOrdersError: string | null
@@ -41,12 +45,14 @@ interface BettingStoreState {
   currentKlineError: string | null
   placeOrderError: string | null
   bettingStatsError: string | null
+  recentOrdersTotalPayoutError: string | null
   
   // Actions
   fetchActiveOrders: (params?: GetActiveOrdersParams) => Promise<void>
   fetchBettingHistory: (params?: GetBettingHistoryParams) => Promise<void>
   fetchCurrentKline: (params?: GetCurrentKlineParams) => Promise<void>
   fetchBettingStats: (params?: GetBettingStatsParams) => Promise<void>
+  fetchRecentOrdersTotalPayout: (params?: GetRecentOrdersTotalPayoutParams) => Promise<RecentOrdersTotalPayoutResponse>
   placeOrder: (params: PlaceOrderRequest) => Promise<PlaceOrderResponse>
   
   // Refresh actions (without loading states for auto-refresh)
@@ -54,6 +60,7 @@ interface BettingStoreState {
   refreshBettingHistory: (params?: GetBettingHistoryParams) => Promise<void>
   refreshCurrentKline: (params?: GetCurrentKlineParams) => Promise<void>
   refreshBettingStats: (params?: GetBettingStatsParams) => Promise<void>
+  refreshRecentOrdersTotalPayout: (params?: GetRecentOrdersTotalPayoutParams) => Promise<void>
   
   // Clear errors
   clearActiveOrdersError: () => void
@@ -61,6 +68,7 @@ interface BettingStoreState {
   clearCurrentKlineError: () => void
   clearPlaceOrderError: () => void
   clearBettingStatsError: () => void
+  clearRecentOrdersTotalPayoutError: () => void
   
   // Clear all
   clearAll: () => void
@@ -72,6 +80,7 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
   bettingHistory: [],
   currentKline: null,
   bettingStats: null,
+  recentOrdersTotalPayout: null,
   pagination: null,
   
   // Loading states
@@ -80,6 +89,7 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
   currentKlineLoading: false,
   placeOrderLoading: false,
   bettingStatsLoading: false,
+  recentOrdersTotalPayoutLoading: false,
   
   // Error states
   activeOrdersError: null,
@@ -87,6 +97,7 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
   currentKlineError: null,
   placeOrderError: null,
   bettingStatsError: null,
+  recentOrdersTotalPayoutError: null,
   
   // Fetch active orders
   fetchActiveOrders: async (params = {}) => {
@@ -182,6 +193,36 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
     }
   },
 
+  // Fetch recent orders total payout
+  fetchRecentOrdersTotalPayout: async (params = {}) => {
+    set({ recentOrdersTotalPayoutLoading: true, recentOrdersTotalPayoutError: null })
+    try {
+      const result = await bettingAPI.getRecentOrdersTotalPayout(params)
+      set({ 
+        recentOrdersTotalPayout: result,
+        recentOrdersTotalPayoutLoading: false 
+      })
+      
+      // Emit event để thông báo cho các components khác
+      storeCommunication.emitBettingRecentOrdersTotalPayoutUpdated(result)
+      
+      // Return data for immediate use
+      return result
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định'
+      set({ 
+        recentOrdersTotalPayoutError: errorMessage,
+        recentOrdersTotalPayoutLoading: false 
+      })
+      
+      // Emit error event
+      storeCommunication.emitError(errorMessage, 'betting-store')
+      
+      // Re-throw error so caller can handle it
+      throw error
+    }
+  },
+
   // Place betting order
   placeOrder: async (params) => {
     set({ placeOrderLoading: true, placeOrderError: null })
@@ -268,12 +309,27 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
     }
   },
 
+  // Refresh recent orders total payout without loading state (for auto-refresh)
+  refreshRecentOrdersTotalPayout: async (params = {}) => {
+    try {
+      const result = await bettingAPI.getRecentOrdersTotalPayout(params)
+      set({ recentOrdersTotalPayout: result })
+      
+      // Emit event để thông báo cho các components khác
+      storeCommunication.emitBettingRecentOrdersTotalPayoutUpdated(result)
+    } catch (error) {
+      // Silent error for auto-refresh - don't show loading or error states
+      console.warn('Auto-refresh recent orders total payout failed:', error)
+    }
+  },
+
   // Clear errors
   clearActiveOrdersError: () => set({ activeOrdersError: null }),
   clearBettingHistoryError: () => set({ bettingHistoryError: null }),
   clearCurrentKlineError: () => set({ currentKlineError: null }),
   clearPlaceOrderError: () => set({ placeOrderError: null }),
   clearBettingStatsError: () => set({ bettingStatsError: null }),
+  clearRecentOrdersTotalPayoutError: () => set({ recentOrdersTotalPayoutError: null }),
   
   // Clear all
   clearAll: () => set({
@@ -281,16 +337,19 @@ export const useBettingStore = create<BettingStoreState>((set, get) => ({
     bettingHistory: [],
     currentKline: null,
     bettingStats: null,
+    recentOrdersTotalPayout: null,
     pagination: null,
     activeOrdersLoading: false,
     bettingHistoryLoading: false,
     currentKlineLoading: false,
     placeOrderLoading: false,
     bettingStatsLoading: false,
+    recentOrdersTotalPayoutLoading: false,
     activeOrdersError: null,
     bettingHistoryError: null,
     currentKlineError: null,
     placeOrderError: null,
     bettingStatsError: null,
+    recentOrdersTotalPayoutError: null,
   }),
 }))

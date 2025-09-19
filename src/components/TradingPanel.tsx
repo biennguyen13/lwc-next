@@ -248,6 +248,7 @@ export default function TradingPanel({
       toast({
         title: "Đặt lệnh thành công",
         description: `Lệnh BUY ${value} USDT đã được đặt thành công`,
+        duration: 1000,
       })
 
       // Refresh wallet balance summary after successful order
@@ -260,6 +261,7 @@ export default function TradingPanel({
         title: "Đặt lệnh thất bại",
         description: error instanceof Error ? error.message : "Có lỗi xảy ra khi đặt lệnh",
         variant: "destructive",
+        duration: 1000,
       })
     }
   }
@@ -288,6 +290,7 @@ export default function TradingPanel({
       toast({
         title: "Đặt lệnh thành công",
         description: `Lệnh SELL ${value} USDT đã được đặt thành công`,
+        duration: 1000,
       })
 
       // Refresh wallet balance summary after successful order
@@ -300,6 +303,7 @@ export default function TradingPanel({
         title: "Đặt lệnh thất bại",
         description: error instanceof Error ? error.message : "Có lỗi xảy ra khi đặt lệnh",
         variant: "destructive",
+        duration: 1000,
       })
     }
   }

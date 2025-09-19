@@ -326,7 +326,7 @@ const GaugeIndicator = ({
 
         {/* Segment separator lines */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="hidden absolute inset-0 pointer-events-none"
           style={{
             width: `${speedometerWidth * 0.8}px`,
             height: `${speedometerHeight * 0.67}px`,

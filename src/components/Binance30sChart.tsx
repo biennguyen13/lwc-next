@@ -38,19 +38,18 @@ const convertBinance30sToHLC = (binance30sData: any[]): any[] => {
 interface Binance30sChartProps {
   symbol?: string;
   limit?: number;
-  title?: string;
 }
 
 export default function Binance30sChart({ 
   symbol = "BTCUSDT", 
   limit = 150, 
-  title = "Binance 30s Candles" 
 }: Binance30sChartProps) {
   const { 
     candles, 
     candlesLoading, 
     candlesError, 
-    fetchCandles 
+    fetchCandles,
+    clearAll
   } = useBinance30sStore();
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -64,6 +63,10 @@ export default function Binance30sChart({
     hlcData: [],
     volumeData: [],
   });
+
+  useEffect(()=>{
+    clearAll();
+  },[])
 
   // Fetch data khi component mount
   useEffect(() => {
@@ -112,38 +115,38 @@ export default function Binance30sChart({
     );
   }
 
-  // Error state
-  if (candlesError) {
-    return (
-      <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4">
-        <p className="font-semibold">Lỗi khi tải dữ liệu:</p>
-        <p className="text-sm">{candlesError}</p>
-        <button 
-          onClick={() => fetchCandles({ symbol, limit })}
-          className="mt-2 px-4 py-2 bg-[#fc605f] text-white rounded hover:bg-red-600"
-        >
-          Thử lại
-        </button>
-      </div>
-    );
-  }
+  // // Error state
+  // if (candlesError) {
+  //   return (
+  //     <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4">
+  //       <p className="font-semibold">Lỗi khi tải dữ liệu:</p>
+  //       <p className="text-sm">{candlesError}</p>
+  //       <button 
+  //         onClick={() => fetchCandles({ symbol, limit })}
+  //         className="mt-2 px-4 py-2 bg-[#fc605f] text-white rounded hover:bg-red-600"
+  //       >
+  //         Thử lại
+  //       </button>
+  //     </div>
+  //   );
+  // }
 
-  // Empty state
-  if (!candles || candles.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-        <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">Không có dữ liệu</p>
-          <button 
-            onClick={() => fetchCandles({ symbol, limit })}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Tải dữ liệu
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // // Empty state
+  // if (!candles || candles.length === 0) {
+  //   return (
+  //     <div className="flex items-center justify-center h-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+  //       <div className="text-center">
+  //         <p className="text-gray-600 dark:text-gray-300 mb-4">Không có dữ liệu</p>
+  //         <button 
+  //           onClick={() => fetchCandles({ symbol, limit })}
+  //           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+  //         >
+  //           Tải dữ liệu
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <Chart 
