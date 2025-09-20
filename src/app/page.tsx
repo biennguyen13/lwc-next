@@ -1,23 +1,25 @@
 "use client"
 
-import { useState } from "react"
-import { Binance30sTest } from "@/components/Binance30sTest"
-import Binance30sChart from "@/components/Binance30sChart"
-import CandleTables from "@/components/CandleTables"
-import GaugeIndicators from "@/components/GaugeIndicators"
-import TradingPanel from "@/components/TradingPanel"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { HeroSection } from "@/components/HeroSection"
+import { IndicatorsSection } from "@/components/IndicatorsSection"
+import { FeaturesSection } from "@/components/FeaturesSection"
+import { CryptoBannerSection } from "@/components/CryptoBannerSection"
+import { StepsSection } from "@/components/StepsSection"
+import { TabletSection } from "@/components/TabletSection"
+import { FAQSection } from "@/components/FAQSection"
+import { FooterSection } from "@/components/FooterSection"
 
 export default function Home() {
-  const [activeMainTab, setActiveMainTab] = useState<"gauges" | "candles">(
-    "gauges"
-  ) // Main tab state
-
   return (
-    <main className="min-h-screen p-2 bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="max-w-[100vw] mx-auto">
-      </div>
+    <main className="min-h-screen bg-[#141416]">
+      <HeroSection />
+      <IndicatorsSection />
+      <FeaturesSection />
+      <CryptoBannerSection />
+      <StepsSection />
+      <TabletSection />
+      <FAQSection />
+      <FooterSection />
     </main>
   )
 }

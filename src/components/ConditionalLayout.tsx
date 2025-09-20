@@ -33,7 +33,7 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
 
   // If user is authenticated, show full layout with navigation and sidebar
   return (
-    <div className="min-h-screen bg-gray-900 pt-[65px]">
+    <div className={`min-h-screen bg-gray-900 ${isAuthenticated ? 'pt-[65px]' : 'pt-0'}`}>
       {
         isAuthenticated && 
         <Navigation 
@@ -56,7 +56,7 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
             onClose={() => setIsMobileMenuOpen(false)}
           />
         }
-        <div className="flex-1 pl-1 lg:pl-[95px] z-0">
+        <div className={`flex-1 z-0 ${isAuthenticated ? 'pl-1 lg:pl-[95px]' : ''}`}>
           {children}
         </div>
       </main>
