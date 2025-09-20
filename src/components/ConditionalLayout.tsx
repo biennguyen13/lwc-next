@@ -15,14 +15,17 @@ interface ConditionalLayoutProps {
 }
 
 function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
-  const { isAuthenticated, isLoading } = useAuthStore()
+  const { isAuthenticated, isLoading, checkAuthStatus } = useAuthStore()
   const [mounted, setMounted] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isActiveOrdersOpen, toggleActiveOrders } = useActiveOrders()
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    
+    // Check auth status on app initialization (when browser reloads)
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)

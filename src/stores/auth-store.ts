@@ -2,8 +2,9 @@
 
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { authAPI } from "@/lib/api"
+import { authAPI, accountAPI } from "@/lib/api"
 import { storeCommunication } from "./store-communication"
+import { clearAllStores } from "./store-utils"
 
 // Types
 interface User {
@@ -42,6 +43,7 @@ interface AuthState {
   logout: () => Promise<void>
   refreshToken: () => Promise<void>
   checkAuthStatus: () => Promise<void>
+  fetchProfile: () => Promise<void>
   clearError: () => void
   clearAll: () => void
 }
@@ -69,6 +71,14 @@ export const useAuthStore = create<AuthState>()(
             error: null
           })
 
+          // Fetch fresh profile data after login
+          try {
+            await get().fetchProfile()
+          } catch (profileError) {
+            console.warn('Failed to fetch profile after login:', profileError)
+            // Don't throw error, user is still logged in
+          }
+
           // Emit login success event
           storeCommunication.emitUserLoggedIn(response.user)
           
@@ -95,6 +105,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authAPI.logout()
           
+          // Clear all stores first
+          clearAllStores()
+          
           set({
             user: null,
             isAuthenticated: false,
@@ -106,7 +119,9 @@ export const useAuthStore = create<AuthState>()(
           storeCommunication.emitUserLoggedOut()
           
         } catch (error: any) {
-          // Even if logout fails, clear local state
+          // Even if logout fails, clear all stores and local state
+          clearAllStores()
+          
           set({
             user: null,
             isAuthenticated: false,
@@ -121,6 +136,7 @@ export const useAuthStore = create<AuthState>()(
 
       // Refresh token action
       refreshToken: async () => {
+        console.log('refreshTokenrefreshToken')
         try {
           const response = await authAPI.refreshToken()
           
@@ -129,10 +145,20 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             error: null
           })
+
+          // Fetch fresh profile data after token refresh
+          try {
+            await get().fetchProfile()
+          } catch (profileError) {
+            console.warn('Failed to fetch profile after token refresh:', profileError)
+            // Don't throw error, user is still authenticated
+          }
           
         } catch (error: any) {
           // If refresh fails, logout user
           get().logout()
+        } finally {
+          set({ isLoading: false })
         }
       },
 
@@ -142,10 +168,11 @@ export const useAuthStore = create<AuthState>()(
         
         try {
           const hasToken = await authAPI.hasAccessToken()
-          
+          console.log('hasToken', hasToken)
           if (hasToken) {
             // Try to refresh token to get user info
-            await get().refreshToken()
+            // await get().refreshToken()
+            await get().fetchProfile()
           } else {
             set({
               user: null,
@@ -160,6 +187,33 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false
           })
+        } finally {
+          set({ isLoading: false })
+        }
+      },
+
+      // Fetch user profile
+      fetchProfile: async () => {
+        try {
+          const profile = await accountAPI.getProfile()
+          
+          set((state) => ({
+            user: profile,
+            isAuthenticated: true,
+            error: null
+          }))
+
+          // Emit profile updated event
+          storeCommunication.emitUserLoggedIn(profile)
+          
+        } catch (error: any) {
+          const errorMessage = error?.response?.data?.message || "Lấy profile thất bại"
+          set({ error: errorMessage })
+          
+          // Emit error event
+          storeCommunication.emitError(errorMessage, "auth-store")
+          
+          throw error
         }
       },
 

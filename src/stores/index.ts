@@ -39,9 +39,5 @@ export {
   useBettingStore,
 }
 
-export const clearAllStores = () => {
-  useBinance30sStore.getState().clearAll()
-  useWalletStore.getState().clearAll()
-  useAuthStore.getState().clearAll()
-  useBettingStore.getState().clearAll()
-}
+// Re-export clearAllStores from store-utils
+export { clearAllStores } from "./store-utils"

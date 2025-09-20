@@ -26,8 +26,10 @@ const initBackendConnection = () => {
   if (backendSocket) return backendSocket
 
   const backendSocketUrl = process.env.SOCKET_SERVER_URL || 'http://localhost:4002'
+  const timestamp = new Date().toISOString()
   
-  console.log('🔌 Connecting to backend Socket.IO server:', backendSocketUrl)
+  console.log(`🔌 [${timestamp}] Initializing backend Socket.IO connection`)
+  console.log(`   🌐 Backend URL: ${backendSocketUrl}`)
   
   backendSocket = ClientIO(backendSocketUrl, {
     transports: ['websocket', 'polling'],
@@ -41,15 +43,22 @@ const initBackendConnection = () => {
   })
 
   backendSocket.on('connect', () => {
-    console.log('✅ Connected to backend Socket.IO server')
+    const connectTimestamp = new Date().toISOString()
+    console.log(`✅ [${connectTimestamp}] Backend Socket.IO connected successfully`)
+    console.log(`   🆔 Socket ID: ${backendSocket.id}`)
   })
 
-  backendSocket.on('disconnect', () => {
-    console.log('❌ Disconnected from backend Socket.IO server')
+  backendSocket.on('disconnect', (reason) => {
+    const disconnectTimestamp = new Date().toISOString()
+    console.log(`❌ [${disconnectTimestamp}] Backend Socket.IO disconnected`)
+    console.log(`   📝 Reason: ${reason}`)
   })
 
   backendSocket.on('connect_error', (error) => {
-    console.error('❌ Backend connection error:', error)
+    const errorTimestamp = new Date().toISOString()
+    console.error(`❌ [${errorTimestamp}] Backend connection error:`)
+    console.error(`   🚨 Error: ${error.message}`)
+    console.error(`   🔗 URL: ${backendSocketUrl}`)
   })
 
   return backendSocket
@@ -59,10 +68,32 @@ app.prepare().then(() => {
   // Create HTTP server
   const httpServer = createServer(async (req, res) => {
     try {
-      const parsedUrl = parse(req.url, true)
+      const url = req.url || '/'
+      const parsedUrl = parse(url, true)
+      const pathname = parsedUrl.pathname || '/'
+      const method = req.method || 'GET'
+      
+      // Log request với format đẹp
+      const timestamp = new Date().toISOString()
+      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
+      
+      dev && console.log(`🌐 [${timestamp}] ${method} ${pathname} - IP: ${ip}`)
+      
+      // Log query parameters nếu có
+      if (Object.keys(parsedUrl.query).length > 0) {
+        dev && console.log(`   📋 Query:`, parsedUrl.query)
+      }
+      
       await handle(req, res, parsedUrl)
+      
+      // Log response status
+      dev && console.log(`✅ [${timestamp}] ${method} ${pathname} - Status: ${res.statusCode}`)
+      
     } catch (err) {
-      console.error('Error occurred handling', req.url, err)
+      const timestamp = new Date().toISOString()
+      const url = req.url || '/'
+      const method = req.method || 'GET'
+      console.error(`❌ [${timestamp}] Error handling ${method} ${url}:`, err.message)
       res.statusCode = 500
       res.end('internal server error')
     }
@@ -86,29 +117,44 @@ app.prepare().then(() => {
 
   // Handle Socket.IO connections
   io.on('connection', (socket) => {
-    console.log('👤 Frontend client connected:', socket.id)
+    const timestamp = new Date().toISOString()
+    const clientIP = socket.handshake.address || 'unknown'
+    
+    console.log(`🔌 [${timestamp}] Socket.IO client connected`)
+    console.log(`   📍 Socket ID: ${socket.id}`)
+    console.log(`   🌐 Client IP: ${clientIP}`)
+    console.log(`   📱 User Agent: ${socket.handshake.headers['user-agent'] || 'unknown'}`)
 
     // Forward all events from frontend to backend
     socket.onAny((eventName, ...args) => {
-      console.log(`📤 Forwarding event '${eventName}' to backend`)
+      const eventTimestamp = new Date().toISOString()
+      console.log(`📤 [${eventTimestamp}] Event: ${eventName} → Backend`)
+      console.log(`   🔗 Socket: ${socket.id}`)
+      
       if (backend && backend.connected) {
         backend.emit(eventName, ...args)
       } else {
-        console.warn('⚠️ Backend not connected, cannot forward event:', eventName)
+        console.warn(`⚠️ [${eventTimestamp}] Backend not connected, cannot forward: ${eventName}`)
       }
     })
 
     // Forward all events from backend to frontend
     const forwardEvent = (eventName, ...args) => {
-      console.log(`📥 Forwarding event '${eventName}' to frontend (${socket.id})`)
+      const eventTimestamp = new Date().toISOString()
+      // console.log(`📥 [${eventTimestamp}] Event: ${eventName} → Frontend`)
+      // console.log(`   🔗 Socket: ${socket.id}`)
       socket.emit(eventName, ...args)
     }
     
     backend.onAny(forwardEvent)
 
     // Handle disconnection
-    socket.on('disconnect', () => {
-      console.log('👋 Frontend client disconnected:', socket.id)
+    socket.on('disconnect', (reason) => {
+      const disconnectTimestamp = new Date().toISOString()
+      console.log(`👋 [${disconnectTimestamp}] Socket.IO client disconnected`)
+      console.log(`   📍 Socket ID: ${socket.id}`)
+      console.log(`   📝 Reason: ${reason}`)
+      
       // Cleanup event listener to prevent memory leak
       backend.offAny(forwardEvent)
     })
@@ -118,7 +164,14 @@ app.prepare().then(() => {
   httpServer.listen(port, (err) => {
     if (err) throw err
     const instanceId = process.env.INSTANCE_ID || 'single'
-    console.log(`🚀 Ready on http://${hostname}:${port} (Instance: ${instanceId})`)
-    console.log(`🔌 Socket.IO server running on /api/socketio`)
+    const startTimestamp = new Date().toISOString()
+    
+    console.log(`🚀 [${startTimestamp}] Next.js server started successfully`)
+    console.log(`   🌐 URL: http://${hostname}:${port}`)
+    console.log(`   🆔 Instance: ${instanceId}`)
+    console.log(`   🔧 Environment: ${process.env.NODE_ENV || 'development'}`)
+    console.log(`   🔌 Socket.IO: /api/socketio`)
+    console.log(`   📊 Rate Limiting: Enabled`)
+    console.log(`   ⚡ Cluster Mode: ${isCluster ? 'Yes' : 'No'}`)
   })
 })
