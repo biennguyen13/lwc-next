@@ -33,7 +33,7 @@ const nextConfig = {
   },
   env: {
     API_SERVER_URL: process.env.API_SERVER_URL,
-    SOCKET_SERVER_URL: process.env.SERVER_SOCKET_URL,
+    SOCKET_SERVER_URL: process.env.SOCKET_SERVER_URL,
     NEXT_SERVER_URL: process.env.NEXT_SERVER_URL,
   },
 }

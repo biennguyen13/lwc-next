@@ -3,10 +3,16 @@ import { parse } from 'url'
 import next from 'next'
 import { Server } from 'socket.io'
 import { io as ClientIO } from 'socket.io-client'
+import cluster from 'cluster'
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = 'localhost'
 const port = process.env.PORT || 4000
+
+console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+
+// Cluster support
+const isCluster = (process.env.NODE_ENV === 'production' || process.env.DEV_CLUSTER) && cluster.isWorker
 
 // Initialize Next.js app
 const app = next({ dev, hostname, port })
@@ -19,7 +25,7 @@ let backendSocket = null
 const initBackendConnection = () => {
   if (backendSocket) return backendSocket
 
-  const backendSocketUrl = process.env.SERVER_SOCKET_URL || 'http://localhost:4002'
+  const backendSocketUrl = process.env.SOCKET_SERVER_URL || 'http://localhost:4002'
   
   console.log('🔌 Connecting to backend Socket.IO server:', backendSocketUrl)
   
@@ -62,7 +68,7 @@ app.prepare().then(() => {
     }
   })
 
-  // Initialize Socket.IO server
+  // Initialize Socket.IO server with cluster support
   const io = new Server(httpServer, {
     path: '/api/socketio',
     cors: {
@@ -70,7 +76,9 @@ app.prepare().then(() => {
       methods: ['GET', 'POST'],
       credentials: true
     },
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    // Cluster mode configuration
+    allowEIO3: true
   })
 
   // Initialize backend connection
@@ -109,7 +117,8 @@ app.prepare().then(() => {
   // Start server
   httpServer.listen(port, (err) => {
     if (err) throw err
-    console.log(`🚀 Ready on http://${hostname}:${port}`)
+    const instanceId = process.env.INSTANCE_ID || 'single'
+    console.log(`🚀 Ready on http://${hostname}:${port} (Instance: ${instanceId})`)
     console.log(`🔌 Socket.IO server running on /api/socketio`)
   })
 })
