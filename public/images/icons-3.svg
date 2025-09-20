@@ -1,0 +1,5 @@
+<svg id="icons_Weight_Line" data-name="icons/Weight/Line" xmlns="http://www.w3.org/2000/svg" width="38" height="44" viewBox="0 0 38 44">
+  <path id="Shape" d="M18,36A18,18,0,1,1,36,18,18.02,18.02,0,0,1,18,36ZM18,4A14,14,0,1,0,32,18,14.016,14.016,0,0,0,18,4Z" transform="translate(0 8)" fill="#fcfcfd"/>
+  <path id="Shape-2" data-name="Shape" d="M2,0H2A2,2,0,0,1,4,2v8a2,2,0,0,1-2,2H2a2,2,0,0,1-2-2V2A2,2,0,0,1,2,0Z" transform="translate(16 16)" fill="#fcfcfd"/>
+  <path id="Shape-3" data-name="Shape" d="M24,12a1.987,1.987,0,0,1-1.414-.586l-2-2a2,2,0,1,1,2.828-2.828l2,2A2,2,0,0,1,24,12ZM10,4H2A2,2,0,1,1,2,0h8a2,2,0,1,1,0,4Z" transform="translate(12 0)" fill="#fcfcfd"/>
+</svg>

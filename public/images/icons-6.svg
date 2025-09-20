@@ -1,0 +1,8 @@
+<svg id="icon" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect id="icon_Background_" data-name="icon (Background)" width="80" height="80" rx="24" fill="#45b26b"/>
+  <g id="icons_Stopwatch_Line" data-name="icons/Stopwatch/Line" transform="translate(31 29)">
+    <path id="Shape" d="M9,18a9,9,0,1,1,9-9A9.01,9.01,0,0,1,9,18ZM9,2a7,7,0,1,0,7,7A7.008,7.008,0,0,0,9,2Z" transform="translate(0 4)" fill="#fcfcfd"/>
+    <path id="Shape-2" data-name="Shape" d="M1,0H1A1,1,0,0,1,2,1V5A1,1,0,0,1,1,6H1A1,1,0,0,1,0,5V1A1,1,0,0,1,1,0Z" transform="translate(8 8)" fill="#fcfcfd"/>
+    <path id="Shape-3" data-name="Shape" d="M12,6a.993.993,0,0,1-.707-.293l-1-1a1,1,0,1,1,1.414-1.414l1,1A1,1,0,0,1,12,6ZM5,2H1A1,1,0,1,1,1,0H5A1,1,0,1,1,5,2Z" transform="translate(6 0)" fill="#fcfcfd"/>
+  </g>
+</svg>

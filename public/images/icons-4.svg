@@ -1,0 +1,7 @@
+<svg id="icon" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect id="icon_Background_" data-name="icon (Background)" width="80" height="80" rx="24" fill="#9757d7"/>
+  <g id="icons_Whistle_Line" data-name="icons/Whistle/Line" transform="translate(28 32)">
+    <path id="Shape" d="M8,16A8,8,0,1,1,8,0h3.311a.5.5,0,0,1,.33.125l.409.36.013.01L12.074.5,14,2,15.926.5l.013-.011.01-.009.409-.36A.5.5,0,0,1,16.689,0H21a3,3,0,0,1,3,3V5.351a3.006,3.006,0,0,1-2.628,2.977l-5.435.68A8.009,8.009,0,0,1,8,16ZM8,2a6,6,0,1,0,5.953,6.759l.194-1.543,6.978-.872A1,1,0,0,0,22,5.351V3a1,1,0,0,0-1-1H17.465A4.013,4.013,0,0,1,14,4a4.013,4.013,0,0,1-3.465-2Z" transform="translate(0 0)" fill="#fcfcfd"/>
+    <path id="Shape-2" data-name="Shape" d="M3,6A3,3,0,1,1,6,3,3,3,0,0,1,3,6ZM3,2A1,1,0,1,0,4,3,1,1,0,0,0,3,2Z" transform="translate(5 5)" fill="#fcfcfd"/>
+  </g>
+</svg>
