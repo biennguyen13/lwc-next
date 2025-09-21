@@ -1,5 +1,6 @@
 "use client"
 
+import { HomeNavigation } from "@/components/HomeNavigation"
 import { HeroSection } from "@/components/HeroSection"
 import { IndicatorsSection } from "@/components/IndicatorsSection"
 import { FeaturesSection } from "@/components/FeaturesSection"
@@ -12,6 +13,7 @@ import { FooterSection } from "@/components/FooterSection"
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#141416]">
+      <HomeNavigation />
       <HeroSection />
       <IndicatorsSection />
       <FeaturesSection />

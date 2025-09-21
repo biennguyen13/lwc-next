@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -103,11 +104,13 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen, onToggleM
       <div className="flex items-center justify-between gap-4 w-full">
         {/* Logo - Hidden on lg screens */}
         <div className="hidden items-center flex-1 lg:flex">
-          <img 
-            src="/finantex-logo.png" 
-            alt="FINANTEX" 
-            className="h-12 w-auto"
-          />
+          <Link href="/">
+            <img 
+              src="/finantex-logo.png" 
+              alt="FINANTEX" 
+              className="h-12 w-auto cursor-pointer"
+            />
+          </Link>
         </div>
 
         {/* Hamburger Menu - Only visible on lg screens */}
