@@ -1,200 +1,254 @@
-# Lightweight Charts với Next.js
+# 🚀 LWC Next.js Application
 
-[![Next.js](https://img.shields.io/badge/Next.js-14.2.5-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-18.3.1-blue)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-blue)](https://www.typescriptlang.org/)
-[![Lightweight Charts](https://img.shields.io/badge/Lightweight%20Charts-4.2.0-green)](https://www.tradingview.com/lightweight-charts/)
+Ứng dụng Next.js với custom server tích hợp Socket.IO, rate limiting và proxy đến backend.
 
-🚀 Demo Next.js 14 với Lightweight Charts - Dự án hoàn chỉnh với TypeScript và Tailwind CSS.
+## 📋 Yêu cầu hệ thống
 
-## ✨ Tính năng
+- Node.js >= 18.0.0
+- npm >= 8.0.0
+- PM2 (cho production)
 
-- ✅ **Candlestick Chart** - Biểu đồ nến truyền thống với dữ liệu OHLC
-- ✅ **HLC Area Chart** - Biểu đồ tùy chỉnh hiển thị High, Low, Close với vùng được tô màu
-- ✅ **Responsive Design** - Tự động điều chỉnh kích thước khi thay đổi màn hình
-- ✅ **TypeScript Support** - Type safety đầy đủ cho development
-- ✅ **Tailwind CSS** - Styling hiện đại và responsive
-- ✅ **Dynamic Imports** - Tránh SSR issues với Next.js
-- ✅ **Interactive Charts** - Hỗ trợ zoom, pan, và crosshair
-
-## 🛠️ Tech Stack
-
-- **Next.js 14** - React framework với App Router
-- **Lightweight Charts 4.2** - Charting library từ TradingView
-- **TypeScript 5.6** - Type safety và development experience
-- **Tailwind CSS 3.4** - Utility-first CSS framework
-- **React 18.3** - UI library
-
-## 🚀 Cài đặt
+## 🛠️ Cài đặt
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/lwc-next-demo.git
-cd lwc-next-demo
+git clone <repository-url>
+cd lwc-next
 
 # Cài đặt dependencies
 npm install
-
-# Chạy development server
-npm run dev
-
-# Build production
-npm run build
-
-# Start production server
-npm start
 ```
 
-Mở [http://localhost:3000](http://localhost:3000) để xem kết quả.
+## 🚀 Scripts có sẵn
+
+### Development Scripts
+
+#### 1. Chạy với Custom Server (Khuyến nghị)
+```bash
+npm run dev
+```
+- **Chức năng**: Chạy Next.js với custom server tích hợp Socket.IO
+- **Port**: 4000
+- **Tính năng**: 
+  - Socket.IO real-time communication
+  - Proxy đến backend
+  - Hot reload
+
+#### 2. Chạy Next.js Standard
+```bash
+npm run dev:next
+```
+- **Chức năng**: Chạy Next.js development server chuẩn
+- **Port**: 4000
+- **Lưu ý**: Không có Socket.IO và custom features
+
+### Production Scripts
+
+#### 1. Build ứng dụng
+```bash
+npm run build
+```
+- **Chức năng**: Build Next.js cho production
+- **Tạo ra**: Thư mục `.next` với code tối ưu hóa
+- **Bắt buộc**: Phải chạy trước khi start production
+
+#### 2. Chạy Production với Custom Server
+```bash
+npm run start
+```
+- **Chức năng**: Chạy production với custom server
+- **Yêu cầu**: Phải chạy `npm run build` trước
+- **Tính năng**: 
+  - Socket.IO
+  - Proxy đến backend
+
+#### 3. Chạy Next.js Production Standard
+```bash
+npm run start:next
+```
+- **Chức năng**: Chạy Next.js production server chuẩn
+- **Yêu cầu**: Phải chạy `npm run build` trước
+
+### Quality Scripts
+
+```bash
+npm run lint
+```
+- **Chức năng**: Kiểm tra code quality với ESLint
+
+## 🔧 PM2 Configuration
+
+### Development Mode
+```bash
+# Chạy app development (2 instances)
+pm2 start ecosystem.config.js --only lwc-next-dev
+```
+
+### Production Mode
+```bash
+# Build trước
+npm run build
+
+# Chạy app production (2 instances)
+pm2 start ecosystem.config.js --only lwc-next
+```
+
+### PM2 Commands
+```bash
+# Xem status
+pm2 status
+
+# Xem logs
+pm2 logs lwc-next
+
+# Restart
+pm2 restart lwc-next
+
+# Stop
+pm2 stop lwc-next
+
+# Delete
+pm2 delete lwc-next
+```
+
+## 🌐 Environment Variables
+
+Tạo file `.env.local`:
+
+```env
+# Next.js
+NODE_ENV=development
+PORT=4000
+
+# Backend API
+API_SERVER_URL=http://localhost:4001
+
+# Socket.IO
+SOCKET_SERVER_URL=http://localhost:4002
+NEXT_SERVER_URL=http://localhost:4000
+
+# PM2
+INSTANCE_ID=0
+DEV_CLUSTER=true
+```
 
 ## 📁 Cấu trúc dự án
 
 ```
 lwc-next/
 ├── src/
-│   ├── app/
-│   │   ├── layout.tsx      # Root layout với metadata
-│   │   ├── page.tsx        # Trang chính với tab switching
-│   │   └── globals.css     # Global styles + Tailwind
-│   └── components/
-│       ├── Chart.tsx       # Candlestick chart component
-│       └── CustomChart.tsx # HLC Area chart component
-├── package.json            # Dependencies và scripts
-├── next.config.js          # Next.js configuration
-├── tailwind.config.js      # Tailwind CSS config
-├── tsconfig.json           # TypeScript config
-└── README.md              # Documentation
+│   ├── app/                 # Next.js App Router
+│   │   ├── api/            # API routes
+│   │   ├── trading/        # Trading page
+│   │   └── dashboard/      # Dashboard page
+│   ├── components/         # React components
+│   ├── stores/            # Zustand stores
+│   └── lib/               # Utilities
+├── server.mjs             # Custom server
+├── ecosystem.config.js    # PM2 configuration
+└── package.json
 ```
 
-## 📊 Sử dụng
+## 🔌 Custom Server Features
 
-### Candlestick Chart
+### Socket.IO Integration
+- Real-time communication với backend
+- Event forwarding
+- Connection management
 
-```typescript
-import Chart from '@/components/Chart';
+### Request Logging
+- HTTP requests logging với timestamps
+- Socket.IO events logging (chỉ development)
+- Query parameters logging
+- IP address tracking
 
-const data = [
-  { time: '2023-01-01', open: 100, high: 110, low: 90, close: 105 },
-  { time: '2023-01-02', open: 105, high: 115, low: 95, close: 110 },
-];
+### Proxy
+- Forward requests đến backend API
+- Handle authentication
+- Error handling
 
-<Chart data={data} title="Biểu đồ giá" />
-```
+## 🚨 Troubleshooting
 
-### Custom Chart (HLC Area)
-
-```typescript
-import CustomChart from '@/components/CustomChart';
-
-const data = [
-  { time: '2023-01-01', high: 110, low: 90, close: 105 },
-  { time: '2023-01-02', high: 115, low: 95, close: 110 },
-];
-
-<CustomChart data={data} title="HLC Area Chart" />
-```
-
-## 🎨 Giao diện
-
-- **Tab Switching**: Chuyển đổi giữa Candlestick và HLC Area chart
-- **Responsive Design**: Tự động điều chỉnh layout trên mobile/desktop
-- **Loading States**: Hiển thị loading khi chart đang tải
-- **Modern UI**: Sử dụng Tailwind CSS với design system
-
-## ⚙️ Cấu hình
-
-### Next.js Config
-```javascript
-// next.config.js
-const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
-  webpack: (config) => {
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-    };
-    return config;
-  },
-};
-```
-
-### TypeScript Paths
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
-
-## 🔧 Development
-
-### Lưu ý quan trọng
-
-1. **SSR Issues**: Sử dụng `dynamic` import với `ssr: false` để tránh lỗi server-side rendering
-2. **Client-side only**: Lightweight Charts chỉ chạy ở browser
-3. **Cleanup**: Luôn cleanup chart khi component unmount
-4. **Responsive**: Tự động resize khi thay đổi kích thước màn hình
-
-### Thêm Custom Series
-
-```typescript
-// 1. Tạo class implement ICustomSeriesPaneView
-class MyCustomSeries {
-  renderer() { /* ... */ }
-  priceValueBuilder(data) { /* ... */ }
-  isWhitespace(data) { /* ... */ }
-  update() { /* ... */ }
-  defaultOptions() { /* ... */ }
-}
-
-// 2. Sử dụng trong component
-const customSeriesView = new MyCustomSeries();
-const myCustomSeries = chart.addCustomSeries(customSeriesView, {
-  // options
-});
-```
-
-## 🚀 Deploy
-
-### Vercel (Khuyến nghị)
+### Port đã được sử dụng
 ```bash
-# Deploy tự động với Vercel
-npx vercel
+# Tìm process sử dụng port 4000
+lsof -i :4000
+
+# Kill process
+kill -9 <PID>
 ```
 
-### Netlify
+### PM2 issues
 ```bash
-# Build và deploy
+# Reset PM2
+pm2 kill
+pm2 start ecosystem.config.js
+```
+
+### Build errors
+```bash
+# Clear cache
+rm -rf .next
 npm run build
-# Upload thư mục .next
 ```
+
+## 📊 Monitoring
+
+### Logs
+```bash
+# Xem logs real-time
+pm2 logs lwc-next --lines 50
+
+# Xem logs file
+tail -f logs/combined.log
+```
+
+### Performance
+```bash
+# Xem PM2 status
+pm2 monit
+
+# Xem memory usage
+pm2 show lwc-next
+```
+
+## 🔄 Development Workflow
+
+1. **Start development**:
+   ```bash
+   npm run dev
+   ```
+
+2. **Make changes** trong `/src/`
+
+3. **Test** trên `http://localhost:4000`
+
+4. **Build for production**:
+   ```bash
+   npm run build
+   npm run start
+   ```
+
+5. **Deploy với PM2**:
+   ```bash
+   pm2 start ecosystem.config.js --env production
+   ```
+
+## 📝 Notes
+
+- **Custom Server** được khuyến nghị cho development và production
+- **Next.js Standard** chỉ dùng khi không cần Socket.IO
+- **PM2** cần thiết cho production với cluster mode
+- **Request logging** tự động log tất cả HTTP requests và Socket.IO events
 
 ## 🤝 Contributing
 
 1. Fork repository
-2. Tạo feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
+2. Tạo feature branch
+3. Commit changes
+4. Push to branch
 5. Tạo Pull Request
 
-## 📝 License
+## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 📞 Contact
-
-- **GitHub**: [@your-username](https://github.com/your-username)
-- **Email**: your-email@example.com
-
-## 🙏 Acknowledgments
-
-- [Lightweight Charts](https://www.tradingview.com/lightweight-charts/) - Charting library
-- [Next.js](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - CSS framework 
+MIT License

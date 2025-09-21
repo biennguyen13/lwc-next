@@ -30,7 +30,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
         title: "Đăng xuất thành công",
         description: "Hẹn gặp lại bạn!",
       })
-      router.push("/login")
+      router.push("/")
     } catch (error: any) {
       toast({
         title: "Lỗi đăng xuất",

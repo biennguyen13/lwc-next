@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 // Define protected routes
 const protectedRoutes = ['/wallet-main', '/trading']
-const authRoutes = ['/login', '/register', '/forgot-password']
+const authRoutes = ['/forgot-password']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
 
   // If user is not authenticated and trying to access protected route
   if (isProtectedRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   // If user is authenticated and trying to access auth routes

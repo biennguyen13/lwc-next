@@ -56,10 +56,10 @@ export default function ForgotPasswordPage() {
                 Gửi lại email
               </Button>
               
-              <Link href="/login" className="block">
+              <Link href="/" className="block">
                 <Button variant="ghost" className="w-full">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Quay lại đăng nhập
+                  Quay lại trang chủ
                 </Button>
               </Link>
             </div>
@@ -109,10 +109,10 @@ export default function ForgotPasswordPage() {
 
             {/* Back to Login */}
             <div className="text-center">
-              <Link href="/login">
+              <Link href="/">
                 <Button variant="ghost" className="w-full">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Quay lại đăng nhập
+                  Quay lại trang chủ
                 </Button>
               </Link>
             </div>

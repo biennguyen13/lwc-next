@@ -48,8 +48,7 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest)
         }
       } catch (refreshError) {
-        // Refresh token cũng hết hạn, redirect về login
-        // window.location.href = '/login';
+        // Refresh token cũng hết hạn
         return Promise.reject(refreshError)
       }
     }
@@ -80,6 +79,22 @@ export const authAPI = {
         withCredentials: true,
       }
     )
+  },
+
+  // Đăng ký - gọi trực tiếp đến Fastify backend
+  register: async (userData: {
+    email: string
+    password: string
+    first_name: string
+    last_name: string
+    nickname: string
+    phone: string
+  }): Promise<{ message: string }> => {
+    const response: AxiosResponse = await apiClient.post(
+      "/register",
+      userData
+    )
+    return response.data
   },
 
   // Refresh token - gọi qua API route
