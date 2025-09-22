@@ -9,6 +9,7 @@ import { UserMenu } from "@/components/UserMenu"
 import { StoreEventManager } from "@/stores/store-communication-usage"
 import { Toaster } from "@/components/ui"
 import { ActiveOrdersProvider, useActiveOrders } from "@/contexts/ActiveOrdersContext"
+import { useAuthSync } from "@/hooks/use-auth-sync"
 
 interface ConditionalLayoutProps {
   children: React.ReactNode
@@ -19,6 +20,9 @@ function ConditionalLayoutContent({ children }: ConditionalLayoutProps) {
   const [mounted, setMounted] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isActiveOrdersOpen, toggleActiveOrders } = useActiveOrders()
+  
+  // Enable auth sync across tabs
+  useAuthSync()
 
   useEffect(() => {
     setMounted(true)

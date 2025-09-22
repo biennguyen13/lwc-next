@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware"
 import { authAPI, accountAPI } from "@/lib/api"
 import { storeCommunication } from "./store-communication"
 import { clearAllStores } from "./store-utils"
+import { triggerAuthSync } from "@/lib/simple-tab-sync"
 
 // Types
 interface User {
@@ -82,6 +83,9 @@ export const useAuthStore = create<AuthState>()(
           // Emit login success event
           storeCommunication.emitUserLoggedIn(response.user)
           
+          // Trigger auth sync for other tabs
+          triggerAuthSync('login')
+          
         } catch (error: any) {
           const errorMessage = error?.response?.data?.message || "Đăng nhập thất bại"
           set({
@@ -118,6 +122,9 @@ export const useAuthStore = create<AuthState>()(
           // Emit logout event
           storeCommunication.emitUserLoggedOut()
           
+          // Trigger auth sync for other tabs
+          triggerAuthSync('logout')
+          
         } catch (error: any) {
           // Even if logout fails, clear all stores and local state
           clearAllStores()
@@ -131,6 +138,9 @@ export const useAuthStore = create<AuthState>()(
           
           // Emit logout event anyway
           storeCommunication.emitUserLoggedOut()
+          
+          // Trigger auth sync for other tabs
+          triggerAuthSync('logout')
         }
       },
 
