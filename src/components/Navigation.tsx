@@ -107,7 +107,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen, onToggleM
           <Link href="/">
             <img 
               src="/finantex-logo.png" 
-              alt="FINANTEX" 
+              alt="BITCRYPTEX" 
               className="h-12 w-auto cursor-pointer"
             />
           </Link>

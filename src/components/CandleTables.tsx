@@ -6,6 +6,7 @@ import { CandleTable, Binance30sCandle } from "@/lib/api/binance-30s"
 import { useTheme } from "./ThemeProvider"
 import { TrendingUp, TrendingDown } from "lucide-react"
 import { useActiveOrders } from "@/contexts/ActiveOrdersContext"
+import { initTooltipState, getTooltipState } from "@/lib/simple-tooltip"
 
 interface CandleTablesProps {
   symbol?: string
@@ -64,7 +65,7 @@ const CandleCell = ({
 
       {/* Tooltip */}
       {
-        process.env.NODE_ENV === "development" && (
+        (showTooltips || process.env.NODE_ENV === "development") && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-20 min-w-[200px] border border-gray-200 dark:border-gray-600 backdrop-blur-sm">
           <div className="font-mono space-y-1">
             <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-600">
@@ -217,7 +218,7 @@ const CandleTableComponent = ({
         )
       }
       grid.push(
-        <div key={i} className="flex justify-center gap-2">
+        <div key={i} className="flex justify-center gap-1 md:gap-2">
           {row}
         </div>
       )
@@ -247,7 +248,7 @@ const CandleTableComponent = ({
         </div>
       </div> */}
 
-      <div className="space-y-2">{renderCandleGrid()}</div>
+      <div className="space-y-1 md:space-y-2">{renderCandleGrid()}</div>
 
       {/* <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-2 gap-2 text-xs text-gray-700 dark:text-gray-300">
@@ -287,6 +288,18 @@ export default function CandleTables({
   const { isActiveOrdersOpen } = useActiveOrders()
   const [currentSymbol, setCurrentSymbol] = useState(symbol)
   const [isMobile, setIsMobile] = useState(false)
+  const [showTooltips, setShowTooltips] = useState(false)
+
+  // Initialize tooltip state and listen for changes
+  useEffect(() => {
+    // Initialize tooltip state with callback
+    initTooltipState((show) => {
+      setShowTooltips(show)
+    })
+    
+    // Set initial state
+    setShowTooltips(getTooltipState())
+  }, [])
 
   // Check screen size
   useEffect(() => {
@@ -397,7 +410,7 @@ export default function CandleTables({
         {/* Tables Grid */}
         {candleTables && candleTables.length > 0 && (
           <div className="grid gap-2 md:gap-8 lg:gap-6 candle-tables-grid">
-            {(isMobile ? candleTables.slice(-2) : candleTables).map((table, index) => (
+            {(isMobile ? candleTables.slice(-3) : candleTables).map((table, index) => (
               <CandleTableComponent
                 key={table.table_key}
                 table={table}

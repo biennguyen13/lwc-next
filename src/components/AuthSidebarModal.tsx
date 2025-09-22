@@ -59,7 +59,7 @@ export function AuthSidebarModal({ isOpen, onClose, defaultMode = "login" }: Aut
           {mode === "login" ? (
             <>
               <div className="text-center">
-                <span className="text-gray-400">Cần tài khoản FINANTEX? </span>
+                <span className="text-gray-400">Cần tài khoản BITCRYPTEX? </span>
                 <button 
                   onClick={handleSwitchToRegister}
                   className="text-orange-500 hover:text-orange-400 transition-colors"

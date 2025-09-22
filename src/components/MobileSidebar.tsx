@@ -77,7 +77,7 @@ export function MobileSidebar({ isOpen, onClose, activeItem, onItemClick }: Mobi
           <div className="flex items-center justify-between mb-8">
             <img 
               src="/finantex-logo.png" 
-              alt="FINANTEX" 
+              alt="BITCRYPTEX" 
               className="h-12 w-auto"
             />
             <Button

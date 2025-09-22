@@ -21,7 +21,7 @@ export function FeaturesSection() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <div className="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-4">
-            FINANTEX
+            BITCRYPTEX
           </div>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
             Nền tảng FinanTex được xây dựng

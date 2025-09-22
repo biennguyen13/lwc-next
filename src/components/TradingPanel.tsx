@@ -185,7 +185,14 @@ export default function TradingPanel({
   const quickValues = [5, 10, 20, 50, 100]
 
   const handleValueChange = (newValue: number) => {
-    setValue(newValue)
+    // Get available balance
+    const availableBalance = bettingMode === 'real' 
+      ? balanceSummary?.real?.tokens?.USDT?.available_balance || 0
+      : balanceSummary?.demo?.tokens?.USDT?.available_balance || 0
+    
+    // Limit value to available balance
+    const limitedValue = Math.min(newValue, availableBalance)
+    setValue(limitedValue)
   }
 
   // Calculate profit when value changes
@@ -195,7 +202,14 @@ export default function TradingPanel({
   }, [value, profitPercentage])
 
   const handleQuickValue = (quickValue: number) => {
-    setValue((prev) => prev + quickValue)
+    // Get available balance
+    const availableBalance = bettingMode === 'real' 
+      ? balanceSummary?.real?.tokens?.USDT?.available_balance || 0
+      : balanceSummary?.demo?.tokens?.USDT?.available_balance || 0
+    
+    // Limit to available balance
+    const newValue = Math.min(value + quickValue, availableBalance)
+    setValue(newValue)
   }
 
   const handleAll = () => {
@@ -230,6 +244,15 @@ export default function TradingPanel({
       toast({
         title: "Không thể đặt lệnh",
         description: "Thời gian đặt lệnh đã kết thúc",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (value <= 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập số tiền cược",
         variant: "destructive",
       })
       return
@@ -277,6 +300,15 @@ export default function TradingPanel({
       return
     }
 
+    if (value <= 0) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập số tiền cược",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       console.log("✅ GIẢM - Sell order placed with value:", value)
       
@@ -318,7 +350,8 @@ export default function TradingPanel({
         <div className="flex items-center gap-1">
           <button
             onClick={() => handleValueChange(Math.max(0, value - 5))}
-            className="w-6 lg:w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
+            disabled={value <= 0}
+            className="w-6 lg:w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             -
           </button>
@@ -333,7 +366,10 @@ export default function TradingPanel({
           </div>
           <button
             onClick={() => handleValueChange(value + 5)}
-            className="w-6 lg:w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors"
+            disabled={value >= (bettingMode === 'real' 
+              ? balanceSummary?.real?.tokens?.USDT?.available_balance || 0
+              : balanceSummary?.demo?.tokens?.USDT?.available_balance || 0) - 4}
+            className="w-6 lg:w-10 h-10 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             +
           </button>
@@ -341,15 +377,23 @@ export default function TradingPanel({
 
         {/* Quick Value Buttons */}
         <div className="grid grid-cols-3 gap-1">
-          {quickValues.map((quickValue) => (
-            <button
-              key={quickValue}
-              onClick={() => handleQuickValue(quickValue)}
-              className="p-x1 lg:px-3 py-1 lg:py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
-            >
-              +{quickValue}
-            </button>
-          ))}
+          {quickValues.map((quickValue) => {
+            const availableBalance = bettingMode === 'real' 
+              ? balanceSummary?.real?.tokens?.USDT?.available_balance || 0
+              : balanceSummary?.demo?.tokens?.USDT?.available_balance || 0
+            const isDisabled = value + quickValue > availableBalance
+            
+            return (
+              <button
+                key={quickValue}
+                onClick={() => handleQuickValue(quickValue)}
+                disabled={isDisabled}
+                className="p-x1 lg:px-3 py-1 lg:py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                +{quickValue}
+              </button>
+            )
+          })}
           <button
             onClick={handleAll}
             className="p-x1 lg:px-3 py-1 lg:py-2 bg-gray-700 hover:bg-gray-600 text-secondary-foreground rounded-xl transition-colors text-sm font-medium"
@@ -400,9 +444,9 @@ export default function TradingPanel({
         {/* TĂNG Button */}
         <button
           onClick={handleIncrease}
-          disabled={!isBettingTime || placeOrderLoading}
+          disabled={!isBettingTime || placeOrderLoading || value <= 0}
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
-            isBettingTime && !placeOrderLoading
+            isBettingTime && !placeOrderLoading && value > 0
               ? 'bg-[#31baa0] hover:bg-[#31baa0] text-white' 
               : 'bg-gray-600 text-gray-200 cursor-not-allowed'
           }`}
@@ -421,9 +465,9 @@ export default function TradingPanel({
         {/* GIẢM Button */}
         <button
           onClick={handleDecrease}
-          disabled={!isBettingTime || placeOrderLoading}
+          disabled={!isBettingTime || placeOrderLoading || value <= 0}
           className={`w-full py-4 font-bold text-base rounded-lg transition-colors flex items-center justify-center gap-2 ${
-            isBettingTime && !placeOrderLoading
+            isBettingTime && !placeOrderLoading && value > 0
               ? 'bg-[#fc605f] hover:bg-red-600 text-white' 
               : 'bg-gray-600 text-gray-200 cursor-not-allowed'
           }`}
