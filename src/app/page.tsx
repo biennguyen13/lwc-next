@@ -1,6 +1,7 @@
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { HomeNavigation } from "@/components/HomeNavigation"
 import { FullScreenAuthModal } from "@/components/FullScreenAuthModal"
 import { HeroSection } from "@/components/HeroSection"
@@ -11,6 +12,7 @@ import { StepsSection } from "@/components/StepsSection"
 import { TabletSection } from "@/components/TabletSection"
 import { FAQSection } from "@/components/FAQSection"
 import { FooterSection } from "@/components/FooterSection"
+import { toast } from "@/hooks/use-toast"
 
 export default function Home() {
   const searchParams = useSearchParams()
@@ -19,6 +21,13 @@ export default function Home() {
   const modal = searchParams.get('modal')
   const isLoginModalOpen = modal === 'login'
   const isRegisterModalOpen = modal === 'register'
+  
+  // Handle email verification results
+  const verified = searchParams.get('verified')
+  const message = searchParams.get('message')
+  const error = searchParams.get('error')
+  const verifiedEmail = searchParams.get('email')
+  const openLogin = searchParams.get('openLogin')
 
   const handleOpenLoginModal = () => {
     router.push('/?modal=login')
@@ -35,6 +44,41 @@ export default function Home() {
   const handleCloseRegisterModal = () => {
     router.push('/')
   }
+
+  // Handle email verification results
+  useEffect(() => {
+    setTimeout(()=>{
+      if (verified === 'true' && message) {
+        toast({
+          title: "Xác thực thành công",
+          description: decodeURIComponent(message),
+        })
+        
+        // If openLogin=true, open login modal with email
+        if (openLogin === 'true' && verifiedEmail) {
+          // Store email in sessionStorage for login form
+          sessionStorage.setItem('prefilledEmail', decodeURIComponent(verifiedEmail))
+          
+          // Open login modal
+          setTimeout(() => {
+            router.push('/?modal=login')
+          }, 500) // Wait 2 seconds for toast to show
+        } else {
+          // Clean URL after showing toast
+          router.replace('/')
+        }
+      } else if (verified === 'false' && error) {
+        toast({
+          title: "Xác thực thất bại",
+          description: decodeURIComponent(error),
+          variant: "destructive",
+        })
+        
+        // Clean URL after showing toast
+        router.replace('/')
+      }
+    }, 1000)
+  }, [verified, message, error, verifiedEmail, openLogin, router])
 
   return (
     <main className="min-h-screen bg-[#141416]">

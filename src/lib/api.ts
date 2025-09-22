@@ -89,9 +89,24 @@ export const authAPI = {
     last_name: string
     nickname: string
     phone: string
-  }): Promise<{ message: string }> => {
+  }): Promise<{ 
+    success: boolean
+    message: string
+    data: {
+      account: {
+        id: number
+        email: string
+        first_name: string
+        last_name: string
+        nickname: string
+        type: string
+        status: string
+        created_at: string
+      }
+    }
+  }> => {
     const response: AxiosResponse = await apiClient.post(
-      "/register",
+      "/auth/register",
       userData
     )
     return response.data
@@ -114,6 +129,19 @@ export const authAPI = {
   hasAccessToken: async (): Promise<boolean> => {
     const response: AxiosResponse = await axios.get("/api/auth/token")
     return response.data.data.hasAccessToken
+  },
+
+  // Verify email - gọi trực tiếp đến Fastify backend
+  verifyEmail: async (email: string, token: string): Promise<{ 
+    success: boolean
+    message: string
+    data?: any
+  }> => {
+    const response: AxiosResponse = await apiClient.post(
+      "/auth/verify-email",
+      { email, token }
+    )
+    return response.data
   },
 }
 

@@ -77,17 +77,17 @@ app.prepare().then(() => {
       const timestamp = new Date().toISOString()
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
       
-      dev && console.log(`🌐 [${timestamp}] ${method} ${pathname} - IP: ${ip}`)
+      false && dev && console.log(`🌐 [${timestamp}] ${method} ${pathname} - IP: ${ip}`)
       
       // Log query parameters nếu có
       if (Object.keys(parsedUrl.query).length > 0) {
-        dev && console.log(`   📋 Query:`, parsedUrl.query)
+        false && dev && console.log(`   📋 Query:`, parsedUrl.query)
       }
       
       await handle(req, res, parsedUrl)
       
       // Log response status
-      dev && console.log(`✅ [${timestamp}] ${method} ${pathname} - Status: ${res.statusCode}`)
+      false && dev && console.log(`✅ [${timestamp}] ${method} ${pathname} - Status: ${res.statusCode}`)
       
     } catch (err) {
       const timestamp = new Date().toISOString()

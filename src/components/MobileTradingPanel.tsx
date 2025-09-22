@@ -120,7 +120,7 @@ export default function MobileTradingPanel({
       toast({
         title: "Đặt lệnh thành công",
         description: `Lệnh BUY ${value} USDT đã được đặt thành công`,
-        duration: 1000,
+        duration: 1750,
       })
     } catch (error) {
       console.error("Error placing BUY order:", error)
@@ -128,6 +128,7 @@ export default function MobileTradingPanel({
         title: "Lỗi",
         description: "Không thể đặt lệnh BUY. Vui lòng thử lại.",
         variant: "destructive",
+        duration: 1750,
       })
     }
   }
@@ -167,7 +168,7 @@ export default function MobileTradingPanel({
       toast({
         title: "Đặt lệnh thành công",
         description: `Lệnh SELL ${value} USDT đã được đặt thành công`,
-        duration: 1000,
+        duration: 1750,
       })
     } catch (error) {
       console.error("Error placing SELL order:", error)
@@ -175,6 +176,7 @@ export default function MobileTradingPanel({
         title: "Lỗi",
         description: "Không thể đặt lệnh SELL. Vui lòng thử lại.",
         variant: "destructive",
+        duration: 1750,
       })
     }
   }

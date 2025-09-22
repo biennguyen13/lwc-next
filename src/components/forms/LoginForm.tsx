@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,6 +25,16 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
   
   const router = useRouter()
   const { login, isLoading, error, clearError } = useAuthStore()
+
+  // Pre-fill email from sessionStorage (from email verification)
+  useEffect(() => {
+    const prefilledEmail = sessionStorage.getItem('prefilledEmail')
+    if (prefilledEmail) {
+      setEmail(prefilledEmail)
+      // Clear the prefilled email after using it
+      sessionStorage.removeItem('prefilledEmail')
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

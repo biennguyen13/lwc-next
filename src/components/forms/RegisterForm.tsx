@@ -65,8 +65,16 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
       
       toast({
         title: "Đăng ký thành công",
-        description: response.message || "Chào mừng bạn đến với FinanTex!",
+        description: response.message || "Đăng ký thành công! Đã gửi mail xác thực đến email của bạn.",
       })
+      
+      // Show additional instruction
+      setTimeout(() => {
+        toast({
+          title: "Kiểm tra email",
+          description: "Vui lòng kiểm tra email và click vào link xác thực để hoàn tất đăng ký.",
+        })
+      }, 2000)
       
       onSuccess?.()
       
