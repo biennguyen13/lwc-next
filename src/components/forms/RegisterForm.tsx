@@ -50,15 +50,11 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     setIsLoading(true)
     
     try {
-      // Fake first_name, last_name từ nickname
-      const fakeFirstName = formData.nickname.charAt(0).toUpperCase() + formData.nickname.slice(1)
-      const fakeLastName = "User"
-      
       const response = await authAPI.register({
         email: formData.email,
         password: formData.password,
-        first_name: fakeFirstName,
-        last_name: fakeLastName,
+        first_name: "",
+        last_name: "",
         nickname: formData.nickname,
         phone: "" // Empty phone
       })

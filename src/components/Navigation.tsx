@@ -252,13 +252,15 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen, onToggleM
 
             {/* Profile */}
             <div className="hidden lg:flex flex-col items-center space-y-1">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-gray-200 hover:bg-gray-700 p-2"
-              >
-                <User className="w-5 h-5" />
-              </Button>
+              <Link href="/profile">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-gray-200 hover:bg-gray-700 p-2"
+                >
+                  <User className="w-5 h-5" />
+                </Button>
+              </Link>
               <span className="text-xs text-gray-300">Quản Lý Hồ Sơ</span>
             </div>
 

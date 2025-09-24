@@ -22,6 +22,7 @@ export type StoreEventType =
   | 'DEMO_BALANCE_RESET'
   | 'USER_LOGGED_IN'
   | 'USER_LOGGED_OUT'
+  | 'TWO_FA_STATUS_UPDATED'
   | 'ERROR_OCCURRED'
 
 export interface StoreEvent {
@@ -254,6 +255,16 @@ class StoreCommunication {
     })
   }
 
+  // 2FA events
+  emit2FAStatusUpdated(enabled: boolean) {
+    this.emit({
+      type: 'TWO_FA_STATUS_UPDATED',
+      payload: { enabled },
+      source: 'two-factor-store',
+      timestamp: Date.now()
+    })
+  }
+
   emitError(error: string, source: string) {
     this.emit({
       type: 'ERROR_OCCURRED',
@@ -292,6 +303,7 @@ export const useStoreCommunication = () => {
     emitDemoBalanceReset: storeCommunication.emitDemoBalanceReset.bind(storeCommunication),
     emitUserLoggedIn: storeCommunication.emitUserLoggedIn.bind(storeCommunication),
     emitUserLoggedOut: storeCommunication.emitUserLoggedOut.bind(storeCommunication),
+    emit2FAStatusUpdated: storeCommunication.emit2FAStatusUpdated.bind(storeCommunication),
     emitError: storeCommunication.emitError.bind(storeCommunication),
   }
 } 

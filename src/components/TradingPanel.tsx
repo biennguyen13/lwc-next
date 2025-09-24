@@ -356,7 +356,19 @@ export default function TradingPanel({
             -
           </button>
           <div className="flex-1 px-1 h-10 flex items-center relative border border-border rounded bg-background">
-            <span className="text-foreground text-base">${value}</span>
+            <input
+              type="number"
+              value={value}
+              onChange={(e) => {
+                const newValue = parseFloat(e.target.value) || 0
+                handleValueChange(newValue)
+              }}
+              onFocus={(e) => e.target.select()}
+              className="w-full h-full bg-transparent text-foreground text-base border-none outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+              placeholder="0"
+              min="0"
+              step="0.01"
+            />
             <button
               onClick={() => handleValueChange(0)}
               className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-full flex items-center justify-center transition-colors text-xs"

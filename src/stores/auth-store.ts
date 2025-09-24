@@ -6,31 +6,7 @@ import { authAPI, accountAPI } from "@/lib/api"
 import { storeCommunication } from "./store-communication"
 import { clearAllStores } from "./store-utils"
 import { triggerAuthSync } from "@/lib/simple-tab-sync"
-
-// Types
-interface User {
-  id: number
-  email: string
-  full_name: string
-  is_verified: boolean
-  created_at: string
-  updated_at: string
-}
-
-interface LoginCredentials {
-  email: string
-  password: string
-  remember_me?: boolean
-  twoFactorToken?: string
-}
-
-interface AuthResponse {
-  user: User
-  accessToken: string
-  refreshToken: string
-  expiresAt: string
-  refreshTokenExpiresAt: string
-}
+import { User, LoginCredentials, AuthResponse } from "@/types"
 
 interface AuthState {
   // State
