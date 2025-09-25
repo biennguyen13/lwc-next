@@ -26,6 +26,11 @@ interface AuthState {
     last_name?: string
     two_fa_token?: string
   }) => Promise<void>
+  changePassword: (data: {
+    current_password: string
+    new_password: string
+    two_fa_token?: string
+  }) => Promise<void>
   clearError: () => void
   clearAll: () => void
 }
@@ -236,6 +241,33 @@ export const useAuthStore = create<AuthState>()(
           
         } catch (error: any) {
           const errorMessage = error?.message || "Cập nhật profile thất bại"
+          set({
+            isLoading: false,
+            error: errorMessage
+          })
+          storeCommunication.emitError(errorMessage, "auth-store")
+          throw error
+        }
+      },
+
+      // Change password
+      changePassword: async (data: {
+        current_password: string
+        new_password: string
+        two_fa_token?: string
+      }) => {
+        set({ isLoading: true, error: null })
+        
+        try {
+          await accountAPI.changePassword(data)
+          
+          set({
+            isLoading: false,
+            error: null
+          })
+          
+        } catch (error: any) {
+          const errorMessage = error?.message || "Đổi mật khẩu thất bại"
           set({
             isLoading: false,
             error: errorMessage

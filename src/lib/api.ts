@@ -170,6 +170,21 @@ export const accountAPI = {
       throw new Error(response.data.message || "Cập nhật profile thất bại")
     return response.data
   },
+
+  // Đổi mật khẩu
+  changePassword: async (data: {
+    current_password: string
+    new_password: string
+    two_fa_token?: string
+  }): Promise<{
+    success: boolean
+    message: string
+  }> => {
+    const response: AxiosResponse = await apiClient.put("/change-password", data)
+    if (!response.data.success)
+      throw new Error(response.data.message || "Đổi mật khẩu thất bại")
+    return response.data
+  },
 }
 
 export default apiClient

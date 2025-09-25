@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast"
 import { useTwoFactorStore, useAuthStore } from "@/stores"
 import { TwoFactorSetupModal } from "@/components/TwoFactorSetupModal"
 import { TwoFactorDisableModal } from "@/components/TwoFactorDisableModal"
+import { ChangePasswordModal } from "@/components/ChangePasswordModal"
 import { User as UserType } from "@/types"
 
 interface ProfileFormProps {
@@ -29,6 +30,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [isHideSensitiveData, setIsHideSensitiveData] = useState(false)
   const [is2FASetupModalOpen, setIs2FASetupModalOpen] = useState(false)
   const [is2FADisableModalOpen, setIs2FADisableModalOpen] = useState(false)
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 2FA Store
@@ -145,11 +147,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
   }
 
   const handleChangePassword = () => {
-    // TODO: Implement change password functionality
-    toast({
-      title: "Thông báo",
-      description: "Chức năng đổi mật khẩu sẽ được triển khai sớm"
-    })
+    setIsChangePasswordModalOpen(true)
   }
 
   const handle2FAToggle = async () => {
@@ -221,100 +219,92 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
         {/* Form Fields - Two Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-200 text-sm font-medium">
-                Địa chỉ Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className="bg-gray-800 border-gray-600 text-gray-300 h-12 rounded-lg"
-                disabled
-              />
-            </div>
-
-            {/* First Name */}
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-gray-200 text-sm font-medium">
-                Tên
-              </Label>
-              <Input
-                id="firstName"
-                type="text"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                placeholder="Nhập tên của bạn"
-                disabled={!user?.is_two_fa}
-                className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              {!user?.is_two_fa && (
-                <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
-              )}
-            </div>
-
+          {/* Email */}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-gray-200 text-sm font-medium">
+              Địa chỉ Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              className="bg-gray-800 border-gray-600 text-gray-300 h-12 rounded-lg"
+              disabled
+            />
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Nickname */}
-            <div className="space-y-2">
-              <Label htmlFor="nickname" className="text-gray-200 text-sm font-medium">
-                Biệt danh
-              </Label>
-              <Input
-                id="nickname"
-                type="text"
-                disabled
-                value={formData.nickname}
-                onChange={(e) => handleInputChange("nickname", e.target.value)}
-                placeholder="Nhập biệt danh"
-                className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg"
-              />
-            </div>
+          {/* Nickname */}
+          <div className="space-y-2">
+            <Label htmlFor="nickname" className="text-gray-200 text-sm font-medium">
+              Biệt danh
+            </Label>
+            <Input
+              id="nickname"
+              type="text"
+              disabled
+              value={formData.nickname}
+              onChange={(e) => handleInputChange("nickname", e.target.value)}
+              placeholder="Nhập biệt danh"
+              className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg"
+            />
+          </div>
 
-            {/* Last Name */}
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-gray-200 text-sm font-medium">
-                Họ
-              </Label>
-              <Input
-                id="lastName"
-                type="text"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                placeholder="Nhập họ của bạn"
-                disabled={!user?.is_two_fa}
-                className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              {!user?.is_two_fa && (
-                <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
-              )}
-            </div>
-
-            {/* 2FA Token - Only show if 2FA is enabled */}
-            {user?.is_two_fa && (
-              <div className="space-y-2">
-                <Label htmlFor="twoFAToken" className="text-gray-200 text-sm font-medium">
-                  Mã 2FA
-                </Label>
-                <Input
-                  id="twoFAToken"
-                  type="text"
-                  value={twoFAToken}
-                  onChange={(e) => setTwoFAToken(e.target.value)}
-                  placeholder="Nhập mã 2FA để cập nhật thông tin"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                  className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg"
-                />
-                <p className="text-gray-400 text-xs">Nhập mã 6 số từ ứng dụng Google Authenticator</p>
-              </div>
+          {/* First Name */}
+          <div className="space-y-2">
+            <Label htmlFor="firstName" className="text-gray-200 text-sm font-medium">
+              Tên
+            </Label>
+            <Input
+              id="firstName"
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => handleInputChange("firstName", e.target.value)}
+              placeholder="Nhập tên của bạn"
+              disabled={!user?.is_two_fa}
+              className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            {!user?.is_two_fa && (
+              <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
             )}
+          </div>
+
+          {/* Last Name */}
+          <div className="space-y-2">
+            <Label htmlFor="lastName" className="text-gray-200 text-sm font-medium">
+              Họ
+            </Label>
+            <Input
+              id="lastName"
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => handleInputChange("lastName", e.target.value)}
+              placeholder="Nhập họ của bạn"
+              disabled={!user?.is_two_fa}
+              className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            {!user?.is_two_fa && (
+              <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
+            )}
+          </div>
+
+          {/* 2FA Token - Only show if 2FA is enabled */}
+          <div className="space-y-2">
+            <Label htmlFor="twoFAToken" className="text-gray-200 text-sm font-medium">
+              Mã 2FA
+            </Label>
+            <Input
+              id="twoFAToken"
+              type="text"
+              value={twoFAToken}
+              onChange={(e) => setTwoFAToken(e.target.value)}
+              placeholder="Nhập mã 2FA để cập nhật thông tin"
+              maxLength={6}
+              pattern="[0-9]{6}"
+              disabled={!user?.is_two_fa}
+              className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg"
+            />
+            <p className="text-gray-400 text-xs">Nhập mã 6 số từ ứng dụng Google Authenticator</p>
           </div>
         </div>
 
@@ -322,7 +312,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <div className="pt-6">
           <Button
             type="submit"
-            disabled={isLoading || isAuthLoading}
+            disabled={!user?.is_two_fa || isLoading || isAuthLoading}
             className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-8 py-3 rounded-lg font-medium"
           >
             {isLoading || isAuthLoading ? "Đang cập nhật..." : "Cập nhật Tài khoản"}
@@ -429,6 +419,19 @@ export function ProfileForm({ user }: ProfileFormProps) {
         isOpen={is2FADisableModalOpen}
         onClose={() => setIs2FADisableModalOpen(false)}
         onSuccess={handle2FADisableSuccess}
+      />
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        onSuccess={() => {
+          toast({
+            title: "Thành công",
+            description: "Đổi mật khẩu thành công",
+            variant: "success"
+          })
+        }}
       />
     </div>
   )
