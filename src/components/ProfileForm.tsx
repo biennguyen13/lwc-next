@@ -21,9 +21,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
     firstName: user?.first_name || "",
     lastName: user?.last_name || "",
     nickname: user?.nickname || "",
-    twoFactorCode: "",
     avatar: user?.avatar || ""
   })
+  const [twoFAToken, setTwoFAToken] = useState("")
   const [avatar, setAvatar] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isHideSensitiveData, setIsHideSensitiveData] = useState(false)
@@ -42,7 +42,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     clearError
   } = useTwoFactorStore()
 
-  const { fetchProfile } = useAuthStore()
+  const { fetchProfile, updateProfile, isLoading: isAuthLoading } = useAuthStore()
 
   // Load 2FA status on component mount
   useEffect(() => {
@@ -97,18 +97,46 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setIsLoading(true)
 
     try {
-      // TODO: Implement profile update API call
-      console.log('Updating profile:', formData)
+      // Validation: Check if 2FA is required
+      if (user?.is_two_fa && !twoFAToken) {
+        toast({
+          title: "Lỗi",
+          description: "Vui lòng nhập mã 2FA để cập nhật thông tin",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Prepare update data
+      const updateData: {
+        first_name?: string
+        last_name?: string
+        two_fa_token?: string
+      } = {
+        first_name: formData.firstName,
+        last_name: formData.lastName
+      }
+
+      // Add 2FA token if provided
+      if (twoFAToken) {
+        updateData.two_fa_token = twoFAToken
+      }
+
+      await updateProfile(updateData)
       
       toast({
         title: "Thành công",
-        description: "Cập nhật thông tin thành công"
+        description: "Cập nhật thông tin thành công",
+        variant: "success"
       })
+      
+      // Clear 2FA token after successful update
+      setTwoFAToken("")
       
     } catch (error: any) {
       toast({
         title: "Lỗi",
-        description: error?.message || "Cập nhật thất bại",
+        description: error?.response?.data?.message || "Cập nhật thất bại",
         variant: "destructive"
       })
     } finally {
@@ -229,20 +257,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
               )}
             </div>
 
-            {/* 2FA Code */}
-            <div className="space-y-2">
-              <Label htmlFor="twoFactorCode" className="text-gray-200 text-sm font-medium">
-                Mã 2FA
-              </Label>
-              <Input
-                id="twoFactorCode"
-                type="text"
-                value={formData.twoFactorCode}
-                onChange={(e) => handleInputChange("twoFactorCode", e.target.value)}
-                placeholder="Nhập mã 2FA"
-                className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg"
-              />
-            </div>
           </div>
 
           {/* Right Column */}
@@ -281,6 +295,26 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
               )}
             </div>
+
+            {/* 2FA Token - Only show if 2FA is enabled */}
+            {user?.is_two_fa && (
+              <div className="space-y-2">
+                <Label htmlFor="twoFAToken" className="text-gray-200 text-sm font-medium">
+                  Mã 2FA
+                </Label>
+                <Input
+                  id="twoFAToken"
+                  type="text"
+                  value={twoFAToken}
+                  onChange={(e) => setTwoFAToken(e.target.value)}
+                  placeholder="Nhập mã 2FA để cập nhật thông tin"
+                  maxLength={6}
+                  pattern="[0-9]{6}"
+                  className="bg-gray-800 border-gray-600 text-gray-200 h-12 rounded-lg"
+                />
+                <p className="text-gray-400 text-xs">Nhập mã 6 số từ ứng dụng Google Authenticator</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -288,10 +322,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <div className="pt-6">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isAuthLoading}
             className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-8 py-3 rounded-lg font-medium"
           >
-            {isLoading ? "Đang cập nhật..." : "Cập nhật Tài khoản"}
+            {isLoading || isAuthLoading ? "Đang cập nhật..." : "Cập nhật Tài khoản"}
           </Button>
         </div>
         </form>

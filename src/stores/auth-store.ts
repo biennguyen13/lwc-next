@@ -21,6 +21,11 @@ interface AuthState {
   refreshToken: () => Promise<void>
   checkAuthStatus: () => Promise<void>
   fetchProfile: () => Promise<void>
+  updateProfile: (data: {
+    first_name?: string
+    last_name?: string
+    two_fa_token?: string
+  }) => Promise<void>
   clearError: () => void
   clearAll: () => void
 }
@@ -199,6 +204,43 @@ export const useAuthStore = create<AuthState>()(
           // Emit error event
           storeCommunication.emitError(errorMessage, "auth-store")
           
+          throw error
+        }
+      },
+
+      // Update user profile
+      updateProfile: async (data: {
+        first_name?: string
+        last_name?: string
+        two_fa_token?: string
+      }) => {
+        set({ isLoading: true, error: null })
+        
+        try {
+          const response = await accountAPI.updateProfile(data)
+          
+          // Update user data if response includes updated user
+          if (response.data) {
+            set((state) => ({
+              user: response.data,
+              isLoading: false,
+              error: null
+            }))
+          } else {
+            // If no user data returned, fetch fresh profile
+            await get().fetchProfile()
+          }
+
+          // Emit profile updated event
+          storeCommunication.emitUserLoggedIn(get().user)
+          
+        } catch (error: any) {
+          const errorMessage = error?.message || "Cập nhật profile thất bại"
+          set({
+            isLoading: false,
+            error: errorMessage
+          })
+          storeCommunication.emitError(errorMessage, "auth-store")
           throw error
         }
       },

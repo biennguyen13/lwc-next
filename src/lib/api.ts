@@ -154,6 +154,22 @@ export const accountAPI = {
       throw new Error(response.data.message || "Lấy profile thất bại")
     return response.data.data
   },
+
+  // Cập nhật profile cá nhân
+  updateProfile: async (data: {
+    first_name?: string
+    last_name?: string
+    two_fa_token?: string
+  }): Promise<{
+    success: boolean
+    message: string
+    data?: User
+  }> => {
+    const response: AxiosResponse = await apiClient.put("/profile", data)
+    if (!response.data.success)
+      throw new Error(response.data.message || "Cập nhật profile thất bại")
+    return response.data
+  },
 }
 
 export default apiClient

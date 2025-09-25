@@ -20,7 +20,7 @@ interface TwoFactorState {
   setup2FA: (secret: string, token: string, password: string, email_otp: string) => Promise<void>
   disable2FA: (token: string, password: string, email_otp: string) => Promise<void>
   verify2FA: (token: string) => Promise<void>
-  sendVerificationEmail: () => Promise<void>
+          sendVerificationEmail: (type: 'turn-on' | 'turn-off') => Promise<void>
   clearError: () => void
   clearSetupData: () => void
 }
@@ -214,31 +214,31 @@ export const useTwoFactorStore = create<TwoFactorState>()(
         set({ error: null })
       },
 
-      // Send verification email
-      sendVerificationEmail: async () => {
-        set({ isLoading: true, error: null })
-        
-        try {
-          await twoFactorAPI.sendVerificationEmail()
-          
-          set({
-            isLoading: false,
-            error: null
-          })
-          
-        } catch (error: any) {
-          const errorMessage = error?.message || "Gửi email verification thất bại"
-          set({
-            isLoading: false,
-            error: errorMessage
-          })
-          
-          // Emit error event
-          storeCommunication.emitError(errorMessage, "two-factor-store")
-          
-          throw error
-        }
-      },
+              // Send verification email
+              sendVerificationEmail: async (type: 'turn-on' | 'turn-off') => {
+                set({ isLoading: true, error: null })
+                
+                try {
+                  await twoFactorAPI.sendVerificationEmail(type)
+                  
+                  set({
+                    isLoading: false,
+                    error: null
+                  })
+                  
+                } catch (error: any) {
+                  const errorMessage = error?.message || "Gửi email verification thất bại"
+                  set({
+                    isLoading: false,
+                    error: errorMessage
+                  })
+                  
+                  // Emit error event
+                  storeCommunication.emitError(errorMessage, "two-factor-store")
+                  
+                  throw error
+                }
+              },
 
       // Clear setup data
       clearSetupData: () => {

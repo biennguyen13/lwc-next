@@ -53,11 +53,12 @@ export function TwoFactorDisableModal({ isOpen, onClose, onSuccess }: TwoFactorD
         description: "Đang gửi mã xác nhận đến email của bạn"
       })
         
-      await sendVerificationEmail()
+      await sendVerificationEmail('turn-off')
       
       toast({
         title: "Thành công",
-        description: "Đã gửi mã xác nhận đến email của bạn"
+        description: "Đã gửi mã xác nhận đến email của bạn",
+        variant: "success"
       })
       
       setIsEmailCodeSent(true)
@@ -134,7 +135,8 @@ export function TwoFactorDisableModal({ isOpen, onClose, onSuccess }: TwoFactorD
       
       toast({
         title: "Thành công",
-        description: "Đã tắt xác thực 2 bước thành công"
+        description: "Đã tắt xác thực 2 bước thành công",
+        variant: "success"
       })
       
       onSuccess()

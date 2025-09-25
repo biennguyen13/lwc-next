@@ -76,12 +76,13 @@ export function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoFactorSet
             description: "Đang gửi mã xác nhận đến email của bạn"
         })
           
-      await sendVerificationEmail()
+      await sendVerificationEmail('turn-on')
       
-      toast({
-        title: "Thành công",
-        description: "Đã gửi mã xác nhận đến email của bạn"
-      })
+             toast({
+               title: "Thành công",
+               description: "Đã gửi mã xác nhận đến email của bạn",
+               variant: "success"
+             })
       
       setIsEmailCodeSent(true)
       
@@ -165,10 +166,11 @@ export function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoFactorSet
         formData.emailCode
       )
       
-      toast({
-        title: "Thành công",
-        description: "Đã bật xác thực 2 bước thành công"
-      })
+             toast({
+               title: "Thành công",
+               description: "Đã bật xác thực 2 bước thành công",
+               variant: "success"
+             })
       
       onSuccess()
       onClose()

@@ -26,14 +26,6 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, isLoading, isCheckingAuth, router])
 
-  if (isCheckingAuth || isLoading) {
-    return (
-      <div className="min-h-screen bg-[#141416] flex items-center justify-center">
-        <div className="text-white">Đang tải...</div>
-      </div>
-    )
-  }
-
   if (!isAuthenticated) {
     return null
   }

@@ -82,11 +82,13 @@ export const twoFactorAPI = {
   },
 
   // Gửi email verification code
-  sendVerificationEmail: async (): Promise<{
+  sendVerificationEmail: async (type: 'turn-on' | 'turn-off'): Promise<{
     success: boolean
     message: string
   }> => {
-    const response: AxiosResponse = await apiClient.post("/2fa/send-verification-email")
+    const response: AxiosResponse = await apiClient.post("/2fa/send-verification-email", {
+      type
+    })
     if (!response.data.success)
       throw new Error(response.data.message || "Gửi email verification thất bại")
     return response.data
