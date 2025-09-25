@@ -380,7 +380,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           {/* Hide Sensitive Data */}
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-4">
                 <Label className="text-gray-200 text-sm font-medium">Ẩn dữ liệu nhạy cảm:</Label>
@@ -403,7 +403,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 }`} />
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

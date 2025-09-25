@@ -54,6 +54,8 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
       toast({
         title: "Đăng nhập thành công",
         description: "Chào mừng bạn quay trở lại!",
+        duration: 1000,
+        variant: "success"
       })
       
       // Call success callback
@@ -67,6 +69,8 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
         toast({
           title: "Yêu cầu mã xác thực 2FA",
           description: "Vui lòng nhập mã xác thực 2FA",
+          duration: 1000,
+          variant: "success"
         })
         return
       }
@@ -75,6 +79,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
           title: "Đăng nhập thất bại",
           description: data?.message || "Vui lòng kiểm tra lại thông tin đăng nhập",
           variant: "destructive",
+          duration: 1000
         })
       }
     }

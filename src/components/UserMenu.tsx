@@ -27,6 +27,7 @@ export function UserMenu() {
       toast({
         title: "Đăng xuất thành công",
         description: "Hẹn gặp lại bạn!",
+        duration: 1000
       })
       router.push("/")
     } catch (error) {
@@ -34,6 +35,7 @@ export function UserMenu() {
         title: "Lỗi đăng xuất",
         description: "Có lỗi xảy ra khi đăng xuất",
         variant: "destructive",
+        duration: 1000
       })
     } finally {
       setIsLoading(false)

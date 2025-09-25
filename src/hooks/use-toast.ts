@@ -177,11 +177,21 @@ function useToast() {
 
   React.useEffect(() => {
     listeners.push(setState)
+    
+    // Listen for custom dismiss events
+    const handleCustomDismiss = (event: CustomEvent) => {
+      const { id } = event.detail
+      dispatch({ type: "DISMISS_TOAST", toastId: id })
+    }
+    
+    window.addEventListener('toast-dismiss', handleCustomDismiss as EventListener)
+    
     return () => {
       const index = listeners.indexOf(setState)
       if (index > -1) {
         listeners.splice(index, 1)
       }
+      window.removeEventListener('toast-dismiss', handleCustomDismiss as EventListener)
     }
   }, [state])
 
