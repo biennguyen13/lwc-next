@@ -10,6 +10,8 @@ import {
   DepositStats,
   ResetDemoBalanceRequest,
   ResetDemoBalanceResponse,
+  SwapBalanceRequest,
+  SwapBalanceResponse,
 } from "@/lib/api/wallet"
 import { storeCommunication } from "./store-communication"
 
@@ -90,6 +92,9 @@ interface WalletStoreState {
   resetDemoBalance: (
     params: ResetDemoBalanceRequest
   ) => Promise<ResetDemoBalanceResponse>
+
+  // Swap balance actions
+  swapBalance: (params: SwapBalanceRequest) => Promise<SwapBalanceResponse['data']>
 
   // Utility actions
   clearBalanceError: () => void
@@ -384,6 +389,25 @@ export const useWalletStore = create<WalletStoreState>()(
             error instanceof Error ? error.message : "Lỗi không xác định"
           storeCommunication.emitError(errorMessage, "wallet-store")
           throw error // Re-throw to let component handle it
+        }
+      },
+
+      // Swap balance
+      swapBalance: async (params: SwapBalanceRequest) => {
+        try {
+          const result = await walletAPI.swapBalance(params)
+          
+          // Refresh balance summary after successful swap
+          await get().fetchBalanceSummary()
+          
+          // Emit balance updated event
+          storeCommunication.emitWalletBalanceUpdated()
+          
+          return result
+        } catch (error: any) {
+          const errorMessage = error?.message || "Swap balance thất bại"
+          storeCommunication.emitError(errorMessage, "wallet-store")
+          throw error
         }
       },
 

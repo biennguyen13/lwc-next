@@ -20,6 +20,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useWalletStore } from "@/stores"
 import { useToast } from "@/hooks/use-toast"
+import { useSwapModal } from "@/hooks/use-swap-modal"
 
 interface NavigationProps {
   onToggleActiveOrders?: () => void
@@ -35,6 +36,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen, onToggleM
   const pathname = usePathname()
   const { balanceSummary, refreshBalanceSummary, bettingMode, setBettingMode, resetDemoBalance } = useWalletStore()
   const { toast } = useToast()
+  const { openSwapModal } = useSwapModal()
   
   // Get real and demo balances
   const realBalance = balanceSummary?.real?.total_available_usd || 0
@@ -189,6 +191,7 @@ export function Navigation({ onToggleActiveOrders, isActiveOrdersOpen, onToggleM
                     </div>
                     <Button
                       size="sm"
+                      onClick={openSwapModal}
                       className="bg-orange-500 hover:bg-orange-600 text-gray-200 p-2 rounded-lg"
                     >
                       <ArrowLeftRight className="w-4 h-4" />

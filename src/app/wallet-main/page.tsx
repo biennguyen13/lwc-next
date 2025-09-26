@@ -64,9 +64,7 @@ export default function WalletMainPage() {
         {/* Wallet Header */}
         <WalletHeader
           className="max-w-6xl mx-auto p-4"
-          totalBalance={balanceSummary?.real?.tokens?.USDT?.total_balance 
-            ? parseFloat(balanceSummary.real.tokens.USDT.total_balance) 
-            : 0}
+          totalBalance={parseFloat(balanceSummary.real.tokens.USDT.total_balance) + parseFloat(balanceSummary.real.tokens.USDT.usdt_wallet) || 0}
         />
       </div>
 

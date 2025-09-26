@@ -4,6 +4,9 @@ import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { ConditionalLayout } from '@/components/ConditionalLayout'
 import { GlobalLoadingProvider } from '@/contexts/GlobalLoadingContext'
+import { SwapProvider } from '@/contexts/SwapContext'
+import { SwapModal } from '@/components/SwapModal'
+import { SwapModalProvider } from '@/components/SwapModalProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,9 +34,12 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <GlobalLoadingProvider>
-            <ConditionalLayout>
-              {children}
-            </ConditionalLayout>
+            <SwapProvider>
+              <ConditionalLayout>
+                {children}
+              </ConditionalLayout>
+              <SwapModalProvider />
+            </SwapProvider>
           </GlobalLoadingProvider>
         </ThemeProvider>
       </body>

@@ -19,6 +19,7 @@ export interface TokenBalance {
   total_balance: string
   total_deposited: string
   total_withdrawn: string
+  usdt_wallet: string
   available_usd: number
   locked_usd: number
   total_usd: number
@@ -95,6 +96,29 @@ export interface DepositAddress {
   total_amount_deposited: string
   last_used: string
   created_at: string
+}
+
+// Types cho Balance Swap
+export interface SwapBalanceRequest {
+  token_symbol: string
+  amount: string
+  direction: 'from-wallet' | 'to-wallet'
+}
+
+export interface SwapBalanceResponse {
+  success: boolean
+  message: string
+  data: {
+    account_id: number
+    token_symbol: string
+    amount: string
+    direction: string
+    from_balance: string
+    to_balance: string
+    from_usd: number
+    to_usd: number
+    swapped_at: string
+  }
 }
 
 // Types cho Withdrawal (dựa trên withdrawal.route.js)
@@ -304,6 +328,14 @@ export const walletAPI = {
     const response: AxiosResponse = await apiClient.post("/deposits/balance/demo/reset", params)
     if (!response.data.success)
       throw new Error(response.data.message || "Reset demo balance thất bại")
+    return response.data.data
+  },
+
+  // Swap balance between wallet and trading
+  swapBalance: async (params: SwapBalanceRequest): Promise<SwapBalanceResponse['data']> => {
+    const response: AxiosResponse = await apiClient.post("/deposits/balance/swap", params)
+    if (!response.data.success)
+      throw new Error(response.data.message || "Swap balance thất bại")
     return response.data.data
   },
 }
