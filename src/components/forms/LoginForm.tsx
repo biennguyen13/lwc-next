@@ -87,151 +87,180 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
 
   return (
     <div className="space-y-6 w-full">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-white">Đăng nhập vào tài khoản của bạn</h2>
-      </div>
-      
-      {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Email Input */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-white">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="email"
-              type="email"
-              placeholder="Nhập email của bạn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 bg-gray-800 border-gray-600 text-white h-12"
-              required
-            />
+      {!requires2FA ? (
+        <>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white">Đăng nhập vào tài khoản của bạn</h2>
           </div>
-        </div>
+          
+          {/* {error && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+            </div>
+          )} */}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Input */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Nhập email của bạn"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 bg-gray-800 border-gray-600 text-white h-12"
+                  required
+                />
+              </div>
+            </div>
 
-        {/* Password Input */}
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-white">Mật khẩu</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Nhập mật khẩu"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 pr-10 bg-gray-800 border-gray-600 text-white h-12"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 h-4 w-4 text-gray-400 hover:text-gray-600"
+            {/* Password Input */}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-white">Mật khẩu</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Nhập mật khẩu"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10 bg-gray-800 border-gray-600 text-white h-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 h-4 w-4 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={setRememberMe}
+                />
+                <Label htmlFor="remember" className="text-sm text-gray-300">
+                  Ghi nhớ đăng nhập
+                </Label>
+              </div>
+              <Button variant="link" className="p-0 h-auto text-sm text-orange-500">
+                Quên mật khẩu?
+              </Button>
+            </div>
+
+            <div className="my-8"/>
+
+            {/* Login Button */}
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              disabled={isLoading}
             >
-              {showPassword ? <EyeOff /> : <Eye />}
-            </button>
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+            </Button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-gray-900 px-2 text-gray-400">
+                  Hoặc
+                </span>
+              </div>
+            </div>
+
+            {/* Register Link */}
+            <div className="text-center text-sm">
+              <span className="text-gray-400">Chưa có tài khoản? </span>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-sm text-orange-500"
+                onClick={onSwitchToRegister}
+              >
+                Đăng ký ngay
+              </Button>
+            </div>
+          </form>
+        </>
+      ) : (
+        <>
+          {/* 2FA Verification Form */}
+          <div className="space-y-6">
+            <div className="text-left">
+              <h2 className="text-2xl font-bold text-white">Xác minh bảo mật</h2>
+            </div>
+            
+            {error && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* 2FA Token Input */}
+              <div className="space-y-2">
+                <Label htmlFor="twoFactorToken" className="text-gray-300 text-sm">
+                  Nhập mã Google Authenticator
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="twoFactorToken"
+                    type="text"
+                    placeholder="Điền mã xác thực trên ứng dụng google auth"
+                    value={twoFactorToken}
+                    onChange={(e) => setTwoFactorToken(e.target.value)}
+                    className="bg-gray-800 border-gray-600 text-white h-12 pr-16"
+                    required
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText()
+                        setTwoFactorToken(text.replace(/\D/g, '').slice(0, 6))
+                      } catch (err) {
+                        console.log('Failed to read clipboard contents: ', err)
+                      }
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-500 hover:text-orange-400 text-sm font-medium"
+                  >
+                    Paste
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                size="lg"
+                className={`w-full text-white ${
+                  twoFactorToken.length === 6 
+                    ? 'bg-orange-500 hover:bg-orange-600' 
+                    : 'bg-gray-600 hover:bg-gray-700'
+                }`}
+                disabled={isLoading || twoFactorToken.length !== 6}
+              >
+                {isLoading ? "Đang xác thực..." : "Gửi"}
+              </Button>
+            </form>
           </div>
-        </div>
-
-        {/* 2FA Token Input - Only show when 2FA is required */}
-        {requires2FA && (
-          <div className="space-y-2">
-            <Label htmlFor="twoFactorToken" className="text-white">Mã xác thực 2FA</Label>
-            <Input
-              id="twoFactorToken"
-              type="text"
-              placeholder="Nhập mã xác thực 2FA"
-              value={twoFactorToken}
-              onChange={(e) => setTwoFactorToken(e.target.value)}
-              className="bg-gray-800 border-gray-600 text-white h-12"
-              required
-            />
-            <p className="text-xs text-gray-400">
-              Vui lòng nhập mã 6 chữ số từ ứng dụng xác thực của bạn
-            </p>
-          </div>
-        )}
-
-        {/* Remember Me & Forgot Password */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="remember"
-              checked={rememberMe}
-              onCheckedChange={setRememberMe}
-            />
-            <Label htmlFor="remember" className="text-sm text-gray-300">
-              Ghi nhớ đăng nhập
-            </Label>
-          </div>
-          <Button variant="link" className="p-0 h-auto text-sm text-orange-500">
-            Quên mật khẩu?
-          </Button>
-        </div>
-
-        <div className="my-8"/>
-
-        {/* Login Button */}
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-          disabled={isLoading}
-        >
-          {isLoading 
-            ? "Đang đăng nhập..." 
-            : requires2FA 
-              ? "Xác thực 2FA" 
-              : "Đăng nhập"
-          }
-        </Button>
-
-        {/* Back to login button when 2FA is required */}
-        {requires2FA && (
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-gray-600 text-white hover:bg-gray-700"
-            onClick={() => {
-              setRequires2FA(false)
-              setTwoFactorToken("")
-              clearError()
-            }}
-          >
-            Quay lại đăng nhập
-          </Button>
-        )}
-
-        {/* Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-gray-600" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-gray-900 px-2 text-gray-400">
-              Hoặc
-            </span>
-          </div>
-        </div>
-
-        {/* Register Link */}
-        <div className="text-center text-sm">
-          <span className="text-gray-400">Chưa có tài khoản? </span>
-          <Button 
-            variant="link" 
-            className="p-0 h-auto text-sm text-orange-500"
-            onClick={onSwitchToRegister}
-          >
-            Đăng ký ngay
-          </Button>
-        </div>
-      </form>
+        </>
+      )}
     </div>
   )
 }

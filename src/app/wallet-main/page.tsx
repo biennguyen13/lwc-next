@@ -7,6 +7,7 @@ import { WalletCard } from "@/components/wallet/WalletCard"
 import { TransactionHistory } from "@/components/wallet/TransactionHistory"
 import { DepositDialog } from "@/components/wallet/DepositDialog"
 import { WithdrawDialog } from "@/components/wallet/WithdrawDialog"
+import { TradingWallet } from "@/components/wallet/TradingWallet"
 import { useWalletStore } from "@/stores"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -57,6 +58,10 @@ export default function WalletMainPage() {
   const totalWithdrawals = withdrawals?.reduce((sum, withdrawal) => sum + parseFloat(withdrawal.amount || '0'), 0) || 0
   const netFlow = totalDeposits - totalWithdrawals
 
+  if(!balanceSummary?.real){
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
 
@@ -68,46 +73,49 @@ export default function WalletMainPage() {
         />
       </div>
 
-      <div className="max-w-6xl mx-auto p-4">
+      <div className="bg-[#1d233b]">
         {/* Wallet Tabs */}
-        <div className="mt-6">
+        <div className="max-w-6xl mx-auto pt-4 px-4">
           <WalletTabs 
             activeTab={activeWalletTab}
             onTabChange={setActiveWalletTab}
           />
         </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto p-4">
         {/* Wallet Content */}
         <div className="mt-6">
           {activeWalletTab === "main" && (
-              <WalletCard 
-                currency="USDT"
-                currencyName="Tether"
-                balance={
-                  balanceSummary?.real?.tokens?.USDT?.total_balance 
-                    ? parseFloat(balanceSummary.real.tokens.USDT.total_balance) 
-                    : 0
-                }
-                usdValue={balanceSummary?.real?.tokens?.USDT?.total_usd || 0}
-                onDeposit={() => setIsDepositDialogOpen(true)}
-                onWithdraw={() => setIsWithdrawDialogOpen(true)}
-              />
+              <>
+                <WalletCard 
+                  currency="USDT"
+                  currencyName="Tether"
+                  balance={
+                    balanceSummary?.real?.tokens?.USDT?.total_balance 
+                      ? parseFloat(balanceSummary.real.tokens.USDT.total_balance) 
+                      : 0
+                  }
+                  usdValue={balanceSummary?.real?.tokens?.USDT?.total_usd || 0}
+                  onDeposit={() => setIsDepositDialogOpen(true)}
+                  onWithdraw={() => setIsWithdrawDialogOpen(true)}
+                />
+
+                {/* Transaction History */}
+                <div className="mt-8">
+                  <TransactionHistory 
+                    activeTab={activeHistoryTab}
+                    onTabChange={setActiveHistoryTab}
+                  />
+                </div>
+              </>
           )}
           
           {activeWalletTab === "trading" && (
-            <div className="text-center py-8 text-gray-400">
-              Trading wallet content coming soon...
-            </div>
+            <TradingWallet />
           )}
         </div>
 
-        {/* Transaction History */}
-        <div className="mt-8">
-          <TransactionHistory 
-            activeTab={activeHistoryTab}
-            onTabChange={setActiveHistoryTab}
-          />
-        </div>
       </div>
 
       {/* Dialogs */}

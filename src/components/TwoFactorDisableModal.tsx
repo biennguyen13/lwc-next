@@ -269,7 +269,7 @@ export function TwoFactorDisableModal({ isOpen, onClose, onSuccess }: TwoFactorD
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium mt-6"
+                className="w-full bg-gray-700 hover:bg-gray-500 text-white font-medium mt-6"
                 disabled={isLoading || isDisableLoading}
               >
                 {isLoading ? "Đang xử lý..." : "Hủy kích hoạt"}

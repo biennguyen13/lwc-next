@@ -23,7 +23,7 @@ export function WalletCard({
 }: WalletCardProps) {
   const { isBalanceHidden } = useWalletStore()
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+    <div className=" max-w-[650px] rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between">
         {/* Currency Info */}
         <div className="flex items-center space-x-4">
@@ -54,7 +54,7 @@ export function WalletCard({
       <div className="flex space-x-4 mt-6">
         <button
           onClick={onDeposit}
-          className="flex-1 flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors border border-gray-600"
+          className="flex-1 flex items-center justify-center space-x-2  hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors border "
         >
           <div className="flex items-center">
             <div className="w-3 h-3 bg-green-400 rounded-full"></div>
@@ -65,7 +65,7 @@ export function WalletCard({
         
         <button
           onClick={onWithdraw}
-          className="flex-1 flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors border border-gray-600"
+          className="flex-1 flex items-center justify-center space-x-2  hover:bg-gray-700 text-white py-3 px-4 rounded-lg transition-colors border "
         >
           <div className="flex items-center">
             <div className="w-3 h-3 bg-red-400 rounded-full"></div>

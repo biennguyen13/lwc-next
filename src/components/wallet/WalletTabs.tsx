@@ -7,7 +7,7 @@ interface WalletTabsProps {
 
 export function WalletTabs({ activeTab, onTabChange }: WalletTabsProps) {
   return (
-    <div className="flex space-x-8 border-b border-gray-200 dark:border-gray-700">
+    <div className="flex space-x-8 border-b">
       <button
         onClick={() => onTabChange("main")}
         className={`pb-3 px-1 text-lg font-medium transition-colors ${

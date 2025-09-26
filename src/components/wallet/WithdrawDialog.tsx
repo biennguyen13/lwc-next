@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { USDTIcon } from "@/components/ui/usdt-icon"
 import { Check, Copy } from "lucide-react"
 import { useWalletStore } from "@/stores"
+import { useAuthStore } from "@/stores"
 import { useToast } from "@/hooks/use-toast"
 
 interface WithdrawDialogProps {
@@ -28,6 +29,7 @@ export function WithdrawDialog({ isOpen, onClose, currency, availableBalance }: 
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const { createWithdrawal } = useWalletStore()
+  const { user } = useAuthStore()
   const { toast } = useToast()
 
   const handleWithdraw = async () => {
@@ -272,12 +274,14 @@ export function WithdrawDialog({ isOpen, onClose, currency, availableBalance }: 
                   </Button>
                 </div>
                 
-                {/* 2FA Warning */}
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">
-                    Bạn phải bật 2FA để yêu cầu rút tiền
-                  </p>
-                </div>
+                {/* 2FA Warning - Only show if 2FA is not enabled */}
+                {!user?.is_two_fa && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    <p className="text-sm text-red-800 dark:text-red-200">
+                      Bạn phải bật 2FA để yêu cầu rút tiền
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -353,12 +357,14 @@ export function WithdrawDialog({ isOpen, onClose, currency, availableBalance }: 
                   </Button>
                 </div>
                 
-                {/* 2FA Warning */}
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">
-                    Bạn phải bật 2FA để yêu cầu rút tiền
-                  </p>
-                </div>
+                {/* 2FA Warning - Only show if 2FA is not enabled */}
+                {!user?.is_two_fa && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    <p className="text-sm text-red-800 dark:text-red-200">
+                      Bạn phải bật 2FA để yêu cầu rút tiền
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}
