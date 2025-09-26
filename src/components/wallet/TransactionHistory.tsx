@@ -57,8 +57,8 @@ export function TransactionHistory({ activeTab, onTabChange }: TransactionHistor
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto max-w-[calc(100vw-32px)] sm:max-w-[calc(100vw-32px-16px)] lg:max-w-[calc(100vw-95px-32px-16px)]">
+        <table className="w-full min-w-max">
           <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -106,16 +106,16 @@ export function TransactionHistory({ activeTab, onTabChange }: TransactionHistor
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     <div className="flex flex-col">
                       <span className="font-medium">
-                        {transaction.amount} {transaction.token_symbol}
+                        {parseFloat(transaction.amount).toFixed(2)} {transaction.token_symbol}
                       </span>
                       {transaction._type === 'withdrawal' && transaction.fee && (
                         <span className="text-xs text-gray-500">
-                          Phí: {transaction.fee} {transaction.token_symbol}
+                          Phí: {parseFloat(transaction.fee).toFixed(2)} {transaction.token_symbol}
                         </span>
                       )}
                       {transaction.amount_usd && (
                         <span className="text-xs text-gray-500">
-                          ≈ ${transaction.amount_usd}
+                          ≈ ${parseFloat(transaction.amount_usd).toFixed(2)}
                         </span>
                       )}
                     </div>

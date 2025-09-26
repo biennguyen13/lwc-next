@@ -21,8 +21,8 @@ export function WalletHeader({
     <div className="text-white p-6" {...props}>
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-lg font-medium">Tổng tài sản (USDT)</h1>
-          <div className="text-3xl font-bold mt-2">
+          <h1 className="text-base md:text-lg font-medium">Tổng tài sản (USDT)</h1>
+          <div className="text-xl md:text-3xl font-bold mt-2">
             {isBalanceHidden ? "****" : totalBalance.toLocaleString()}
           </div>
         </div>

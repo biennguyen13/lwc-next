@@ -65,17 +65,17 @@ export default function WalletMainPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
 
-      <div className="mx-auto p-4 bg-orange-400 "> 
+      <div className="mx-auto p-2 sm:p-4 bg-orange-400 "> 
         {/* Wallet Header */}
         <WalletHeader
-          className="max-w-6xl mx-auto p-4"
+          className="max-w-6xl mx-auto p-2 sm:p-4"
           totalBalance={parseFloat(balanceSummary.real.tokens.USDT.total_balance) + parseFloat(balanceSummary.real.tokens.USDT.usdt_wallet) || 0}
         />
       </div>
 
       <div className="bg-[#1d233b]">
         {/* Wallet Tabs */}
-        <div className="max-w-6xl mx-auto pt-4 px-4">
+        <div className="max-w-6xl mx-auto pt-2 sm:pt-4 px-2 sm:px-4">
           <WalletTabs 
             activeTab={activeWalletTab}
             onTabChange={setActiveWalletTab}
@@ -83,9 +83,9 @@ export default function WalletMainPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4">
+      <div className="max-w-6xl mx-auto p-2 sm:p-4">
         {/* Wallet Content */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           {activeWalletTab === "main" && (
               <>
                 <WalletCard 
@@ -102,7 +102,7 @@ export default function WalletMainPage() {
                 />
 
                 {/* Transaction History */}
-                <div className="mt-8">
+                <div className="mt-4 sm:mt-8">
                   <TransactionHistory 
                     activeTab={activeHistoryTab}
                     onTabChange={setActiveHistoryTab}

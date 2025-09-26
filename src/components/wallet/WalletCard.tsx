@@ -41,7 +41,7 @@ export function WalletCard({
 
         {/* Balance Info */}
         <div className="text-right">
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="md:text-2xl font-bold text-gray-900 dark:text-white">
             {isBalanceHidden ? "****" : `${balance.toLocaleString()} ${currency}`}
           </div>
           <div className="text-gray-500 dark:text-gray-400">

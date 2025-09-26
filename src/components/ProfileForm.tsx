@@ -181,7 +181,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
   return (
     <div className="space-y-8">
       {/* Profile Information Section */}
-      <div className="bg-gray-900 rounded-lg p-8 border border-gray-700">
+      <div className="bg-gray-900 rounded-lg p-4 md:p-8 border border-gray-700">
       <h2 className="text-2xl font-bold text-gray-200 mb-4">Thông tin cá nhân</h2>
       <div className="border-t border-gray-600 mb-6"></div>
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -322,47 +322,47 @@ export function ProfileForm({ user }: ProfileFormProps) {
       </div>
 
       {/* Security Section */}
-      <div className="bg-gray-900 rounded-lg p-8 border border-gray-700">
+      <div className="bg-gray-900 rounded-lg p-4 md:p-8 border border-gray-700">
         <h2 className="text-2xl font-bold text-gray-200 mb-4">Bảo mật</h2>
         <div className="border-t border-gray-600 mb-6"></div>
         
         <div className="space-y-8">
           {/* Password Management */}
-          <div className="flex items-start justify-between">
-            <div className="flex-1 flex">
-              <div className="flex items-center space-x-4 mb-3 flex-shrink-0">
-                <Label className="text-gray-200 text-sm font-medium">Mật khẩu:</Label>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+                <Label className="text-gray-200 text-sm font-medium flex-shrink-0">Mật khẩu:</Label>
                 <p className="text-gray-400 text-sm">
                   Bạn có muốn thay đổi mật khẩu không? Nhấp vào nút phía dưới để thay đổi.
                 </p>
               </div>
-              <div className="flex flex-col items-end flex-1">
-                <Button
-                  type="button"
-                  onClick={handleChangePassword}
-                  disabled={!user?.is_two_fa}
-                  className="bg-orange-500 hover:bg-orange-600 text-gray-200 px-4 py-2 rounded-lg mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Đổi mật khẩu
-                </Button>
-                {!user?.is_two_fa && (
-                  <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
-                )}
-              </div>
+            </div>
+            <div className="flex flex-col items-start sm:items-end">
+              <Button
+                type="button"
+                onClick={handleChangePassword}
+                disabled={!user?.is_two_fa}
+                className="bg-orange-500 hover:bg-orange-600 text-gray-200 px-4 py-2 rounded-lg mb-2 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+              >
+                Đổi mật khẩu
+              </Button>
+              {!user?.is_two_fa && (
+                <p className="text-red-500 text-xs">* Bạn phải bật 2FA để điều chỉnh</p>
+              )}
             </div>
           </div>
 
           {/* Two-Factor Authentication */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center space-x-4">
-                <Label className="text-gray-200 text-sm font-medium">Mã 2FA:</Label>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <Label className="text-gray-200 text-sm font-medium flex-shrink-0">Mã 2FA:</Label>
                 <p className="text-gray-400 text-sm">
                   Bắt buộc để rút tiền hoặc cập nhật các bảo mật.
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-between sm:justify-end space-x-3">
               <span className="text-gray-200 text-sm">{is2FAEnabled ? 'On' : 'Off'}</span>
               <button
                 type="button"

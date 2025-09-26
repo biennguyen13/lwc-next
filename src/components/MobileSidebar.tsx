@@ -9,6 +9,7 @@ import {
   WalletIcon, 
   DashboardIcon
 } from "./ui/icons"
+import { User } from "lucide-react"
 import { Button } from "./ui/button"
 import { X } from "lucide-react"
 
@@ -43,6 +44,13 @@ export function MobileSidebar({ isOpen, onClose, activeItem, onItemClick }: Mobi
       icon: WalletIcon,
       href: "/wallet-main",
       isActive: pathname === "/wallet-main" || activeItem === "wallet"
+    },
+    {
+      id: "profile",
+      label: "Hồ Sơ",
+      icon: User,
+      href: "/profile",
+      isActive: pathname === "/profile" || activeItem === "profile"
     },
     {
       id: "dashboard",
@@ -118,10 +126,14 @@ export function MobileSidebar({ isOpen, onClose, activeItem, onItemClick }: Mobi
                           : "text-gray-300 hover:bg-gray-700 hover:text-white"
                       }`}
                     >
-                      <Icon 
-                        isActive={item.isActive}
-                        className="w-5 h-5" 
-                      />
+                      {item.id === 'profile' ? (
+                        <User className="w-5 h-5" />
+                      ) : (
+                        <Icon 
+                          isActive={item.isActive}
+                          className="w-5 h-5" 
+                        />
+                      )}
                       <span className="font-medium">{item.label}</span>
                     </Link>
                   )
@@ -135,7 +147,7 @@ export function MobileSidebar({ isOpen, onClose, activeItem, onItemClick }: Mobi
                 Quản Lý Hồ Sơ
               </h3>
               <div className="space-y-2">
-                {menuItems.slice(2).map((item) => {
+                {menuItems.slice(2, 4).map((item) => {
                   const Icon = item.icon
                   return (
                     <Link
@@ -148,10 +160,48 @@ export function MobileSidebar({ isOpen, onClose, activeItem, onItemClick }: Mobi
                           : "text-gray-300 hover:bg-gray-700 hover:text-white"
                       }`}
                     >
-                      <Icon 
-                        isActive={item.isActive}
-                        className="w-5 h-5" 
-                      />
+                      {item.id === 'profile' ? (
+                        <User className="w-5 h-5" />
+                      ) : (
+                        <Icon 
+                          isActive={item.isActive}
+                          className="w-5 h-5" 
+                        />
+                      )}
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Dashboard Section */}
+            <div>
+              <h3 className="text-white font-bold text-sm mb-3 uppercase tracking-wide">
+                Thống Kê
+              </h3>
+              <div className="space-y-2">
+                {menuItems.slice(4).map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => handleItemClick(item)}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                        item.isActive
+                          ? "bg-orange-500 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`}
+                    >
+                      {item.id === 'profile' ? (
+                        <User className="w-5 h-5" />
+                      ) : (
+                        <Icon 
+                          isActive={item.isActive}
+                          className="w-5 h-5" 
+                        />
+                      )}
                       <span className="font-medium">{item.label}</span>
                     </Link>
                   )

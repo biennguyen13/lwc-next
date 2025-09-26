@@ -204,7 +204,7 @@ export const walletAPI = {
     const response: AxiosResponse = await apiClient.get("/deposits", {
       params: {
         page: params.page || 1,
-        limit: params.limit || 20,
+        limit: params.limit || 100,
         ...(params.status && { status: params.status }),
         ...(params.token_symbol && { token_symbol: params.token_symbol }),
       },
@@ -277,7 +277,7 @@ export const walletAPI = {
   }> => {
     const response: AxiosResponse = await apiClient.get(`/deposit-address/${addressId}/deposits`, {
       params: {
-        limit: params.limit || 20,
+        limit: params.limit || 100,
         offset: params.offset || 0,
         ...(params.status && { status: params.status }),
       },
@@ -315,7 +315,7 @@ export const walletAPI = {
     const response: AxiosResponse = await apiClient.get("/withdrawals", {
       params: {
         page: params.page || 1,
-        limit: params.limit || 20,
+        limit: params.limit || 100,
       },
     })
     if (!response.data.success)
